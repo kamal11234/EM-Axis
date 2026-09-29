@@ -1,0 +1,470 @@
+* {
+  box-sizing: border-box;
+}
+
+
+/* =========================================
+   MAIN PAGE
+========================================= */
+
+.register-page {
+  width: 100vw;
+  height: 100vh;
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  position: relative;
+
+  overflow: hidden;
+}
+
+
+/* =========================================
+   LEFT SECTION
+========================================= */
+
+.register-left {
+  position: absolute;
+
+  left: 21.8%;
+  top: 18%;
+
+  width: 420px;
+}
+
+
+/* =========================================
+   BRAND
+========================================= */
+
+.register-brand-section {
+  display: flex;
+
+  align-items: center;
+}
+
+.register-brand-logo {
+  width: 75px;
+  height: 75px;
+
+  object-fit: contain;
+}
+
+.register-brand-text {
+  margin-left: 12px;
+}
+
+.register-brand-text h1 {
+  margin: 0;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 51px;
+  font-weight: 800;
+
+  line-height: 0.95;
+
+  letter-spacing: 1px;
+
+  color: #111;
+}
+
+.register-brand-text p {
+  margin: 4px 0 0;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 17px;
+
+  color: #111;
+}
+
+
+/* =========================================
+   TAGLINE
+========================================= */
+
+.register-tagline {
+  margin-top: 24px;
+  margin-left: 100px;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 16px;
+
+  color: #111;
+}
+
+
+/* =========================================
+   JOIN TEXT
+========================================= */
+
+.register-join-text {
+  margin-top: 45px;
+  margin-left: 70px;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 22px;
+
+  font-style: italic;
+
+  line-height: 1.25;
+
+  color: #111;
+}
+
+
+/* =========================================
+   REGISTER CARD
+========================================= */
+
+.register-card {
+  position: absolute;
+
+  width: 395px;
+  height: 466px;
+
+  right: 21.6%;
+  top: 6.3%;
+
+  padding: 23px 16px 14px;
+
+  background: rgba(255, 255, 255, 0.97);
+
+  border: 1px solid #555;
+
+  border-radius: 27px;
+
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.12);
+}
+
+
+/* =========================================
+   HEADING
+========================================= */
+
+.register-card h2 {
+  margin: 0;
+
+  text-align: center;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 25px;
+  font-weight: 800;
+
+  line-height: 1.1;
+
+  color: #111;
+}
+
+.register-description {
+  margin: 7px 0 10px;
+
+  text-align: center;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 11px;
+
+  color: #333;
+}
+
+
+/* =========================================
+   SECTION TITLES
+========================================= */
+
+.register-section-title {
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  color: #111;
+
+  margin-top: 4px;
+}
+
+.register-title-line {
+  height: 1px;
+
+  background: #999;
+
+  flex: 1;
+
+  margin-left: 3px;
+}
+
+.personal-title {
+  margin-top: 6px;
+}
+
+.credentials-title {
+  margin-top: 6px;
+}
+
+
+/* =========================================
+   ROLE OPTIONS
+========================================= */
+
+.register-role-options {
+  display: flex;
+
+  gap: 7px;
+
+  margin-top: 6px;
+}
+
+.register-role-box {
+  position: relative;
+
+  flex: 1;
+
+  height: 56px;
+
+  background: #c8f4fa;
+
+  border-radius: 15px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 10px;
+
+  color: #111;
+
+  cursor: pointer;
+}
+
+.register-role-icon {
+  font-size: 15px;
+
+  margin-bottom: 1px;
+}
+
+.register-role-box input {
+  position: absolute;
+
+  bottom: 3px;
+
+  width: 14px;
+  height: 14px;
+
+  margin: 0;
+}
+
+
+/* =========================================
+   INPUT ROW
+========================================= */
+
+.register-input-row {
+  display: flex;
+
+  gap: 18px;
+
+  margin-top: 5px;
+}
+
+
+/* =========================================
+   INPUT BOX
+========================================= */
+
+.register-input-box {
+  width: 50%;
+  height: 25px;
+
+  padding: 0 7px;
+
+  display: flex;
+
+  align-items: center;
+
+  border: 1px solid #777;
+
+  border-radius: 15px;
+
+  background: white;
+}
+
+.register-input-box > span:first-child {
+  font-size: 11px;
+
+  margin-right: 6px;
+}
+
+.register-input-box input {
+  width: 100%;
+  height: 100%;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 9px;
+}
+
+.register-input-box input::placeholder {
+  color: #999;
+}
+
+.register-eye {
+  font-size: 10px !important;
+
+  margin-left: 2px !important;
+
+  cursor: pointer;
+}
+
+
+/* =========================================
+   TERMS
+========================================= */
+
+.terms-row {
+  margin-top: 8px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 8px;
+
+  color: #555;
+
+  cursor: pointer;
+}
+
+.terms-row input {
+  width: 11px;
+  height: 11px;
+
+  margin: 0;
+}
+
+.terms-row a {
+  color: #384cff;
+
+  text-decoration: none;
+}
+
+
+/* =========================================
+   REGISTER BUTTON
+========================================= */
+
+.register-button {
+  width: 100%;
+
+  height: 29px;
+
+  margin-top: 7px;
+
+  border: none;
+
+  border-radius: 18px;
+
+  background: #293eb5;
+
+  color: white;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 16px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.register-button:hover {
+  background: #21349d;
+}
+
+
+/* =========================================
+   LOGIN LINK
+========================================= */
+
+.login-link-section {
+  margin-top: 9px;
+
+  padding-top: 7px;
+
+  border-top: 1px solid #999;
+
+  text-align: center;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 10px;
+
+  color: #999;
+}
+
+.login-link-section a {
+  margin-left: 4px;
+
+  color: #384cff;
+
+  text-decoration: none;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1000px) {
+
+  .register-left {
+    left: 8%;
+  }
+
+  .register-card {
+    right: 5%;
+  }
+}
+
+
+@media (max-width: 800px) {
+
+  .register-left {
+    display: none;
+  }
+
+  .register-card {
+    left: 50%;
+    right: auto;
+
+    transform: translateX(-50%);
+  }
+}
