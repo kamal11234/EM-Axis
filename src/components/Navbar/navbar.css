@@ -1,0 +1,336 @@
+* {
+  box-sizing: border-box;
+}
+
+.navbar {
+  width: 100%;
+  height: 76px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 32px;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+  position: relative;
+  z-index: 1000;
+}
+
+
+/* =========================================
+   LEFT SIDE
+========================================= */
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-logo {
+  width: 72px;
+  height: 70px;
+
+  object-fit: contain;
+
+  transform: rotate(-18deg);
+
+  display: block;
+}
+
+.navbar-brand {
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+}
+
+.navbar-brand h2 {
+  margin: 0;
+
+  font-size: 26px;
+  font-weight: 900;
+
+  font-family: Arial Black, sans-serif;
+
+  letter-spacing: 1px;
+
+  color: #172033;
+
+  line-height: 1.2;
+}
+
+.navbar-brand p {
+  margin: 3px 0 0;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  color: #7b8494;
+
+  letter-spacing: 0.2px;
+}
+
+
+/* =========================================
+   RIGHT SIDE
+========================================= */
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+
+  gap: 18px;
+}
+
+
+/* =========================================
+   NOTIFICATION
+========================================= */
+
+.navbar-notification {
+  width: 42px;
+  height: 42px;
+
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.navbar-notification:hover {
+  background: #f3f5f8;
+}
+
+.notification-icon {
+  font-size: 21px;
+
+  line-height: 1;
+}
+
+
+/* =========================================
+   DIVIDER
+========================================= */
+
+.navbar-divider {
+  width: 1px;
+  height: 32px;
+
+  background: #e5e7eb;
+}
+
+
+/* =========================================
+   PROFILE
+========================================= */
+
+.navbar-profile {
+  height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  padding: 0 10px;
+
+  border: none;
+
+  background: transparent;
+
+  border-radius: 24px;
+
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.navbar-profile:hover {
+  background: #f3f5f8;
+}
+
+
+/* PROFILE ICON */
+
+.profile-icon {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #eef2f7;
+
+  font-size: 19px;
+
+  flex-shrink: 0;
+}
+
+
+/* PROFILE NAME + DESIGNATION */
+
+.profile-info {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: flex-start;
+
+  justify-content: center;
+
+  line-height: 1.2;
+
+  min-width: 120px;
+}
+
+.profile-name {
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: #172033;
+
+  white-space: nowrap;
+}
+
+.profile-role {
+  margin-top: 3px;
+
+  font-size: 11px;
+
+  font-weight: 400;
+
+  color: #7b8494;
+
+  white-space: nowrap;
+}
+
+
+/* PROFILE ARROW */
+
+.profile-arrow {
+  font-size: 8px;
+
+  color: #697386;
+
+  margin-left: 2px;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 768px) {
+
+  .navbar {
+    height: 68px;
+
+    padding: 0 18px;
+  }
+
+  .navbar-logo {
+    width: 42px;
+
+    height: 42px;
+  }
+
+  .navbar-brand h2 {
+    font-size: 18px;
+  }
+
+  .navbar-brand p {
+    font-size: 9px;
+  }
+
+  .navbar-right {
+    gap: 8px;
+  }
+
+  .navbar-divider {
+    display: none;
+  }
+
+  .profile-info {
+    min-width: auto;
+  }
+
+  .profile-name {
+    font-size: 12px;
+  }
+
+  .profile-role {
+    font-size: 9px;
+  }
+
+  .profile-arrow {
+    display: none;
+  }
+}
+
+
+/* =========================================
+   SMALL SCREEN
+========================================= */
+
+@media (max-width: 480px) {
+
+  .navbar {
+    padding: 0 12px;
+  }
+
+  .navbar-left {
+    gap: 8px;
+  }
+
+  .navbar-brand p {
+    display: none;
+  }
+
+  .navbar-brand h2 {
+    font-size: 17px;
+  }
+
+  .navbar-notification {
+    width: 38px;
+
+    height: 38px;
+  }
+
+  .navbar-profile {
+    padding: 0;
+  }
+
+  .profile-info {
+    display: none;
+  }
+
+  .profile-icon {
+    width: 34px;
+
+    height: 34px;
+
+    font-size: 17px;
+  }
+}

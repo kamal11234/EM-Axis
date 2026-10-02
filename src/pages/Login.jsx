@@ -1,17 +1,32 @@
 import "./login.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import bg from "../assets/bg.jpeg";
 import logo1 from "../assets/logo1.png";
 
 function Login() {
+  const navigate = useNavigate();
+
   // Password show / hide
   const [showPassword, setShowPassword] = useState(false);
 
-  // Email value
+  // Form fields
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
 
-  // Email input handling
+  // Error messages
+  const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [roleError, setRoleError] = useState("");
+  const [rememberError, setRememberError] = useState("");
+
+  // Forgot password message
+  const [forgotMessage, setForgotMessage] = useState("");
+
+  // Email handling
   const handleEmailChange = (e) => {
     let value = e.target.value;
 
@@ -21,6 +36,150 @@ function Login() {
     }
 
     setEmail(value);
+    setEmailError("");
+    setError("");
+    setForgotMessage("");
+  };
+
+  // Password handling
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    setPasswordError("");
+    setError("");
+  };
+
+  // Role handling
+  const handleRoleChange = (e) => {
+    setRole(e.target.value);
+    setRoleError("");
+    setError("");
+  };
+
+  // Remember Me handling
+  const handleRememberChange = (e) => {
+    setRememberMe(e.target.checked);
+    setRememberError("");
+  };
+
+  // Email format validation
+  const validateEmail = (emailValue) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue);
+  };
+
+  // Login
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    // Clear previous errors
+    setError("");
+    setEmailError("");
+    setPasswordError("");
+    setRoleError("");
+    setRememberError("");
+    setForgotMessage("");
+
+    let isValid = true;
+
+    // Email required
+    if (!email.trim()) {
+      setEmailError("Email is required.");
+      isValid = false;
+    }
+    // Email format
+    else if (!validateEmail(email)) {
+      setEmailError("Please enter a valid email address.");
+      isValid = false;
+    }
+
+    // Password required + minimum 6 characters
+    if (!password) {
+      setPasswordError("Password is required.");
+      isValid = false;
+    } else if (password.length < 6) {
+      setPasswordError("Password must contain at least 6 characters.");
+      isValid = false;
+    }
+
+    // Role required
+    if (!role) {
+      setRoleError("Please select your role.");
+      isValid = false;
+    }
+
+    // Remember Me compulsory
+    if (!rememberMe) {
+      setRememberError("Please select Remember Me to continue.");
+      isValid = false;
+    }
+
+    // Stop login if validation fails
+    if (!isValid) {
+      return;
+    }
+
+    /*
+      TEMPORARY LOGIN CHECK
+
+      Backend/Supabase connect karne ke baad
+      yaha actual authentication API call hogi.
+    */
+
+    // Demo credentials
+    const demoEmail = "admin@emaxis.com";
+    const demoPassword = "123456";
+
+    if (email !== demoEmail || password !== demoPassword) {
+      setError("Invalid email or password. Please try again.");
+      return;
+    }
+
+    // Remember login
+    if (rememberMe) {
+      localStorage.setItem("emAxisRememberMe", "true");
+      localStorage.setItem("emAxisEmail", email);
+      localStorage.setItem("emAxisRole", role);
+    }
+
+    // Role based dashboard redirect
+    if (role === "reporter") {
+      navigate("/reporter-dashboard");
+    } else if (role === "editor") {
+      navigate("/editor-dashboard");
+    } else if (role === "channelHead") {
+      navigate("/channel-head-dashboard");
+    }
+  };
+
+  // Forgot Password
+  const handleForgotPassword = (e) => {
+    e.preventDefault();
+
+    setForgotMessage("");
+    setEmailError("");
+
+    // Email required
+    if (!email.trim()) {
+      setEmailError("Enter your registered email first.");
+      return;
+    }
+
+    // Email format
+    if (!validateEmail(email)) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+
+    /*
+      TEMPORARY RESET PASSWORD LOGIC
+
+      Supabase connect karne ke baad:
+      supabase.auth.resetPasswordForEmail(email)
+      use karenge.
+    */
+
+    setForgotMessage(
+      "Password reset link has been sent to your registered email."
+    );
   };
 
   return (
@@ -28,7 +187,6 @@ function Login() {
       className="login-page"
       style={{ backgroundImage: `url(${bg})` }}
     >
-
       {/* =========================================
           LEFT SECTION
       ========================================= */}
@@ -51,12 +209,10 @@ function Login() {
 
         </div>
 
-
         {/* Tagline */}
         <div className="tagline">
           Inform&nbsp;&nbsp;•&nbsp;&nbsp;Connect&nbsp;&nbsp;•&nbsp;&nbsp;Create Impact
         </div>
-
 
         {/* Join Text */}
         <div className="join-text">
@@ -67,12 +223,14 @@ function Login() {
 
       </div>
 
-
       {/* =========================================
           RIGHT SECTION
       ========================================= */}
 
-      <div className="login-card">
+      <form
+        className="login-card"
+        onSubmit={handleLogin}
+      >
 
         {/* Heading */}
         <h2>Welcome Back !!</h2>
@@ -80,7 +238,6 @@ function Login() {
         <p className="login-description">
           Log in to your account and continue to EM-Axis
         </p>
-
 
         {/* =========================================
             ROLE SECTION
@@ -102,10 +259,10 @@ function Login() {
 
           </div>
 
-
           <div className="role-options">
 
             {/* CHANNEL HEAD */}
+
             <label className="role-box">
 
               <span className="role-icon">
@@ -120,12 +277,14 @@ function Login() {
                 type="radio"
                 name="role"
                 value="channelHead"
+                checked={role === "channelHead"}
+                onChange={handleRoleChange}
               />
 
             </label>
 
-
             {/* EDITOR */}
+
             <label className="role-box">
 
               <span className="role-icon">
@@ -140,12 +299,14 @@ function Login() {
                 type="radio"
                 name="role"
                 value="editor"
+                checked={role === "editor"}
+                onChange={handleRoleChange}
               />
 
             </label>
 
-
             {/* REPORTER */}
+
             <label className="role-box">
 
               <span className="role-icon">
@@ -160,14 +321,21 @@ function Login() {
                 type="radio"
                 name="role"
                 value="reporter"
+                checked={role === "reporter"}
+                onChange={handleRoleChange}
               />
 
             </label>
 
           </div>
 
-        </div>
+          {roleError && (
+            <p className="error-message">
+              {roleError}
+            </p>
+          )}
 
+        </div>
 
         {/* =========================================
             EMAIL
@@ -184,11 +352,15 @@ function Login() {
             placeholder="Email or Username"
             value={email}
             onChange={handleEmailChange}
-            required
           />
 
         </div>
 
+        {emailError && (
+          <p className="error-message">
+            {emailError}
+          </p>
+        )}
 
         {/* =========================================
             PASSWORD
@@ -203,9 +375,12 @@ function Login() {
           <input
             type={showPassword ? "text" : "password"}
             placeholder="Password"
+            value={password}
+            onChange={handlePasswordChange}
           />
 
           {/* SHOW / HIDE PASSWORD */}
+
           <span
             className="eye-icon"
             onClick={() =>
@@ -222,6 +397,11 @@ function Login() {
 
         </div>
 
+        {passwordError && (
+          <p className="error-message">
+            {passwordError}
+          </p>
+        )}
 
         {/* =========================================
             REMEMBER + FORGOT
@@ -233,6 +413,8 @@ function Login() {
 
             <input
               type="checkbox"
+              checked={rememberMe}
+              onChange={handleRememberChange}
             />
 
             <span>
@@ -241,25 +423,46 @@ function Login() {
 
           </label>
 
-
           <a
             href="#"
             className="forgot-link"
+            onClick={handleForgotPassword}
           >
             Forgot Password ?
           </a>
 
         </div>
 
+        {rememberError && (
+          <p className="error-message">
+            {rememberError}
+          </p>
+        )}
+
+        {/* Forgot password success */}
+        {forgotMessage && (
+          <p className="success-message">
+            {forgotMessage}
+          </p>
+        )}
+
+        {/* Login error */}
+        {error && (
+          <p className="error-message login-error">
+            {error}
+          </p>
+        )}
 
         {/* =========================================
             LOGIN BUTTON
         ========================================= */}
 
-        <button className="login-button">
+        <button
+          type="submit"
+          className="login-button"
+        >
           LOGIN →
         </button>
-
 
         {/* =========================================
             REGISTER
@@ -277,7 +480,7 @@ function Login() {
 
         </div>
 
-      </div>
+      </form>
 
     </div>
   );

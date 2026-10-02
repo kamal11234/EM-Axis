@@ -1,21 +1,25 @@
 import "./register.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import bg from "../assets/bg.jpeg";
 import logo1 from "../assets/logo1.png";
 
 function Register() {
+  const navigate = useNavigate();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+
+  const [joiningDate, setJoiningDate] = useState("");
+
+  const [role, setRole] = useState("");
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
 
   /* =========================================
      FULL NAME - ONLY CHARACTERS + SPACE
@@ -29,7 +33,6 @@ function Register() {
     }
   };
 
-
   /* =========================================
      EMAIL
   ========================================= */
@@ -37,7 +40,6 @@ function Register() {
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
   };
-
 
   /* =========================================
      PHONE - ONLY NUMBERS
@@ -51,7 +53,6 @@ function Register() {
     }
   };
 
-
   /* =========================================
      REGISTER
   ========================================= */
@@ -59,14 +60,36 @@ function Register() {
   const handleRegister = (e) => {
     e.preventDefault();
 
+    // Password check
     if (password !== confirmPassword) {
       alert("Password and Confirm Password do not match.");
       return;
     }
 
-    alert("Registration successful!");
-  };
+    // Role check
+    if (!role) {
+      alert("Please select your role.");
+      return;
+    }
 
+    // Temporary user data
+    // Backend connect karne ke baad ye data database me save hoga.
+    const userData = {
+      fullName,
+      email,
+      phone,
+      joiningDate,
+      role,
+      password,
+    };
+
+    console.log("Registered User:", userData);
+
+    alert("Registration successful! Please login.");
+
+    // Registration ke baad Login page par
+    navigate("/");
+  };
 
   return (
     <div
@@ -96,11 +119,9 @@ function Register() {
 
         </div>
 
-
         <div className="register-tagline">
           Inform&nbsp;&nbsp;•&nbsp;&nbsp;Connect&nbsp;&nbsp;•&nbsp;&nbsp;Create Impact
         </div>
-
 
         <div className="register-join-text">
           Be a Part of
@@ -142,6 +163,8 @@ function Register() {
 
         <div className="register-role-options">
 
+          {/* CHANNEL HEAD */}
+
           <label className="register-role-box">
 
             <span className="register-role-icon">👨‍💼</span>
@@ -152,11 +175,15 @@ function Register() {
               type="radio"
               name="register-role"
               value="channelHead"
+              checked={role === "channelHead"}
+              onChange={(e) => setRole(e.target.value)}
               required
             />
 
           </label>
 
+
+          {/* EDITOR */}
 
           <label className="register-role-box">
 
@@ -168,10 +195,14 @@ function Register() {
               type="radio"
               name="register-role"
               value="editor"
+              checked={role === "editor"}
+              onChange={(e) => setRole(e.target.value)}
             />
 
           </label>
 
+
+          {/* REPORTER */}
 
           <label className="register-role-box">
 
@@ -183,6 +214,8 @@ function Register() {
               type="radio"
               name="register-role"
               value="reporter"
+              checked={role === "reporter"}
+              onChange={(e) => setRole(e.target.value)}
             />
 
           </label>
@@ -241,7 +274,7 @@ function Register() {
         </div>
 
 
-        {/* PHONE + DOB */}
+        {/* PHONE + JOINING DATE */}
 
         <div className="register-input-row">
 
@@ -266,11 +299,11 @@ function Register() {
 
           <div className="register-input-box">
 
-
             <input
               type="date"
+              value={joiningDate}
+              onChange={(e) => setJoiningDate(e.target.value)}
               required
-               placeholder="select joining date"
             />
 
           </div>
