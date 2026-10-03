@@ -1,10 +1,11 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
 import Dashboard from "./reporter/Dashboard/Dashboard";
 import Profile from "./reporter/Profile/Profile";
+import TotalNews from "./reporter/TotalNews/TotalNews";
 
 import DashboardLayout from "./layout/DashboardLayout/DashboardLayout";
 
@@ -36,6 +37,22 @@ function App() {
             <Profile />
           </DashboardLayout>
         }
+      />
+
+      {/* Reporter - Total News */}
+      <Route
+        path="/reporter/total-news"
+        element={
+          <DashboardLayout>
+            <TotalNews />
+          </DashboardLayout>
+        }
+      />
+
+      {/* Unknown URL */}
+      <Route
+        path="*"
+        element={<Navigate to="/" />}
       />
 
     </Routes>
