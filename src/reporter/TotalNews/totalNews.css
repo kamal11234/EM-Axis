@@ -5,11 +5,8 @@
 .total-news-page {
   width: 100%;
   min-height: 100vh;
-
   background: #ffffff;
-
   color: #171717;
-
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -20,22 +17,15 @@
 
 .total-news-layout {
   width: 100%;
-
   display: flex;
-
   min-height: calc(100vh - 60px);
 }
 
-
 .total-news-main {
   flex: 1;
-
   min-width: 0;
-
-  padding: 18px 25px 40px;
-
+  padding: 32px 40px 50px;
   background: #ffffff;
-
   box-sizing: border-box;
 }
 
@@ -46,52 +36,38 @@
 
 .total-title-row {
   width: 100%;
-
-  max-width: 780px;
-
-  min-height: 65px;
-
-  margin: 0 auto;
+  max-width: 1230px;
+  min-height: 75px;
+  margin: 0 auto 25px;
 
   display: flex;
-
   align-items: center;
-
   justify-content: flex-start;
 }
 
-
 .total-title-left {
   display: flex;
-
   align-items: center;
-
-  gap: 8px;
+  gap: 12px;
 }
 
-
 .all-icon {
-  width: 31px;
-  height: 31px;
+  width: 42px;
+  height: 42px;
 
   display: flex;
-
   align-items: center;
   justify-content: center;
 
   border: 2px solid #477143;
-
   border-radius: 50%;
 
   color: #2f7b34;
-
-  font-size: 7px;
-
+  font-size: 11px;
   font-weight: 900;
 
   box-sizing: border-box;
 }
-
 
 .total-title-left h1 {
   margin: 0;
@@ -101,102 +77,40 @@
     "Times New Roman",
     serif;
 
-  font-size: 28px;
-
+  font-size: 38px;
   font-style: italic;
-
   color: #111111;
 }
 
-
 .news-count {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
 
   display: flex;
-
   align-items: center;
   justify-content: center;
 
   border-radius: 50%;
 
   background: #dce3ff;
-
   color: #27368f;
 
-  font-size: 10px;
+  font-size: 13px;
 }
 
-
-/* =====================================================
-   SEARCH
+/* /* =====================================================
+   FILTER SECTION
 ===================================================== */
 
 .filters {
   width: 100%;
-
-  max-width: 780px;
-
-  margin: 0 auto 18px;
-}
-
-
-.search-row {
-  width: 100%;
-
-  display: flex;
-
-  justify-content: flex-end;
-
-  margin-bottom: 9px;
-}
-
-
-.search-input {
-  width: 245px;
-  height: 28px;
-
-  display: flex;
-
-  align-items: center;
-
-  padding: 0 10px;
-
-  border: 1px solid #777777;
-
-  border-radius: 16px;
-
-  background: #ffffff;
-
+  margin: 28px 0 22px;
   box-sizing: border-box;
 }
 
 
-.search-input span {
-  margin-right: 7px;
-
-  font-size: 15px;
-
-  line-height: 1;
-}
-
-
-.search-input input {
-  width: 100%;
-  height: 100%;
-
-  border: 0;
-
-  outline: 0;
-
-  background: transparent;
-
-  font-size: 8px;
-}
-
-
 /* =====================================================
-   FILTER FIELDS
+   FOUR FILTERS - SAME LINE
 ===================================================== */
 
 .filter-fields {
@@ -205,53 +119,123 @@
   display: grid;
 
   grid-template-columns:
+    2.2fr
     1fr
     1fr
     1.15fr;
 
-  gap: 16px;
+  gap: 18px;
+
+  align-items: end;
+
+  box-sizing: border-box;
 }
 
 
-.filter-fields label {
-  display: block;
+/* =====================================================
+   FILTER ITEM
+===================================================== */
 
-  min-width: 0;
-}
-
-
-.filter-fields label > span {
-  display: block;
-
-  margin-bottom: 4px;
-
-  margin-left: 8px;
-
-  font-size: 8px;
-
-  color: #222222;
-}
-
-
-.filter-fields select {
+.filter-item {
   width: 100%;
-  height: 27px;
+  min-width: 0;
 
-  padding: 0 10px;
+  display: block;
 
-  border: 1px solid #999999;
+  box-sizing: border-box;
+}
 
-  border-radius: 14px;
 
-  background: #ffffff;
+.filter-item > span {
+  display: block;
+
+  margin: 0 0 7px 8px;
+
+  font-size: 12px;
+  line-height: 1;
+
+  color: #222;
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+.search-input {
+  width: 100%;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 14px;
+
+  border: 1px solid #999;
+  border-radius: 22px;
+
+  background: #fff;
+
+  box-sizing: border-box;
+}
+
+
+.search-input span {
+  margin-right: 8px;
+
+  font-size: 17px;
+  line-height: 1;
+
+  color: #222;
+}
+
+
+.search-input input {
+  width: 100%;
+  height: 100%;
+
+  padding: 0;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  font-size: 13px;
+  color: #222;
+
+  box-sizing: border-box;
+}
+
+
+.search-input input::placeholder {
+  color: #777;
+}
+
+
+/* =====================================================
+   SELECT
+===================================================== */
+
+.filter-item select {
+  width: 100%;
+  height: 42px;
+
+  padding: 0 13px;
+
+  border: 1px solid #999;
+  border-radius: 22px;
+
+  background: #fff;
 
   outline: none;
 
-  font-size: 8px;
-
-  cursor: pointer;
+  font-size: 13px;
+  color: #222;
 
   box-sizing: border-box;
+
+  cursor: pointer;
 }
 
 
@@ -261,19 +245,17 @@
 
 .single-date {
   width: 100%;
-  height: 27px;
+  height: 42px;
 
   display: flex;
-
   align-items: center;
 
-  padding: 0 8px;
+  padding: 0 12px;
 
-  border: 1px solid #999999;
+  border: 1px solid #999;
+  border-radius: 22px;
 
-  border-radius: 14px;
-
-  background: #ffffff;
+  background: #fff;
 
   box-sizing: border-box;
 }
@@ -283,106 +265,77 @@
   width: 100%;
   height: 100%;
 
-  border: 0;
-
+  border: none;
   outline: none;
 
   background: transparent;
 
-  font-size: 8px;
+  font-size: 13px;
 
-  color: #222222;
+  box-sizing: border-box;
 }
-
-
 /* =====================================================
    TABLE
 ===================================================== */
 
 .news-table-wrapper {
   width: 100%;
-
-  max-width: 780px;
-
+  max-width: 1220px;
   margin: 0 auto;
-
   overflow-x: auto;
 }
 
-
 .news-table {
   width: 100%;
-
-  min-width: 720px;
-
+  min-width: 900px;
   border-collapse: collapse;
-
   table-layout: fixed;
 }
 
-
 .news-table th {
-  height: 24px;
-
-  padding: 5px 6px;
-
+  height: 38px;
+  padding: 8px 10px;
   background: #d9e1ff;
-
   color: #30374b;
-
-  font-size: 8px;
-
-  font-weight: 500;
-
+  font-size: 12px;
+  font-weight: 600;
   text-align: left;
 }
 
-
 .news-table th:first-child {
-  width: 55px;
-}
-
-
-.news-table th:nth-child(2) {
-  width: 225px;
-}
-
-
-.news-table th:nth-child(3) {
-  width: 65px;
-}
-
-
-.news-table th:nth-child(4) {
-  width: 95px;
-}
-
-
-.news-table th:nth-child(5) {
-  width: 85px;
-}
-
-
-.news-table th:nth-child(6) {
   width: 75px;
 }
 
-
-.news-table th:nth-child(7) {
-  width: 80px;
+.news-table th:nth-child(2) {
+  width: 310px;
 }
 
+.news-table th:nth-child(3) {
+  width: 115px;
+}
+
+.news-table th:nth-child(4) {
+  width: 125px;
+}
+
+.news-table th:nth-child(5) {
+  width: 120px;
+}
+
+.news-table th:nth-child(6) {
+  width: 115px;
+}
+
+.news-table th:nth-child(7) {
+  width: 120px;
+}
 
 .news-table td {
-  height: 39px;
-
-  padding: 5px 7px;
-
+  height: 52px;
+  padding: 7px 10px;
   border-bottom: 1px solid #d7d7d7;
-
   vertical-align: middle;
-
-  font-size: 8px;
+  font-size: 12px;
 }
 
 
@@ -392,44 +345,29 @@
 
 .news-slug {
   display: flex;
-
   align-items: center;
-
-  gap: 7px;
-
+  gap: 10px;
   min-width: 0;
 }
 
-
 .thumbnail {
-  width: 29px;
-  height: 19px;
-
-  flex: 0 0 29px;
-
+  width: 38px;
+  height: 27px;
+  flex: 0 0 38px;
   display: flex;
-
   align-items: center;
   justify-content: center;
-
-  border-radius: 2px;
-
+  border-radius: 3px;
   background: #d6e0e8;
-
   color: #34495e;
-
-  font-size: 7px;
-
+  font-size: 10px;
   font-weight: 700;
 }
 
-
 .news-slug strong {
   display: block;
-
-  font-size: 7px;
-
-  line-height: 1.15;
+  font-size: 11px;
+  line-height: 1.25;
 }
 
 
@@ -442,18 +380,302 @@
   display: block;
 }
 
-
 .created-date strong {
-  font-size: 8px;
-
+  font-size: 11px;
   font-weight: 500;
 }
 
+.created-date small {
+  margin-top: 3px;
+  font-size: 10px;
+  color: #999999;
+}
+
+
+/* =====================================================
+   STATUS BADGES
+===================================================== */
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.status-published {
+  background: #ccd5ff;
+  color: #2138de;
+}
+
+.status-approved {
+  background: #c8f4c2;
+  color: #2d9a20;
+}
+
+.status-pending {
+  background: #f2edb8;
+  color: #a09514;
+}
+
+.status-rejected {
+  background: #ffd0d4;
+  color: #e51f31;
+}
+
+
+/* =====================================================
+   ACTION BUTTONS
+===================================================== */
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.actions button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actions .view {
+  background: #2530bd;
+}
+
+.actions .edit {
+  background: #b5e321;
+  color: #172000;
+}
+
+.actions .delete {
+  background: #ff2e4a;
+}
+
+
+/* =====================================================
+   NO RESULTS
+===================================================== */
+
+.no-results {
+  padding: 35px !important;
+  text-align: center !important;
+  color: #777777 !important;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1100px) {
+
+  .filters,
+  .news-table-wrapper {
+    max-width: 95%;
+  }
+
+  .filter-fields {
+    grid-template-columns: 1.4fr 1fr 1fr;
+    padding-left: 0;
+    margin-top: 15px;
+  }
+
+  .search-row {
+    margin-bottom: 15px;
+  }
+
+}
+
+
+@media (max-width: 750px) {
+
+  .filter-fields {
+    grid-template-columns: 1fr 1fr;
+    padding-left: 0;
+    margin-top: 15px;
+  }
+
+}
+
+
+@media (max-width: 500px) {
+
+  .filter-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .filters {
+    max-width: 100%;
+  }
+
+  .news-table-wrapper {
+    max-width: 100%;
+  }
+
+}
+
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+.news-table-wrapper {
+  width: 100%;
+  max-width: 1230px;
+
+  margin: 0 auto;
+
+  overflow-x: auto;
+}
+
+.news-table {
+  width: 100%;
+  min-width: 1000px;
+
+  border-collapse: collapse;
+
+  table-layout: fixed;
+}
+
+
+/* =====================================================
+   TABLE HEADER
+===================================================== */
+
+.news-table th {
+  height: 45px;
+
+  padding: 10px 12px;
+
+  background: #d9e1ff;
+
+  color: #30374b;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  text-align: left;
+}
+
+
+/* Column widths */
+
+.news-table th:first-child {
+  width: 75px;
+}
+
+.news-table th:nth-child(2) {
+  width: 300px;
+}
+
+.news-table th:nth-child(3) {
+  width: 120px;
+}
+
+.news-table th:nth-child(4) {
+  width: 145px;
+}
+
+.news-table th:nth-child(5) {
+  width: 130px;
+}
+
+.news-table th:nth-child(6) {
+  width: 115px;
+}
+
+.news-table th:nth-child(7) {
+  width: 120px;
+}
+
+
+/* =====================================================
+   TABLE BODY
+===================================================== */
+
+.news-table td {
+  height: 58px;
+
+  padding: 8px 12px;
+
+  border-bottom: 1px solid #d7d7d7;
+
+  vertical-align: middle;
+
+  font-size: 12px;
+}
+
+
+/* =====================================================
+   NEWS SLUG
+===================================================== */
+
+.news-slug {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  min-width: 0;
+}
+
+.thumbnail {
+  width: 42px;
+  height: 30px;
+
+  flex: 0 0 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 3px;
+
+  background: #d6e0e8;
+  color: #34495e;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.news-slug strong {
+  display: block;
+
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+
+/* =====================================================
+   CREATED DATE
+===================================================== */
+
+.created-date strong,
+.created-date small {
+  display: block;
+}
+
+.created-date strong {
+  font-size: 12px;
+  font-weight: 500;
+}
 
 .created-date small {
-  margin-top: 2px;
+  margin-top: 3px;
 
-  font-size: 7px;
+  font-size: 10px;
 
   color: #999999;
 }
@@ -466,40 +688,32 @@
 .status-badge {
   display: inline-block;
 
-  padding: 3px 7px;
+  padding: 5px 11px;
 
-  border-radius: 9px;
+  border-radius: 12px;
 
-  font-size: 7px;
+  font-size: 10px;
 
   white-space: nowrap;
 }
 
-
 .status-published {
   background: #ccd5ff;
-
   color: #2138de;
 }
 
-
 .status-approved {
   background: #c8f4c2;
-
   color: #2d9a20;
 }
 
-
 .status-pending {
   background: #f2edb8;
-
   color: #a09514;
 }
 
-
 .status-rejected {
   background: #ffd0d4;
-
   color: #e51f31;
 }
 
@@ -513,23 +727,22 @@
 
   align-items: center;
 
-  gap: 3px;
+  gap: 6px;
 }
 
-
 .actions button {
-  width: 16px;
-  height: 16px;
+  width: 30px;
+  height: 30px;
 
   padding: 0;
 
   border: 0;
 
-  border-radius: 2px;
+  border-radius: 4px;
 
   color: #ffffff;
 
-  font-size: 8px;
+  font-size: 13px;
 
   cursor: pointer;
 
@@ -539,18 +752,14 @@
   justify-content: center;
 }
 
-
 .actions .view {
   background: #2530bd;
 }
 
-
 .actions .edit {
   background: #b5e321;
-
   color: #172000;
 }
-
 
 .actions .delete {
   background: #ff2e4a;
@@ -562,7 +771,7 @@
 ===================================================== */
 
 .no-results {
-  padding: 35px !important;
+  padding: 40px !important;
 
   text-align: center !important;
 
@@ -584,7 +793,6 @@
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
   padding: 20px;
@@ -594,12 +802,10 @@
   box-sizing: border-box;
 }
 
-
 .modal {
-  width: 430px;
+  width: 480px;
 
   max-width: 100%;
-
   max-height: 90vh;
 
   overflow-y: auto;
@@ -622,28 +828,25 @@
   display: flex;
 
   align-items: center;
-
   justify-content: space-between;
 
-  padding: 15px 18px;
+  padding: 18px 20px;
 
   border-bottom: 1px solid #eeeeee;
 }
 
-
 .modal-header h2 {
   margin: 0;
 
-  font-size: 17px;
+  font-size: 20px;
 }
-
 
 .modal-header button {
   border: 0;
 
   background: transparent;
 
-  font-size: 24px;
+  font-size: 26px;
 
   cursor: pointer;
 }
@@ -654,21 +857,19 @@
 ===================================================== */
 
 .view-news {
-  padding: 18px;
+  padding: 22px;
 }
-
 
 .view-news h3 {
-  margin: 0 0 15px;
+  margin: 0 0 18px;
 
-  font-size: 16px;
+  font-size: 19px;
 }
 
-
 .view-news p {
-  margin: 9px 0;
+  margin: 10px 0;
 
-  font-size: 11px;
+  font-size: 13px;
 }
 
 
@@ -677,29 +878,27 @@
 ===================================================== */
 
 .edit-news {
-  padding: 18px;
+  padding: 22px;
 }
-
 
 .edit-news label {
   display: block;
 
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 
-  font-size: 10px;
+  font-size: 12px;
 
   font-weight: 700;
 }
 
-
 .edit-news input,
 .edit-news select {
   width: 100%;
-  height: 32px;
+  height: 38px;
 
-  margin-top: 5px;
+  margin-top: 6px;
 
-  padding: 0 8px;
+  padding: 0 10px;
 
   border: 1px solid #bbbbbb;
 
@@ -707,7 +906,7 @@
 
   outline: none;
 
-  font-size: 11px;
+  font-size: 13px;
 
   box-sizing: border-box;
 }
@@ -722,14 +921,13 @@
 
   justify-content: flex-end;
 
-  gap: 8px;
+  gap: 10px;
 
-  margin-top: 18px;
+  margin-top: 20px;
 }
 
-
 .modal-actions button {
-  padding: 8px 14px;
+  padding: 9px 16px;
 
   border: 0;
 
@@ -737,14 +935,12 @@
 
   cursor: pointer;
 
-  font-size: 11px;
+  font-size: 12px;
 }
-
 
 .cancel {
   background: #eeeeee;
 }
-
 
 .save {
   background: #2039ae;
@@ -757,48 +953,77 @@
    RESPONSIVE
 ===================================================== */
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
 
-  .filter-fields {
+  .total-news-main {
+    padding: 25px 25px 40px;
+  }
+
+  .search-row {
     grid-template-columns:
+      1.3fr
+      1fr
       1fr
       1fr;
+
+    gap: 12px;
+  }
+
+  .total-title-left h1 {
+    font-size: 34px;
   }
 
 }
 
 
-@media (max-width: 650px) {
-
-  .total-news-main {
-    padding: 12px 10px 30px;
-  }
-
-
-  .total-title-row {
-    min-height: 55px;
-  }
-
-
-  .total-title-left h1 {
-    font-size: 24px;
-  }
-
+@media (max-width: 850px) {
 
   .search-row {
-    justify-content: stretch;
+    grid-template-columns: 1fr 1fr;
   }
-
-
-  .search-input {
-    width: 100%;
-  }
-
 
   .filter-fields {
-    grid-template-columns: 1fr;
+    display: contents;
   }
 
+}
+
+
+@media (max-width: 600px) {
+
+  .total-news-main {
+    padding: 18px 12px 30px;
+  }
+
+  .total-title-row {
+    min-height: 60px;
+    margin-bottom: 20px;
+  }
+
+  .total-title-left h1 {
+    font-size: 28px;
+  }
+
+  .all-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .news-count {
+    width: 32px;
+    height: 32px;
+  }
+
+  .search-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .search-input,
+  .filter-fields select,
+  .single-date {
+    height: 44px;
+  }
 
   .news-table-wrapper {
     overflow-x: auto;

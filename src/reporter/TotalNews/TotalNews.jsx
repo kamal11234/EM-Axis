@@ -2,13 +2,13 @@ import { useMemo, useState } from "react";
 
 
 
-import "./TotalNews.css";
+import "./totalNews.css";
 
 
 const initialNews = [
   {
     id: "N001",
-    title: "City to get New Metro Line Next Year",
+    title: "City to get New Metro Line Nesxt Year",
     format: "AV",
     date: "2025-08-12",
     displayDate: "12-08-2025",
@@ -314,140 +314,89 @@ function TotalNews() {
 
           <section className="filters">
 
+  <div className="filter-fields">
 
-            <div className="search-row">
+    {/* SEARCH */}
+    <label className="filter-item search-field">
+      <span>Search by News Slug</span>
 
+      <div className="search-input">
+        <span>⌕</span>
 
-              <div className="search-input">
-
-                <span>
-                  ⌕
-                </span>
-
-
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(event) =>
-                    setSearch(
-                      event.target.value
-                    )
-                  }
-                  placeholder="Search by News Slug"
-                />
+        <input
+          type="text"
+          value={search}
+          onChange={(event) =>
+            setSearch(event.target.value)
+          }
+          placeholder="Search by News Slug"
+        />
+      </div>
+    </label>
 
 
-              </div>
+    {/* NEWS FORMAT */}
+    <label className="filter-item">
+      <span>News Format</span>
+
+      <select
+        value={format}
+        onChange={(event) =>
+          setFormat(event.target.value)
+        }
+      >
+        {formats.map((item) => (
+          <option
+            key={item}
+            value={item}
+          >
+            {item}
+          </option>
+        ))}
+      </select>
+    </label>
 
 
-            </div>
+    {/* STATUS */}
+    <label className="filter-item">
+      <span>Status</span>
+
+      <select
+        value={status}
+        onChange={(event) =>
+          setStatus(event.target.value)
+        }
+      >
+        {statuses.map((item) => (
+          <option
+            key={item}
+            value={item}
+          >
+            {item}
+          </option>
+        ))}
+      </select>
+    </label>
 
 
-            {/* =====================================
-                FILTER FIELDS
-            ====================================== */}
+    {/* DATE */}
+    <label className="filter-item">
+      <span>Date</span>
 
-            <div className="filter-fields">
+      <div className="single-date">
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={(event) =>
+            setSelectedDate(event.target.value)
+          }
+        />
+      </div>
+    </label>
 
+  </div>
 
-              {/* NEWS FORMAT */}
-
-              <label>
-
-                <span>
-                  News Format
-                </span>
-
-
-                <select
-                  value={format}
-                  onChange={(event) =>
-                    setFormat(
-                      event.target.value
-                    )
-                  }
-                >
-
-                  {formats.map((item) => (
-
-                    <option
-                      key={item}
-                      value={item}
-                    >
-                      {item}
-                    </option>
-
-                  ))}
-
-                </select>
-
-              </label>
-
-
-              {/* STATUS */}
-
-              <label>
-
-                <span>
-                  Status
-                </span>
-
-
-                <select
-                  value={status}
-                  onChange={(event) =>
-                    setStatus(
-                      event.target.value
-                    )
-                  }
-                >
-
-                  {statuses.map((item) => (
-
-                    <option
-                      key={item}
-                      value={item}
-                    >
-                      {item}
-                    </option>
-
-                  ))}
-
-                </select>
-
-              </label>
-
-
-              {/* DATE */}
-
-              <label>
-
-                <span>
-                  Date
-                </span>
-
-
-                <div className="single-date">
-
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(event) =>
-                      setSelectedDate(
-                        event.target.value
-                      )
-                    }
-                  />
-
-                </div>
-
-              </label>
-
-
-            </div>
-
-
-          </section>
+</section>
 
 
           {/* =====================================
