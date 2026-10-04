@@ -1,252 +1,643 @@
-
-import "./Profile.css";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./profile.css";
 
 function Profile() {
-  const [profileImage, setProfileImage] = useState(null);
-  const [showOptions, setShowOptions] = useState(false);
+  const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
-  const [gender, setGender] = useState("");
-  const [location, setLocation] = useState("");
+  const [profileImage, setProfileImage] = useState(
+    localStorage.getItem("reporterProfileImage") || ""
+  );
 
-  // Profile image upload
+  const [showPhotoMenu, setShowPhotoMenu] = useState(false);
+
+  const [gender, setGender] = useState(
+    localStorage.getItem("reporterGender") || "Male"
+  );
+
+  const [accountStatus, setAccountStatus] = useState(
+    localStorage.getItem("reporterAccountStatus") || "Active"
+  );
+
+  const [name, setName] = useState(
+    localStorage.getItem("reporterName") || "Kamal Vadar"
+  );
+
+  const [isEditingName, setIsEditingName] = useState(false);
+
+  const [tempName, setTempName] = useState(name);
+
+
+  /* =====================================================
+     CAMERA BUTTON
+  ===================================================== */
+
+  const handleCameraClick = () => {
+    setShowPhotoMenu((prev) => !prev);
+  };
+
+
+  /* =====================================================
+     CHANGE PHOTO
+  ===================================================== */
+
+  const handleChangePhoto = () => {
+    setShowPhotoMenu(false);
+
+    fileInputRef.current.click();
+  };
+
+
+  /* =====================================================
+     IMAGE CHANGE
+  ===================================================== */
+
   const handleImageChange = (event) => {
     const file = event.target.files[0];
 
-    if (file) {
-      const imageURL = URL.createObjectURL(file);
-      setProfileImage(imageURL);
-      setShowOptions(false);
+    if (!file) {
+      return;
     }
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select a valid image file.");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Please select an image smaller than 5 MB.");
+      event.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const imageData = reader.result;
+
+      setProfileImage(imageData);
+
+      localStorage.setItem(
+        "reporterProfileImage",
+        imageData
+      );
+    };
+
+    reader.readAsDataURL(file);
+
+    event.target.value = "";
   };
 
-  // Delete profile image
-  const handleDeleteImage = () => {
-    setProfileImage(null);
-    setShowOptions(false);
+
+  /* =====================================================
+     REMOVE PHOTO
+  ===================================================== */
+
+  const handleRemovePhoto = () => {
+    setProfileImage("");
+
+    localStorage.removeItem("reporterProfileImage");
+
+    setShowPhotoMenu(false);
   };
+
+
+  /* =====================================================
+     EDIT NAME
+  ===================================================== */
+
+  const handleEditName = () => {
+    setTempName(name);
+
+    setIsEditingName(true);
+  };
+
+
+  /* =====================================================
+     SAVE NAME
+  ===================================================== */
+
+  const handleSaveName = () => {
+    const trimmedName = tempName.trim();
+
+    if (!trimmedName) {
+      alert("Please enter your name.");
+      return;
+    }
+
+    if (!/^[A-Za-z ]+$/.test(trimmedName)) {
+      alert("Name should contain only letters and spaces.");
+      return;
+    }
+
+    setName(trimmedName);
+
+    localStorage.setItem(
+      "reporterName",
+      trimmedName
+    );
+
+    setIsEditingName(false);
+  };
+
+
+  /* =====================================================
+     CANCEL NAME EDIT
+  ===================================================== */
+
+  const handleCancelName = () => {
+    setTempName(name);
+
+    setIsEditingName(false);
+  };
+
+
+  /* =====================================================
+     GENDER
+  ===================================================== */
+
+  const handleGenderChange = (event) => {
+    const value = event.target.value;
+
+    setGender(value);
+
+    localStorage.setItem(
+      "reporterGender",
+      value
+    );
+  };
+
+
+  /* =====================================================
+     ACCOUNT STATUS
+  ===================================================== */
+
+  const handleStatusChange = (event) => {
+    const value = event.target.value;
+
+    setAccountStatus(value);
+
+    localStorage.setItem(
+      "reporterAccountStatus",
+      value
+    );
+  };
+
+
+  /* =====================================================
+     LOGOUT
+  ===================================================== */
+
+  const handleLogout = () => {
+    navigate("/");
+  };
+
 
   return (
     <div className="profile-page">
 
-      {/* PAGE HEADING */}
-      <div className="profile-title">
-        <h1>Your Profile</h1>
+      {/* =================================================
+          PROFILE HEADER
+      ================================================= */}
+
+      <div className="profile-page-header">
+
+        <div className="profile-heading">
+
+          <div className="profile-user-icon">
+            <span>♙</span>
+          </div>
+
+          <h1>Reporter Profile</h1>
+
+        </div>
+
       </div>
 
-      {/* PROFILE CONTAINER */}
-      <div className="profile-container">
 
-        {/* ================= LEFT SECTION ================= */}
+      {/* =================================================
+          PROFILE MAIN
+      ================================================= */}
 
-        <div className="profile-left">
+      <div className="profile-main">
 
-          {/* PROFILE IMAGE */}
-          <div className="profile-photo-wrapper">
 
-            <div className="profile-image">
-              {profileImage ? (
-                <img
-                  src={profileImage}
-                  alt="Profile"
-                  className="profile-image-preview"
-                />
-              ) : (
-                <span className="default-profile-icon">
-                  👤
-                </span>
-              )}
-            </div>
+        {/* =================================================
+            LEFT PROFILE CARD
+        ================================================= */}
+
+        <div className="profile-left-card">
+
+
+          {/* =================================================
+              PROFILE IMAGE
+          ================================================= */}
+
+          <div className="profile-image-wrapper">
+
+            {profileImage ? (
+
+              <img
+                src={profileImage}
+                alt="Reporter Profile"
+                className="profile-image"
+              />
+
+            ) : (
+
+              <div className="profile-placeholder">
+                <span>♙</span>
+              </div>
+
+            )}
+
 
             {/* CAMERA BUTTON */}
+
             <button
               type="button"
-              className="camera-button"
-              onClick={() => setShowOptions(!showOptions)}
+              className="camera-btn"
+              onClick={handleCameraClick}
+              title="Profile photo options"
             >
               📷
             </button>
 
-            {/* IMAGE OPTIONS */}
-            {showOptions && (
-              <div className="profile-image-options">
 
-                {/* CHANGE PHOTO */}
-                <label
-                  htmlFor="profile-upload"
-                  className="image-option"
+            {/* =================================================
+                PHOTO OPTIONS
+            ================================================= */}
+
+            {showPhotoMenu && (
+
+              <div className="photo-menu">
+
+                <button
+                  type="button"
+                  className="photo-menu-item change-photo"
+                  onClick={handleChangePhoto}
                 >
-                  📷 Change Photo
-                </label>
+                  <span>📷</span>
+                  Change Photo
+                </button>
 
-                <input
-                  id="profile-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  hidden
-                />
 
-                {/* DELETE PHOTO */}
                 {profileImage && (
+
                   <button
                     type="button"
-                    className="image-option delete-option"
-                    onClick={handleDeleteImage}
+                    className="photo-menu-item remove-photo"
+                    onClick={handleRemovePhoto}
                   >
-                    🗑 Delete Photo
+                    <span>🗑️</span>
+                    Remove Photo
                   </button>
+
                 )}
 
               </div>
+
             )}
+
+
+            {/* HIDDEN FILE INPUT */}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="profile-file-input"
+            />
 
           </div>
 
-          {/* REPORTER NAME */}
-          <h2 className="profile-user-name">
-            {/* Registration se automatically aayega */}
-          </h2>
 
-          {/* REPORTER ID */}
-          <p className="profile-user-id">
-            {/* System automatically generate karega */}
-          </p>
+          {/* =================================================
+              PROFILE NAME
+          ================================================= */}
 
-          {/* ACCOUNT STATUS */}
-          <div className="account-status">
+          {!isEditingName ? (
 
-            <span className="status-title">
-              Account Status
-            </span>
+            <div className="profile-name">
 
-            <span className="status-active">
-              ● Active
-            </span>
+              {name}
+
+              <button
+                type="button"
+                className="edit-icon"
+                onClick={handleEditName}
+                title="Edit Name"
+              >
+                ✎
+              </button>
+
+            </div>
+
+          ) : (
+
+            <div className="name-edit-box">
+
+              <input
+                type="text"
+                value={tempName}
+                onChange={(e) =>
+                  setTempName(e.target.value)
+                }
+                className="name-input"
+                autoFocus
+              />
+
+
+              <div className="name-edit-buttons">
+
+                <button
+                  type="button"
+                  className="name-save-btn"
+                  onClick={handleSaveName}
+                  title="Save Name"
+                >
+                  ✓
+                </button>
+
+                <button
+                  type="button"
+                  className="name-cancel-btn"
+                  onClick={handleCancelName}
+                  title="Cancel"
+                >
+                  ✕
+                </button>
+
+              </div>
+
+            </div>
+
+          )}
+
+
+          {/* =================================================
+              REPORTER ID
+          ================================================= */}
+
+          <div className="profile-id">
+            REP001
+          </div>
+
+
+          {/* =================================================
+              ACCOUNT STATUS BADGE
+          ================================================= */}
+
+          <div
+            className={`profile-active-badge ${
+              accountStatus === "Inactive"
+                ? "inactive-badge"
+                : ""
+            }`}
+          >
+
+            <span></span>
+
+            {accountStatus}
 
           </div>
 
         </div>
 
 
-        {/* ================= RIGHT SECTION ================= */}
+        {/* =================================================
+            RIGHT DETAILS CARD
+        ================================================= */}
 
-        <div className="profile-right">
+        <div className="profile-details-card">
+
 
           {/* REPORTER NAME */}
-          <div className="profile-info-row">
-            <span>Reporter Name</span>
 
-            <strong>
-              {/* Registration ka name */}
-            </strong>
+          <div className="profile-detail-row">
+
+            <div className="detail-icon">
+              ●
+            </div>
+
+            <div className="detail-label">
+              Reporter Name
+            </div>
+
+            <div className="detail-value">
+              {name}
+            </div>
+
           </div>
 
 
           {/* REPORTER ID */}
-          <div className="profile-info-row">
-            <span>Reporter ID</span>
 
-            <strong>
-              {/* Automatically generated ID */}
-            </strong>
+          <div className="profile-detail-row">
+
+            <div className="detail-icon">
+              ▣
+            </div>
+
+            <div className="detail-label">
+              Reporter ID
+            </div>
+
+            <div className="detail-value">
+              REP001
+            </div>
+
           </div>
 
 
           {/* EMAIL */}
-          <div className="profile-info-row">
-            <span>Email ID</span>
 
-            <strong>
-              {/* Registration ka email */}
-            </strong>
+          <div className="profile-detail-row">
+
+            <div className="detail-icon">
+              ✉
+            </div>
+
+            <div className="detail-label">
+              Email ID
+            </div>
+
+            <div className="detail-value">
+              kamalvadar@gmail.com
+            </div>
+
           </div>
 
 
-          {/* DESIGNATION */}
-          <div className="profile-info-row">
-            <span>Designation</span>
+          {/* MOBILE NUMBER */}
 
-            <strong>
-              {/* Reporter / Editor / Channel Head */}
-            </strong>
-          </div>
+          <div className="profile-detail-row">
 
+            <div className="detail-icon">
+              ●
+            </div>
 
-          {/* MOBILE */}
-          <div className="profile-info-row">
-            <span>Mobile No.</span>
+            <div className="detail-label">
+              Mobile Number
+            </div>
 
-            <strong>
-              {/* Registration ka mobile number */}
-            </strong>
+            <div className="detail-value">
+              9844567895
+            </div>
+
           </div>
 
 
           {/* GENDER */}
-          <div className="profile-info-row">
-            <span>Gender</span>
 
-            <select
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              className="profile-select"
-            >
-              <option value="">Select Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-              <option value="Prefer not to say">
-                Prefer not to say
-              </option>
-            </select>
+          <div className="profile-detail-row">
+
+            <div className="detail-icon">
+              ⚥
+            </div>
+
+            <div className="detail-label">
+              Gender
+            </div>
+
+            <div className="detail-value">
+
+              <select
+                className="profile-select"
+                value={gender}
+                onChange={handleGenderChange}
+              >
+
+                <option value="Male">
+                  Male
+                </option>
+
+                <option value="Female">
+                  Female
+                </option>
+
+                <option value="Other">
+                  Other
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+
+          {/* DESIGNATION */}
+
+          <div className="profile-detail-row">
+
+            <div className="detail-icon">
+              ▣
+            </div>
+
+            <div className="detail-label">
+              Designation
+            </div>
+
+            <div className="detail-value">
+              Reporter
+            </div>
+
           </div>
 
 
           {/* LOCATION */}
-          <div className="profile-info-row">
-            <span>Location</span>
 
-            <select
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="profile-select"
-            >
-              <option value="">Select Location</option>
-              <option value="Maharashtra">Maharashtra</option>
-              <option value="Delhi">Delhi</option>
-              <option value="Gujarat">Gujarat</option>
-              <option value="Karnataka">Karnataka</option>
-              <option value="Madhya Pradesh">
-                Madhya Pradesh
-              </option>
-              <option value="Rajasthan">Rajasthan</option>
-              <option value="Uttar Pradesh">
-                Uttar Pradesh
-              </option>
-              <option value="Other">Other</option>
-            </select>
+          <div className="profile-detail-row">
+
+            <div className="detail-icon">
+              ●
+            </div>
+
+            <div className="detail-label">
+              Location
+            </div>
+
+            <div className="detail-value">
+              Pune
+            </div>
+
           </div>
 
 
           {/* JOINING DATE */}
-          <div className="profile-info-row">
-            <span>Joining Date</span>
 
-            <strong>
-              {/* Registration ke time automatically save hogi */}
-            </strong>
+          <div className="profile-detail-row">
+
+            <div className="detail-icon">
+              ▦
+            </div>
+
+            <div className="detail-label">
+              Joining Date
+            </div>
+
+            <div className="detail-value">
+              19-04-2023
+            </div>
+
           </div>
 
 
-          {/* LOGOUT */}
-          <div className="logout-section">
+          {/* ACCOUNT STATUS */}
+
+          <div className="profile-detail-row">
+
+            <div className="detail-icon">
+              ◉
+            </div>
+
+            <div className="detail-label">
+              Account Status
+            </div>
+
+            <div className="detail-value">
+
+              <select
+                className={`profile-select status-select ${
+                  accountStatus === "Inactive"
+                    ? "inactive-select"
+                    : ""
+                }`}
+                value={accountStatus}
+                onChange={handleStatusChange}
+              >
+
+                <option value="Active">
+                  Active
+                </option>
+
+                <option value="Inactive">
+                  Inactive
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+
+          {/* =================================================
+              LOGOUT BUTTON
+          ================================================= */}
+
+          <div className="profile-action">
 
             <button
               type="button"
               className="logout-btn"
+              onClick={handleLogout}
             >
-              Logout
+              ⇥ LOG OUT
             </button>
 
           </div>
