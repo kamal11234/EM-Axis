@@ -1,4 +1,55 @@
-#root {
-  width: 100%;
-  height: 100%;
+import React from 'react';
+
+function App() {
+  return (
+    <div style={{ background: '#f4f6fb', padding: '20px', minHeight: '100vh', fontFamily: 'Arial' }}>
+
+      {/* ===== HE BUTTON GELE HOTE - PARAT AANLE ===== */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+        <button style={{ padding: '6px 12px', border: '1px solid #333', borderRadius: '4px', background: '#e0eaff', fontWeight: 'bold' }}>Draft</button>
+        <button style={{ padding: '6px 12px', border: '1px solid #333', borderRadius: '4px', background: 'white' }}>Pending News</button>
+        <button style={{ padding: '6px 12px', border: '1px solid #333', borderRadius: '4px', background: 'white' }}>Submitted News</button>
+        <button style={{ padding: '6px 12px', border: '1px solid #333', borderRadius: '4px', background: 'white' }}>Published News</button>
+      </div>
+
+      {/* BLUE BOX */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+        <h2 style={{ margin: 0 }}>📋 Draft</h2>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div style={{ background: 'white', border: '1px solid #ccc', borderRadius: '20px', padding: '7px 15px', fontSize: '12px' }}>🔍 Search by News ID, Title...</div>
+          <div style={{ background: 'white', border: '1px solid #ccc', borderRadius: '20px', padding: '7px 15px', fontSize: '12px' }}>All Categories ▾</div>
+          <div style={{ background: '#a8c6ff', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>2</div>
+        </div>
+      </div>
+
+      {/* GREEN BOX */}
+      <div style={{ background: 'white', borderRadius: '10px', overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: '#dbe6ff', textAlign: 'left', fontSize: '12px' }}>
+              <th style={{ padding: '12px' }}>News ID</th>
+              <th>News Slug</th>
+              <th>Format</th>
+              <th>Created Date</th>
+              <th>Last Updated Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody style={{ fontSize: '13px' }}>
+            <tr>
+              <td style={{ padding: '12px' }}>N010</td>
+              <td>New education policy brings major changes</td>
+              <td>Avb</td>
+              <td>08-08-2025</td>
+              <td>10-08-2025</td>
+              <td>👁️ ✏️ 🗑️</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  );
 }
+
+export default App;
