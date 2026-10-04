@@ -1,16 +1,8 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import React from "react";
+import CheckNewsStatus from "./reporter/CheckNewsStatus/CheckNewsStatus.jsx";
 
 function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
-  );
+  return <CheckNewsStatus />;
 }
 
 export default App;

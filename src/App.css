@@ -1,4 +1,175 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: white;
+}
+
 #root {
   width: 100%;
-  height: 100%;
+}
+
+/* Main Page */
+
+.my-news-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 40px 45px;
+  background: white;
+}
+
+/* Heading */
+
+.my-news-page h1 {
+  margin: 0 0 28px 0;
+  font-size: 38px;
+  font-weight: 700;
+}
+
+/* Top Section */
+
+.top-section {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* Tabs */
+
+.tabs {
+  display: flex;
+}
+
+.tabs button {
+  height: 48px;
+  padding: 0 28px;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.tabs .active {
+  background: #3569e8;
+  color: white;
+  border-radius: 7px 0 0 7px;
+}
+
+.tabs button:not(.active) {
+  background: #dce5ff;
+  color: #222;
+  border-radius: 0 7px 7px 0;
+}
+
+.tabs span {
+  margin-left: 10px;
+  padding: 4px 7px;
+  border-radius: 50%;
+  background: #c5d2f5;
+  color: #222;
+}
+
+.tabs .active span {
+  background: white;
+  color: #3569e8;
+}
+
+/* Search and Category */
+
+.filters {
+  display: flex;
+  align-items: center;
+  margin-left: 50px;
+  gap: 35px;
+}
+
+.filters input {
+  width: 310px;
+  height: 44px;
+  border: 1.5px solid #888;
+  border-radius: 25px;
+  padding: 0 18px;
+  font-size: 14px;
+  outline: none;
+}
+
+.filters select {
+  width: 230px;
+  height: 44px;
+  border: 1.5px solid #888;
+  border-radius: 25px;
+  padding: 0 18px;
+  background: white;
+  font-size: 14px;
+  outline: none;
+}
+
+/* Table */
+
+.news-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* Blue Header */
+
+.news-table thead {
+  background: #dce5ff;
+}
+
+.news-table th {
+  height: 46px;
+  padding: 10px 15px;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Empty White Rows */
+
+.news-table tbody tr {
+  height: 58px;
+  background: white;
+}
+
+.news-table tbody td {
+  border-bottom: 2px solid #e5e5e5;
+}
+
+/* Column Width */
+
+.news-table th:nth-child(1) {
+  width: 10%;
+}
+
+.news-table th:nth-child(2) {
+  width: 25%;
+}
+
+.news-table th:nth-child(3) {
+  width: 15%;
+}
+
+.news-table th:nth-child(4) {
+  width: 18%;
+}
+
+.news-table th:nth-child(5) {
+  width: 17%;
+}
+
+.news-table th:nth-child(6) {
+  width: 15%;
+}
+
+/* Draft Heading */
+
+.my-news-page h2 {
+  font-size: 32px;
+  margin: 20px 0 18px 10px;
+  font-weight: 700;
 }

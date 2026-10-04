@@ -1,0 +1,14 @@
+.notif-wrapper{max-width:900px;margin:20px auto;background:#fff;padding:20px;border-radius:10px;font-family:sans-serif}
+.notif-header{display:flex;justify-content:space-between;align-items:center}
+.notif-header h2{margin:0;font-size:22px;font-weight:800}
+.mark-read{color:#3b5bdb;font-size:12px;font-weight:600;cursor:pointer}
+.notif-list{margin-top:15px;display:flex;flex-direction:column;gap:10px}
+.notif-card{height:45px;border-radius:6px}
+.notif-card.active{border:2px solid #3b5bdb}
+.notif-card.submitted,.approved{background:#e6f8ee}
+.notif-card.review{background:#eaf2ff}
+.notif-card.correction{background:#fff8db}
+.notif-card.rejected{background:#fde8e8}
+.notif-card.published{background:#eef1ff}
+.notif-card.draft{background:#d6fffe}
+.notif-card.resubmitted{background:#f1f3f5}
