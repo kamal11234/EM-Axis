@@ -1,0 +1,743 @@
+/* =====================================================
+   SETTINGS PAGE
+===================================================== */
+
+.settings-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 32px 42px 45px;
+  box-sizing: border-box;
+
+  background: transparent;
+  color: #111111;
+
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
+}
+
+
+/* =====================================================
+   SETTINGS HEADER
+===================================================== */
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  margin-bottom: 32px;
+}
+
+.settings-header-icon {
+  font-size: 43px;
+  font-weight: 900;
+
+  color: #000000;
+
+  transition: color 0.3s ease;
+}
+
+.settings-header h1 {
+  margin: 0;
+
+  font-size: 36px;
+  font-weight: 900;
+
+  color: #111111;
+
+  letter-spacing: -0.8px;
+
+  transition: color 0.3s ease;
+}
+
+
+/* =====================================================
+   SETTINGS CONTAINER
+===================================================== */
+
+.settings-container {
+  width: 100%;
+  max-width: 1000px;
+}
+
+
+/* =====================================================
+   SETTING ROW / CARD
+===================================================== */
+
+.setting-row {
+  width: 100%;
+  min-height: 82px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 30px;
+
+  padding: 12px 10px 12px 16px;
+
+  box-sizing: border-box;
+
+  /* LIGHT MODE DIVIDER */
+  border-bottom: 1px solid #d2d2d2;
+
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
+}
+
+
+/* =====================================================
+   LEFT SECTION
+===================================================== */
+
+.setting-left {
+  display: flex;
+  align-items: center;
+
+  gap: 18px;
+
+  min-width: 0;
+}
+
+
+/* =====================================================
+   ICON
+===================================================== */
+
+.setting-icon {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  flex-shrink: 0;
+
+  font-size: 21px;
+}
+
+
+/* Individual icon backgrounds */
+
+.account-icon {
+  background: #e8f0ff;
+}
+
+.language-icon {
+  background: #e9f8ed;
+}
+
+.appearance-icon {
+  background: #fff3dc;
+}
+
+.notification-icon {
+  background: #ffe9ed;
+}
+
+.help-icon {
+  background: #eee8ff;
+
+  font-weight: 900;
+}
+
+
+/* =====================================================
+   SETTING TEXT
+===================================================== */
+
+.setting-info h3 {
+  margin: 0 0 5px;
+
+  font-size: 17px;
+  font-weight: 800;
+
+  color: #292929;
+
+  transition: color 0.3s ease;
+}
+
+.setting-info p {
+  margin: 0;
+
+  font-size: 13px;
+
+  color: #555555;
+
+  transition: color 0.3s ease;
+}
+
+
+/* =====================================================
+   ACCOUNT STATUS
+===================================================== */
+
+.status-control {
+  display: flex;
+
+  border: 1px solid #cccccc;
+
+  border-radius: 9px;
+
+  overflow: hidden;
+
+  background: #f3f3f3;
+}
+
+.status-control button {
+  border: none;
+
+  padding: 9px 18px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  background: #f3f3f3;
+  color: #555555;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.status-control button:hover {
+  background: #e5e5e5;
+}
+
+/* Active selected */
+.status-control .active-btn {
+  background: #111111;
+  color: #ffffff;
+}
+
+/* Inactive selected */
+.status-control .inactive-btn {
+  background: #555555;
+  color: #ffffff;
+}
+
+
+/* =====================================================
+   LANGUAGE
+===================================================== */
+
+.language-select {
+  min-width: 145px;
+
+  padding: 10px 14px;
+
+  border: 1px solid #cccccc;
+
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  outline: none;
+
+  cursor: pointer;
+
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.language-select:focus {
+  border-color: #777777;
+}
+
+
+/* =====================================================
+   APPEARANCE
+===================================================== */
+
+.theme-control {
+  display: flex;
+
+  border: 1px solid #cccccc;
+
+  border-radius: 9px;
+
+  overflow: hidden;
+
+  background: #f3f3f3;
+}
+
+.theme-control button {
+  border: none;
+
+  padding: 9px 16px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  background: #f3f3f3;
+  color: #555555;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.theme-control button:hover {
+  background: #e5e5e5;
+}
+
+/* Light selected */
+.theme-control .light-active {
+  background: #111111;
+  color: #ffffff;
+}
+
+/* Dark selected */
+.theme-control .dark-active {
+  background: #555555;
+  color: #ffffff;
+}
+
+
+/* =====================================================
+   NOTIFICATION
+===================================================== */
+
+.notification-control {
+  display: flex;
+
+  border: 1px solid #cccccc;
+
+  border-radius: 9px;
+
+  overflow: hidden;
+
+  background: #f3f3f3;
+}
+
+.notification-control button {
+  border: none;
+
+  padding: 9px 18px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  background: #f3f3f3;
+  color: #555555;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.notification-control button:hover {
+  background: #e5e5e5;
+}
+
+/* ON selected */
+.notification-control .on-active {
+  background: #111111;
+  color: #ffffff;
+}
+
+/* OFF selected */
+.notification-control .off-active {
+  background: #555555;
+  color: #ffffff;
+}
+
+
+/* =====================================================
+   HELP & GUIDELINES
+===================================================== */
+
+.help-row {
+  cursor: pointer;
+
+  border-bottom: 1px solid #d2d2d2;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.3s ease;
+}
+
+.help-row:hover {
+  background: #f7f7f7;
+}
+
+.help-arrow {
+  padding-right: 8px;
+
+  font-size: 34px;
+  font-weight: 300;
+
+  color: #555555;
+
+  transition: color 0.3s ease;
+}
+
+
+/* =====================================================
+   DARK MODE - WHOLE APPLICATION
+===================================================== */
+
+html.dark-theme {
+  background: #111111 !important;
+}
+
+html.dark-theme body {
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html.dark-theme #root {
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+
+/* =====================================================
+   DARK MODE - SETTINGS
+===================================================== */
+
+html.dark-theme .settings-page {
+  background: #111111;
+  color: #ffffff;
+}
+
+
+/* =====================================================
+   DARK MODE - HEADER
+===================================================== */
+
+html.dark-theme .settings-header-icon {
+  color: #ffffff;
+}
+
+html.dark-theme .settings-header h1 {
+  color: #ffffff;
+}
+
+
+/* =====================================================
+   DARK MODE - TEXT
+===================================================== */
+
+html.dark-theme .setting-info h3 {
+  color: #ffffff;
+}
+
+html.dark-theme .setting-info p {
+  color: #bdbdbd;
+}
+
+
+/* =====================================================
+   DARK MODE - DIVIDER LINES
+===================================================== */
+
+/*
+   Important:
+   Cards ke beech lines clearly visible
+*/
+
+html.dark-theme .setting-row {
+  border-bottom: 1px solid #666666 !important;
+}
+
+html.dark-theme .help-row {
+  border-bottom: 1px solid #666666 !important;
+}
+
+
+/* =====================================================
+   DARK MODE - ACCOUNT STATUS
+===================================================== */
+
+html.dark-theme .status-control {
+  border: 1px solid #777777;
+
+  background: #222222;
+}
+
+html.dark-theme .status-control button {
+  background: #222222;
+
+  color: #dddddd;
+}
+
+/* ACTIVE SELECTED */
+html.dark-theme .status-control .active-btn {
+  background: #ffffff;
+
+  color: #111111;
+
+  font-weight: 800;
+}
+
+/* INACTIVE SELECTED */
+html.dark-theme .status-control .inactive-btn {
+  background: #555555;
+
+  color: #ffffff;
+
+  font-weight: 800;
+}
+
+
+/* =====================================================
+   DARK MODE - LANGUAGE
+===================================================== */
+
+html.dark-theme .language-select {
+  background: #222222;
+
+  color: #ffffff;
+
+  border: 1px solid #777777;
+}
+
+
+/* =====================================================
+   DARK MODE - APPEARANCE
+===================================================== */
+
+html.dark-theme .theme-control {
+  border: 1px solid #777777;
+
+  background: #222222;
+}
+
+html.dark-theme .theme-control button {
+  background: #222222;
+
+  color: #dddddd;
+}
+
+/* LIGHT SELECTED */
+html.dark-theme .theme-control .light-active {
+  background: #ffffff;
+
+  color: #111111;
+
+  font-weight: 800;
+}
+
+/* DARK SELECTED */
+html.dark-theme .theme-control .dark-active {
+  background: #555555;
+
+  color: #ffffff;
+
+  font-weight: 800;
+}
+
+
+/* =====================================================
+   DARK MODE - NOTIFICATION
+===================================================== */
+
+html.dark-theme .notification-control {
+  border: 1px solid #777777;
+
+  background: #222222;
+}
+
+html.dark-theme .notification-control button {
+  background: #222222;
+
+  color: #dddddd;
+}
+
+/* ON SELECTED */
+html.dark-theme .notification-control .on-active {
+  background: #ffffff;
+
+  color: #111111;
+
+  font-weight: 800;
+}
+
+/* OFF SELECTED */
+html.dark-theme .notification-control .off-active {
+  background: #555555;
+
+  color: #ffffff;
+
+  font-weight: 800;
+}
+
+
+/* =====================================================
+   DARK MODE - HELP
+===================================================== */
+
+html.dark-theme .help-arrow {
+  color: #ffffff;
+}
+
+html.dark-theme .help-row:hover {
+  background: #1d1d1d;
+}
+
+
+/* =====================================================
+   DARK MODE - ICON BACKGROUNDS
+===================================================== */
+
+html.dark-theme .account-icon {
+  background: #26344f;
+}
+
+html.dark-theme .language-icon {
+  background: #24402d;
+}
+
+html.dark-theme .appearance-icon {
+  background: #4a3b20;
+}
+
+html.dark-theme .notification-icon {
+  background: #48272d;
+}
+
+html.dark-theme .help-icon {
+  background: #382f50;
+}
+
+
+/* =====================================================
+   RESPONSIVE - TABLET
+===================================================== */
+
+@media (max-width: 768px) {
+
+  .settings-page {
+    padding: 25px 20px 35px;
+  }
+
+  .settings-header {
+    margin-bottom: 25px;
+  }
+
+  .settings-header h1 {
+    font-size: 30px;
+  }
+
+  .setting-row {
+    min-height: auto;
+
+    padding: 18px 5px;
+
+    align-items: flex-start;
+  }
+
+  .setting-left {
+    gap: 12px;
+  }
+
+  .setting-info h3 {
+    font-size: 15px;
+  }
+
+  .setting-info p {
+    font-size: 12px;
+  }
+
+  .setting-icon {
+    width: 36px;
+    height: 36px;
+
+    font-size: 18px;
+  }
+
+  .status-control,
+  .theme-control,
+  .notification-control {
+    flex-shrink: 0;
+  }
+
+  .status-control button,
+  .theme-control button,
+  .notification-control button {
+    padding: 8px 10px;
+
+    font-size: 11px;
+  }
+
+  .language-select {
+    min-width: 110px;
+
+    padding: 8px 10px;
+
+    font-size: 12px;
+  }
+}
+
+
+/* =====================================================
+   RESPONSIVE - MOBILE
+===================================================== */
+
+@media (max-width: 550px) {
+
+  .settings-page {
+    padding: 22px 15px 30px;
+  }
+
+  .settings-header {
+    gap: 10px;
+  }
+
+  .settings-header-icon {
+    font-size: 35px;
+  }
+
+  .settings-header h1 {
+    font-size: 27px;
+  }
+
+  .setting-row {
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 15px;
+
+    padding: 18px 5px;
+  }
+
+  .status-control,
+  .theme-control,
+  .notification-control,
+  .language-select {
+    align-self: flex-end;
+  }
+
+  .help-row {
+    position: relative;
+  }
+
+  .help-arrow {
+    position: absolute;
+
+    right: 5px;
+    top: 50%;
+
+    transform: translateY(-50%);
+  }
+}
