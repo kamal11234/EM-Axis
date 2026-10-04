@@ -1,0 +1,89 @@
+/* =========================================
+   PROFILE IMAGE
+========================================= */
+
+.profile-image-wrapper {
+  position: relative;
+
+  width: 145px;
+  height: 145px;
+
+  margin-bottom: 25px;
+}
+
+.profile-image {
+  width: 145px;
+  height: 145px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  border: 5px solid #ffffff;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  overflow: hidden;
+}
+
+/* SELECTED IMAGE */
+
+.profile-image-preview {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+}
+
+/* DEFAULT ICON */
+
+.default-profile-icon {
+  font-size: 65px;
+}
+
+/* =========================================
+   CAMERA BUTTON
+========================================= */
+
+.profile-camera-btn {
+  position: absolute;
+
+  right: 2px;
+  bottom: 2px;
+
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #102a56;
+
+  border: 4px solid #e6f3ff;
+
+  color: #ffffff;
+
+  font-size: 18px;
+
+  cursor: pointer;
+
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+
+  transition: all 0.2s ease;
+}
+
+.profile-camera-btn:hover {
+  background: #1c3d70;
+
+  transform: scale(1.05);
+}
