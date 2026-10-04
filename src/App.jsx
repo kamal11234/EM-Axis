@@ -6,6 +6,8 @@ import Register from "./pages/Register";
 import Dashboard from "./reporter/Dashboard/Dashboard";
 import Profile from "./reporter/Profile/Profile";
 import TotalNews from "./reporter/TotalNews/TotalNews";
+import CreateNews from "./reporter/CreateNews/CreateNews";
+import NewsWorkspace from "./reporter/NewsWorkspace/NewsWorkspace";
 
 import DashboardLayout from "./layout/DashboardLayout/DashboardLayout";
 
@@ -48,6 +50,23 @@ function App() {
           </DashboardLayout>
         }
       />
+      {/* Reporter - Create News */}
+<Route
+  path="/reporter/create-news"
+  element={
+    <DashboardLayout>
+      <CreateNews />
+    </DashboardLayout>
+  }
+/>
+<Route
+  path="/reporter/news-workspace"
+  element={
+    <DashboardLayout>
+      <NewsWorkspace />
+    </DashboardLayout>
+  }
+/>
 
       {/* Unknown URL */}
       <Route
