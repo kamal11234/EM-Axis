@@ -1,0 +1,330 @@
+
+/* ===== Main Wrapper ===== */
+.notif-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  padding: 28px 30px;
+  box-sizing: border-box;
+  background-color: #f5f7fb;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #243047;
+}
+
+/* ===== Header ===== */
+.notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.notif-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #202c45;
+  font-size: 27px;
+  font-weight: 700;
+}
+
+/* Notification Count */
+.notif-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 25px;
+  height: 25px;
+  padding: 0 7px;
+  border-radius: 20px;
+  background-color: #e53935;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  box-sizing: border-box;
+}
+
+/* Mark All as Read */
+.mark-read {
+  padding: 10px 16px;
+  border: 1px solid #cbd9f5;
+  border-radius: 8px;
+  background-color: #edf3ff;
+  color: #3269d6;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.mark-read:hover:not(:disabled) {
+  background-color: #3269d6;
+  border-color: #3269d6;
+  color: #ffffff;
+}
+
+.mark-read:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ===== Notification List ===== */
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+/* ===== Notification Card ===== */
+.notif-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  padding: 20px 22px;
+  box-sizing: border-box;
+  border: 1px solid #e1e7f0;
+  border-left: 5px solid #9aa8bd;
+  border-radius: 10px;
+  background-color: #ffffff;
+  box-shadow: 0 3px 10px rgba(32, 44, 69, 0.035);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.notif-card:hover {
+  box-shadow: 0 5px 16px rgba(32, 44, 69, 0.08);
+  transform: translateY(-1px);
+}
+
+/* Card Content */
+.notif-content {
+  width: 100%;
+  min-width: 0;
+}
+
+.notif-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.notif-title-row h3 {
+  margin: 0;
+  color: #263550;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.notif-content p {
+  margin: 0 0 15px;
+  color: #647087;
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+/* Date and Time */
+.notif-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: #8993a5;
+  font-size: 12px;
+}
+
+.notif-meta span {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Unread Indicator */
+.unread-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: #3269d6;
+}
+
+/* Unread Card */
+.notif-card.unread {
+  background-color: #fbfcff;
+  border-right-color: #d5e2ff;
+}
+
+.notif-card.unread .notif-title-row h3 {
+  color: #1e2e4a;
+}
+
+/* Read Card */
+.notif-card.read {
+  background-color: #ffffff;
+}
+
+.notif-card.read .notif-content p {
+  color: #7b879a;
+}
+
+/* ===== Notification Type Colors ===== */
+
+/* Submitted */
+.notif-card.submitted {
+  border-left-color: #3980e8;
+}
+
+.notif-card.submitted .notif-title-row h3 {
+  color: #2866c7;
+}
+
+/* Under Review */
+.notif-card.review {
+  border-left-color: #e6a23c;
+}
+
+.notif-card.review .notif-title-row h3 {
+  color: #a66b0a;
+}
+
+/* Approved */
+.notif-card.approved {
+  border-left-color: #22a06b;
+}
+
+.notif-card.approved .notif-title-row h3 {
+  color: #16834a;
+}
+
+/* Correction Required */
+.notif-card.correction {
+  border-left-color: #e69a28;
+}
+
+.notif-card.correction .notif-title-row h3 {
+  color: #b87413;
+}
+
+/* Rejected */
+.notif-card.rejected {
+  border-left-color: #df4b4b;
+}
+
+.notif-card.rejected .notif-title-row h3 {
+  color: #c53e3e;
+}
+
+/* Published */
+.notif-card.published {
+  border-left-color: #1caa83;
+}
+
+.notif-card.published .notif-title-row h3 {
+  color: #138568;
+}
+
+/* Active Published Card */
+.notif-card.active {
+  background-color: #f3fbf7;
+  border-top-color: #d7eee2;
+  border-right-color: #d7eee2;
+  border-bottom-color: #d7eee2;
+}
+
+/* Draft */
+.notif-card.draft {
+  border-left-color: #8b75d7;
+}
+
+.notif-card.draft .notif-title-row h3 {
+  color: #7056ba;
+}
+
+/* Resubmitted */
+.notif-card.resubmitted {
+  border-left-color: #279ca8;
+}
+
+.notif-card.resubmitted .notif-title-row h3 {
+  color: #177f89;
+}
+
+/* ===== Tablet ===== */
+@media (max-width: 768px) {
+  .notif-wrapper {
+    padding: 22px 18px;
+  }
+
+  .notif-header h2 {
+    font-size: 24px;
+  }
+
+  .notif-card {
+    padding: 18px;
+  }
+
+  .notif-title-row h3 {
+    font-size: 15px;
+  }
+
+  .notif-content p {
+    font-size: 13px;
+  }
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 480px) {
+  .notif-wrapper {
+    padding: 18px 12px;
+  }
+
+  .notif-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .notif-header h2 {
+    font-size: 22px;
+  }
+
+  .mark-read {
+    align-self: flex-end;
+    padding: 9px 12px;
+    font-size: 12px;
+  }
+
+  .notif-list {
+    gap: 12px;
+  }
+
+  .notif-card {
+    padding: 15px 13px;
+    border-radius: 8px;
+  }
+
+  .notif-title-row h3 {
+    font-size: 14px;
+  }
+
+  .notif-content p {
+    margin-bottom: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .notif-meta {
+    gap: 10px;
+    font-size: 11px;
+  }
+}

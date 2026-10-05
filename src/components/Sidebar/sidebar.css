@@ -3,7 +3,7 @@
 }
 
 .sidebar {
-  width: 250px;
+  width: 300px;
   height: calc(100vh - 76px);
 
   background: #144db1;

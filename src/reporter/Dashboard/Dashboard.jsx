@@ -1,19 +1,18 @@
+
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./dashboard.css";
 import repoimg from "../../assets/repoimg.png";
 
 function Dashboard() {
-  const [showFilters, setShowFilters] = useState(true);
+  const navigate = useNavigate();
 
+  const [showFilters, setShowFilters] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [newsType, setNewsType] = useState("All");
   const [status, setStatus] = useState("All");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
-
-  /* =========================
-     SAMPLE NEWS DATA
-  ========================= */
 
   const newsData = [
     {
@@ -58,10 +57,6 @@ function Dashboard() {
     },
   ];
 
-  /* =========================
-     FILTER NEWS
-  ========================= */
-
   const filteredNews = newsData.filter((news) => {
     const search = searchText.toLowerCase().trim();
 
@@ -93,10 +88,6 @@ function Dashboard() {
     );
   });
 
-  /* =========================
-     CLEAR FILTER
-  ========================= */
-
   const clearFilters = () => {
     setSearchText("");
     setNewsType("All");
@@ -107,16 +98,10 @@ function Dashboard() {
 
   return (
     <div className="dashboard-content">
-
-      {/* =========================
-          WELCOME SECTION
-      ========================= */}
-
+      {/* WELCOME SECTION */}
       <div className="welcome-section">
-
         <div className="welcome-text">
           <h1>Welcome to EM-AXIS</h1>
-
           <h3>Kamal Vadar</h3>
 
           <p>
@@ -127,213 +112,110 @@ function Dashboard() {
         </div>
 
         <div className="welcome-image">
-          <img
-            src={repoimg}
-            alt="Reporter News"
-          />
+          <img src={repoimg} alt="Reporter News" />
         </div>
-
       </div>
 
-
-      {/* =========================
-          MAIN DASHBOARD
-      ========================= */}
-
+      {/* MAIN DASHBOARD */}
       <div className="dashboard-main-layout">
-
-        {/* =========================
-            LEFT COLUMN
-        ========================= */}
-
+        {/* LEFT COLUMN */}
         <div className="dashboard-left">
-
-          {/* ACTION SECTION */}
-
           <div className="action-section">
-
-            <button className="create-news-btn">
+            <button
+              className="create-news-btn"
+              onClick={() => navigate("/reporter/create-news")}
+            >
               + Create News
             </button>
 
             <div className="search-box">
-
               <span>⌕</span>
 
               <input
                 type="text"
                 placeholder="Search by title, category, or ID"
                 value={searchText}
-                onChange={(e) =>
-                  setSearchText(e.target.value)
-                }
+                onChange={(e) => setSearchText(e.target.value)}
               />
-
             </div>
 
             <button
               className={`filter-btn ${
                 showFilters ? "active-filter" : ""
               }`}
-              onClick={() =>
-                setShowFilters(!showFilters)
-              }
+              onClick={() => setShowFilters(!showFilters)}
             >
-
               <span>⚱</span>
-
               Filter
-
               <span className="filter-arrow">
                 {showFilters ? "⌃" : "⌄"}
               </span>
-
             </button>
-
           </div>
 
-
-          {/* =========================
-              FILTER SECTION
-          ========================= */}
-
+          {/* FILTER SECTION */}
           {showFilters && (
             <div className="filter-section">
-
-              {/* NEWS TYPE */}
-
               <div className="filter-field">
-
-                <label>
-                  News Type
-                </label>
+                <label>News Type</label>
 
                 <select
                   value={newsType}
-                  onChange={(e) =>
-                    setNewsType(e.target.value)
-                  }
+                  onChange={(e) => setNewsType(e.target.value)}
                 >
-
-                  <option value="All">
-                    All
-                  </option>
-
-                  <option value="Text">
-                    Text
-                  </option>
-
-                  <option value="Audio">
-                    Audio
-                  </option>
-
-                  <option value="Video">
-                    Video
-                  </option>
-
-                  <option value="AV">
-                    AV
-                  </option>
-
-                  <option value="AVB">
-                    AVB
-                  </option>
-
+                  <option value="All">All</option>
+                  <option value="Text">Text</option>
+                  <option value="Video">Video</option>
+                  <option value="AV">AV</option>
+                  <option value="AVB">AVB</option>
+                  <option value="PKG">PKG</option>
+                  <option value="TikTak">TikTak</option>
+                  <option value="One-to-one">One-to-one</option>
+                  <option value="WKT">WKT</option>
                 </select>
-
               </div>
 
-
-              {/* STATUS */}
-
               <div className="filter-field">
-
-                <label>
-                  Status
-                </label>
+                <label>Status</label>
 
                 <select
                   value={status}
-                  onChange={(e) =>
-                    setStatus(e.target.value)
-                  }
+                  onChange={(e) => setStatus(e.target.value)}
                 >
-
-                  <option value="All">
-                    All
-                  </option>
-
-                  <option value="Draft">
-                    Draft
-                  </option>
-
-                  <option value="Pending">
-                    Pending
-                  </option>
-
-                  <option value="Approved">
-                    Approved
-                  </option>
-
-                  <option value="Rejected">
-                    Rejected
-                  </option>
-
-                  <option value="Published">
-                    Published
-                  </option>
-
+                  <option value="All">All</option>
+                  <option value="Draft">Draft</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Rejected">Rejected</option>
+                  <option value="Published">Published</option>
                 </select>
-
               </div>
 
-
-              {/* DATE */}
-
               <div className="filter-field date-field">
-
-                <label>
-                  Date range
-                </label>
+                <label>Date range</label>
 
                 <div className="date-range-box">
-
                   <div className="date-part">
-
                     <span>▣</span>
 
                     <input
                       type="date"
                       value={fromDate}
-                      onChange={(e) =>
-                        setFromDate(e.target.value)
-                      }
+                      onChange={(e) => setFromDate(e.target.value)}
                     />
-
                   </div>
 
-                  <span className="date-separator">
-                    -
-                  </span>
+                  <span className="date-separator">-</span>
 
                   <div className="date-part">
-
                     <input
                       type="date"
                       value={toDate}
-                      onChange={(e) =>
-                        setToDate(e.target.value)
-                      }
+                      onChange={(e) => setToDate(e.target.value)}
                     />
-
                   </div>
-
                 </div>
-
               </div>
-
-
-              {/* CLEAR */}
 
               <button
                 className="clear-filter-btn"
@@ -341,52 +223,25 @@ function Dashboard() {
               >
                 Clear
               </button>
-
             </div>
           )}
 
-
-          {/* =========================
-              NEWS RESULTS
-          ========================= */}
-
+          {/* NEWS RESULTS */}
           <div className="news-results-section">
-
             <div className="news-results-header">
-
               <div>
-                <h2>
-                  News Results
-                </h2>
-
-                <p>
-                  {filteredNews.length} news found
-                </p>
+                <h2>News Results</h2>
+                <p>{filteredNews.length} news found</p>
               </div>
-
             </div>
 
-
-            {/* NEWS LIST */}
-
             <div className="news-list">
-
               {filteredNews.length > 0 ? (
-
                 filteredNews.map((news) => (
-
-                  <div
-                    className="news-card"
-                    key={news.id}
-                  >
-
+                  <div className="news-card" key={news.id}>
                     <div className="news-card-left">
-
                       <div className="news-title-row">
-
-                        <h3>
-                          {news.title}
-                        </h3>
+                        <h3>{news.title}</h3>
 
                         <span
                           className={`status-badge ${news.status
@@ -395,330 +250,150 @@ function Dashboard() {
                         >
                           {news.status}
                         </span>
-
                       </div>
 
                       <div className="news-details">
-
-                        <span>
-                          {news.type}
-                        </span>
-
-                        <span>
-                          •
-                        </span>
-
-                        <span>
-                          {news.area}
-                        </span>
-
-                        <span>
-                          •
-                        </span>
-
-                        <span>
-                          {news.date}
-                        </span>
-
+                        <span>{news.type}</span>
+                        <span>•</span>
+                        <span>{news.area}</span>
+                        <span>•</span>
+                        <span>{news.date}</span>
                       </div>
-
                     </div>
-
 
                     <button className="view-news-btn">
                       View
                     </button>
-
                   </div>
-
                 ))
-
               ) : (
-
                 <div className="no-news">
-
-                  <div className="no-news-icon">
-                    🔍
-                  </div>
-
-                  <h3>
-                    No news found
-                  </h3>
+                  <div className="no-news-icon">🔍</div>
+                  <h3>No news found</h3>
 
                   <p>
                     Try changing your search or
                     filter options.
                   </p>
-
                 </div>
-
               )}
-
             </div>
-
           </div>
-
         </div>
 
-
-        {/* =========================
-            RIGHT COLUMN
-        ========================= */}
-
+        {/* RIGHT COLUMN */}
         <div className="dashboard-right">
-
-          {/* =========================
-              QUICK STATUS
-          ========================= */}
-
+          {/* QUICK STATUS */}
           <div className="quick-status-section">
-
             <div className="quick-status-header">
-
-              <h2>
-                Quick Status
-              </h2>
-
-              <span>
-                Overview
-              </span>
-
+              <h2>Quick Status</h2>
+              <span>Overview</span>
             </div>
-
 
             <div className="status-card">
-
-              <div className="status-icon draft">
-                📝
-              </div>
-
+              <div className="status-icon draft">📝</div>
               <div>
-                <h3>
-                  Draft
-                </h3>
-
-                <p>
-                  3 News
-                </p>
+                <h3>Draft</h3>
+                <p>3 News</p>
               </div>
-
             </div>
-
 
             <div className="status-card">
-
-              <div className="status-icon pending">
-                ⏳
-              </div>
-
+              <div className="status-icon pending">⏳</div>
               <div>
-                <h3>
-                  Pending
-                </h3>
-
-                <p>
-                  5 News
-                </p>
+                <h3>Pending</h3>
+                <p>5 News</p>
               </div>
-
             </div>
-
 
             <div className="status-card">
-
-              <div className="status-icon approved">
-                ✓
-              </div>
-
+              <div className="status-icon approved">✓</div>
               <div>
-                <h3>
-                  Approved
-                </h3>
-
-                <p>
-                  8 News
-                </p>
+                <h3>Approved</h3>
+                <p>8 News</p>
               </div>
-
             </div>
-
 
             <div className="status-card">
-
-              <div className="status-icon published">
-                ◉
-              </div>
-
+              <div className="status-icon published">◉</div>
               <div>
-                <h3>
-                  Published
-                </h3>
-
-                <p>
-                  12 News
-                </p>
+                <h3>Published</h3>
+                <p>12 News</p>
               </div>
-
             </div>
-
 
             <div className="status-card">
-
-              <div className="status-icon rejected">
-                !
-              </div>
-
+              <div className="status-icon rejected">!</div>
               <div>
-                <h3>
-                  Rejected
-                </h3>
-
-                <p>
-                  2 News
-                </p>
+                <h3>Rejected</h3>
+                <p>2 News</p>
               </div>
-
             </div>
-
           </div>
 
-
-          {/* =========================
-              RECENT NOTIFICATIONS
-          ========================= */}
-
+          {/* RECENT NOTIFICATIONS */}
           <div className="notification-section">
-
             <div className="notification-header">
-
               <div>
-
-                <h2>
-                  Recent Notifications
-                </h2>
-
-                <p>
-                  Latest updates
-                </p>
-
+                <h2>Recent Notifications</h2>
+                <p>Latest updates</p>
               </div>
 
-              <button className="view-all-btn">
+              <button
+                type="button"
+                className="view-all-btn"
+                onClick={() =>
+                  navigate("/reporter/notifications")
+                }
+              >
                 View All
               </button>
-
             </div>
-
 
             <div className="notification-list">
+              <div className="notification-card unread">
+                <div className="notification-icon">✓</div>
+
+                <div className="notification-content">
+                  <h3>News Submitted</h3>
+                  <p>City Development Update submitted.</p>
+                  <span>5 min ago</span>
+                </div>
+              </div>
 
               <div className="notification-card unread">
-
-                <div className="notification-icon">
-                  ✓
-                </div>
+                <div className="notification-icon warning">!</div>
 
                 <div className="notification-content">
-
-                  <h3>
-                    News Submitted
-                  </h3>
-
-                  <p>
-                    City Development Update submitted.
-                  </p>
-
-                  <span>
-                    5 min ago
-                  </span>
-
+                  <h3>Correction Required</h3>
+                  <p>Correction requested in Traffic Update.</p>
+                  <span>25 min ago</span>
                 </div>
-
               </div>
-
-
-              <div className="notification-card unread">
-
-                <div className="notification-icon warning">
-                  !
-                </div>
-
-                <div className="notification-content">
-
-                  <h3>
-                    Correction Required
-                  </h3>
-
-                  <p>
-                    Correction requested in Traffic Update.
-                  </p>
-
-                  <span>
-                    25 min ago
-                  </span>
-
-                </div>
-
-              </div>
-
 
               <div className="notification-card">
-
-                <div className="notification-icon">
-                  ✓
-                </div>
+                <div className="notification-icon">✓</div>
 
                 <div className="notification-content">
-
-                  <h3>
-                    News Approved
-                  </h3>
-
-                  <p>
-                    Local Sports Event approved.
-                  </p>
-
-                  <span>
-                    1 hour ago
-                  </span>
-
+                  <h3>News Approved</h3>
+                  <p>Local Sports Event approved.</p>
+                  <span>1 hour ago</span>
                 </div>
-
               </div>
-
 
               <div className="notification-card">
-
-                <div className="notification-icon">
-                  ✓
-                </div>
+                <div className="notification-icon">✓</div>
 
                 <div className="notification-content">
-
-                  <h3>
-                    News Published
-                  </h3>
-
-                  <p>
-                    Local Event Report published.
-                  </p>
-
-                  <span>
-                    2 hours ago
-                  </span>
-
+                  <h3>News Published</h3>
+                  <p>Local Event Report published.</p>
+                  <span>2 hours ago</span>
                 </div>
-
               </div>
-
             </div>
-
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 }

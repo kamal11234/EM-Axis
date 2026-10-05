@@ -1,85 +1,38 @@
 import "./Sidebar.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function Sidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const menuItems = [
+    { name: "Dashboard", icon: "🏠", path: "/dashboard" },
+    { name: "Check News Status", icon: "📊", path: "/reporter/check-news-status" },
+    { name: "Total News", icon: "📰", path: "/reporter/total-news" },
+    { name: "My News", icon: "📄", path: "/reporter/my-news" },
+    { name: "Draft", icon: "📝", path: "/reporter/draft" },
+    { name: "Notifications", icon: "🔔", path: "/reporter/notifications" },
+    { name: "Profile", icon: "👤", path: "/profile" },
+    { name: "Settings", icon: "⚙️", path: "/settings" },
+  ];
 
   return (
     <aside className="sidebar">
-
       <div className="sidebar-menu">
-
-        {/* Dashboard */}
-        <button
-          className="sidebar-item active"
-          onClick={() => navigate("/dashboard")}
-        >
-          <span className="sidebar-icon">🏠</span>
-          <span>Dashboard</span>
-        </button>
-
-
-        {/* Check News Status */}
-        <button
-          className="sidebar-item"
-          onClick={() => navigate("/news-status")}
-        >
-          <span className="sidebar-icon">📊</span>
-          <span>Check News Status</span>
-        </button>
-
-
-        {/* Total News */}
-        <button
-          className="sidebar-item"
-          onClick={() => navigate("/total-news")}
-        >
-          <span className="sidebar-icon">📰</span>
-          <span>Total News</span>
-        </button>
-
-
-        {/* My News */}
-        <button
-          className="sidebar-item"
-          onClick={() => navigate("/my-news")}
-        >
-          <span className="sidebar-icon">📄</span>
-          <span>My News</span>
-        </button>
-
-
-        {/* Notifications */}
-        <button
-          className="sidebar-item"
-          onClick={() => navigate("/notifications")}
-        >
-          <span className="sidebar-icon">🔔</span>
-          <span>Notifications</span>
-        </button>
-
-
-        {/* Profile */}
-        <button
-          className="sidebar-item"
-          onClick={() => navigate("/profile")}
-        >
-          <span className="sidebar-icon">👤</span>
-          <span>Profile</span>
-        </button>
-
-
-        {/* Settings */}
-        <button
-          className="sidebar-item"
-          onClick={() => navigate("/settings")}
-        >
-          <span className="sidebar-icon">⚙️</span>
-          <span>Settings</span>
-        </button>
-
+        {menuItems.map((item) => (
+          <button
+            key={item.path}
+            type="button"
+            className={`sidebar-item ${
+              location.pathname === item.path ? "active" : ""
+            }`}
+            onClick={() => navigate(item.path)}
+          >
+            <span className="sidebar-icon">{item.icon}</span>
+            <span>{item.name}</span>
+          </button>
+        ))}
       </div>
-
     </aside>
   );
 }
