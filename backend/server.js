@@ -34,15 +34,15 @@ app.get("/api/health/db", async (req, res) => {
       "SELECT current_database() AS database"
     );
 
-    res.json({
+    return res.status(200).json({
       success: true,
       message: "PostgreSQL connected successfully!",
       database: result.rows[0].database,
     });
   } catch (error) {
-    console.error("Database error:", error.message);
+    console.error("DATABASE ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Database connection failed.",
     });
@@ -115,7 +115,7 @@ app.post("/api/auth/register", async (req, res) => {
       });
     }
 
-    // Mobile is required and must contain exactly 10 digits
+    // Mobile validation
     const cleanMobile =
       typeof mobile === "string" ? mobile.trim() : "";
 
@@ -206,7 +206,9 @@ app.post("/api/auth/register", async (req, res) => {
       user: result.rows[0],
     });
   } catch (error) {
-    console.error("Registration error:", error.message);
+    console.error("REGISTRATION ERROR FULL DETAILS:", error);
+    console.error("REGISTRATION ERROR CODE:", error?.code);
+    console.error("REGISTRATION ERROR STACK:", error?.stack);
 
     if (error.code === "23505") {
       return res.status(409).json({
@@ -229,6 +231,7 @@ app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
+    // Required fields
     if (
       typeof email !== "string" ||
       typeof password !== "string" ||
@@ -250,6 +253,7 @@ app.post("/api/auth/login", async (req, res) => {
       .toLowerCase()
       .replace(/[\s-]+/g, "_");
 
+    // Find user
     const result = await pool.query(
       `SELECT
          id,
@@ -273,6 +277,20 @@ app.post("/api/auth/login", async (req, res) => {
 
     const user = result.rows[0];
 
+    // Check stored password hash
+    if (!user.password_hash) {
+      console.error(
+        "LOGIN ERROR: password_hash is missing for user ID:",
+        user.id
+      );
+
+      return res.status(500).json({
+        success: false,
+        message: "Account configuration error. Please contact support.",
+      });
+    }
+
+    // Compare password
     const passwordMatch = await bcrypt.compare(
       password,
       user.password_hash
@@ -285,6 +303,7 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
+    // Check role
     if (user.role !== cleanRole) {
       return res.status(403).json({
         success: false,
@@ -292,6 +311,7 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
+    // Login successful
     return res.status(200).json({
       success: true,
       message: "Login successful!",
@@ -305,7 +325,11 @@ app.post("/api/auth/login", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Login error:", error.message);
+    // Detailed debugging in backend terminal
+    console.error("LOGIN ERROR FULL DETAILS:", error);
+    console.error("LOGIN ERROR MESSAGE:", error?.message);
+    console.error("LOGIN ERROR CODE:", error?.code);
+    console.error("LOGIN ERROR STACK:", error?.stack);
 
     return res.status(500).json({
       success: false,
@@ -353,7 +377,7 @@ app.get("/api/users/:id", async (req, res) => {
       user: result.rows[0],
     });
   } catch (error) {
-    console.error("Profile fetch error:", error.message);
+    console.error("PROFILE FETCH ERROR FULL DETAILS:", error);
 
     return res.status(500).json({
       success: false,
@@ -366,5 +390,5 @@ app.get("/api/users/:id", async (req, res) => {
 // START SERVER
 // =====================================
 app.listen(PORT, () => {
-  console.log(`EM-AXIS server running at http://localhost:${PORT}`);
+  console.log(`EM-AXIS server running on port ${PORT}`);
 });
