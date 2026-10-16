@@ -1,3 +1,4 @@
+
 import "./register.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -10,20 +11,17 @@ function Register() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-
-  const [joiningDate, setJoiningDate] = useState("");
-
+  const [joiningDate, setJoiningDate] = useState(
+    new Date().toLocaleDateString("en-CA")
+  );
   const [role, setRole] = useState("");
-
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  /* =========================================
-     FULL NAME - ONLY CHARACTERS + SPACE
-  ========================================= */
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleNameChange = (e) => {
     const value = e.target.value;
@@ -33,18 +31,6 @@ function Register() {
     }
   };
 
-  /* =========================================
-     EMAIL
-  ========================================= */
-
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
-  };
-
-  /* =========================================
-     PHONE - ONLY NUMBERS
-  ========================================= */
-
   const handlePhoneChange = (e) => {
     const value = e.target.value;
 
@@ -53,42 +39,82 @@ function Register() {
     }
   };
 
-  /* =========================================
-     REGISTER
-  ========================================= */
-
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
+    setError("");
 
-    // Password check
+    if (!fullName.trim() || !email.trim() || !phone || !joiningDate) {
+      setError("Please fill in all personal information fields.");
+      return;
+    }
+
+    if (!/^\d{10}$/.test(phone)) {
+      setError("Please enter a valid 10-digit phone number.");
+      return;
+    }
+
     if (password !== confirmPassword) {
-      alert("Password and Confirm Password do not match.");
+      setError("Password and Confirm Password do not match.");
       return;
     }
 
-    // Role check
+    if (password.length < 8) {
+      setError("Password must contain at least 8 characters.");
+      return;
+    }
+
     if (!role) {
-      alert("Please select your role.");
+      setError("Please select your role.");
       return;
     }
 
-    // Temporary user data
-    // Backend connect karne ke baad ye data database me save hoga.
-    const userData = {
-      fullName,
-      email,
-      phone,
-      joiningDate,
-      role,
-      password,
+    const roleMap = {
+      channelHead: "channel_head",
+      editor: "editor",
+      reporter: "reporter",
     };
 
-    console.log("Registered User:", userData);
+    // All registration details are sent to the backend.
+    const userData = {
+      full_name: fullName.trim(),
+      email: email.trim().toLowerCase(),
+      mobile: phone.trim(),
+      joining_date: joiningDate,
+      password,
+      role: roleMap[role],
+    };
 
-    alert("Registration successful! Please login.");
+    try {
+      setLoading(true);
 
-    // Registration ke baad Login page par
-    navigate("/");
+      const response = await fetch(
+        "http://localhost:5000/api/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || data.success === false) {
+        setError(data.message || "Registration failed. Please try again.");
+        return;
+      }
+
+      alert("Registration successful! Please login.");
+      navigate("/");
+    } catch (err) {
+      console.error("Registration request failed:", err);
+      setError(
+        "Cannot connect to the server. Make sure the backend is running."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -96,13 +122,8 @@ function Register() {
       className="register-page"
       style={{ backgroundImage: `url(${bg})` }}
     >
-
-      {/* LEFT SECTION */}
-
       <div className="register-left">
-
         <div className="register-brand-section">
-
           <img
             src={logo1}
             alt="EM-Axis Logo"
@@ -110,13 +131,9 @@ function Register() {
           />
 
           <div className="register-brand-text">
-
             <h1>EM-AXIS</h1>
-
             <p>News Management System</p>
-
           </div>
-
         </div>
 
         <div className="register-tagline">
@@ -128,49 +145,25 @@ function Register() {
           <br />
           Our News Team!
         </div>
-
       </div>
 
-
-      {/* RIGHT REGISTER CARD */}
-
-      <form
-        className="register-card"
-        onSubmit={handleRegister}
-      >
-
+      <form className="register-card" onSubmit={handleRegister}>
         <h2>Create Your Account</h2>
 
         <p className="register-description">
           Fill in the details below to register for EM-AXIS
         </p>
 
-
-        {/* =========================================
-            1. SELECT YOUR ROLE
-        ========================================= */}
-
         <div className="register-section-title">
-
           <span>1.</span>
-
           <span>Select Your Role</span>
-
           <div className="register-title-line"></div>
-
         </div>
 
-
         <div className="register-role-options">
-
-          {/* CHANNEL HEAD */}
-
           <label className="register-role-box">
-
             <span className="register-role-icon">👨‍💼</span>
-
             <span>Channel Head</span>
-
             <input
               type="radio"
               name="register-role"
@@ -179,73 +172,44 @@ function Register() {
               onChange={(e) => setRole(e.target.value)}
               required
             />
-
           </label>
 
-
-          {/* EDITOR */}
-
           <label className="register-role-box">
-
             <span className="register-role-icon">📝</span>
-
             <span>Editor</span>
-
             <input
               type="radio"
               name="register-role"
               value="editor"
               checked={role === "editor"}
               onChange={(e) => setRole(e.target.value)}
+              required
             />
-
           </label>
 
-
-          {/* REPORTER */}
-
           <label className="register-role-box">
-
             <span className="register-role-icon">🎤</span>
-
             <span>Reporter</span>
-
             <input
               type="radio"
               name="register-role"
               value="reporter"
               checked={role === "reporter"}
               onChange={(e) => setRole(e.target.value)}
+              required
             />
-
           </label>
-
         </div>
-
-
-        {/* =========================================
-            2. PERSONAL INFORMATION
-        ========================================= */}
 
         <div className="register-section-title personal-title">
-
           <span>2.</span>
-
           <span>Personal Information</span>
-
           <div className="register-title-line"></div>
-
         </div>
 
-
-        {/* FULL NAME + EMAIL */}
-
         <div className="register-input-row">
-
           <div className="register-input-box">
-
             <span>✍️</span>
-
             <input
               type="text"
               placeholder="Enter Your Full Name"
@@ -253,93 +217,61 @@ function Register() {
               onChange={handleNameChange}
               required
             />
-
           </div>
 
-
           <div className="register-input-box">
-
             <span>📧</span>
-
             <input
               type="email"
               placeholder="Enter Email Address"
               value={email}
-              onChange={handleEmailChange}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
-
           </div>
-
         </div>
 
-
-        {/* PHONE + JOINING DATE */}
-
         <div className="register-input-row">
-
           <div className="register-input-box">
-
             <span>☎</span>
-
             <input
               type="tel"
               placeholder="Enter Phone Number"
               value={phone}
               onChange={handlePhoneChange}
-              maxLength="10"
+              maxLength={10}
               inputMode="numeric"
               pattern="[0-9]{10}"
               title="Enter a valid 10-digit phone number"
               required
             />
-
           </div>
 
-
           <div className="register-input-box">
-
             <input
               type="date"
               value={joiningDate}
               onChange={(e) => setJoiningDate(e.target.value)}
               required
             />
-
           </div>
-
         </div>
-
-
-        {/* =========================================
-            3. ACCOUNT CREDENTIALS
-        ========================================= */}
 
         <div className="register-section-title credentials-title">
-
           <span>3.</span>
-
           <span>Account Credentials</span>
-
           <div className="register-title-line"></div>
-
         </div>
 
-
         <div className="register-input-row">
-
-          {/* PASSWORD */}
-
           <div className="register-input-box">
-
             <span>🔐</span>
-
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              minLength="8"
+              minLength={8}
               pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&]).{8,}"
               title="Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one special character."
               required
@@ -347,29 +279,19 @@ function Register() {
 
             <span
               className="register-eye"
-              onClick={() =>
-                setShowPassword(!showPassword)
-              }
+              onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? "🙈" : "👀"}
             </span>
-
           </div>
 
-
-          {/* CONFIRM PASSWORD */}
-
           <div className="register-input-box">
-
             <span>🔐</span>
-
             <input
               type={showConfirmPassword ? "text" : "password"}
               placeholder="Confirm Password"
               value={confirmPassword}
-              onChange={(e) =>
-                setConfirmPassword(e.target.value)
-              }
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
 
@@ -381,72 +303,43 @@ function Register() {
             >
               {showConfirmPassword ? "🙈" : "👀"}
             </span>
-
           </div>
-
         </div>
 
-
-        {/* =========================================
-            TERMS
-        ========================================= */}
-
         <label className="terms-row">
-
-          <input
-            type="checkbox"
-            required
-          />
-
+          <input type="checkbox" required />
           <span>
-
-            I agree to
-
-            <a href="#">
-              {" "}Term and Condition{" "}
-            </a>
-
-            and
-
-            <a href="#">
-              {" "}Private Policy
-            </a>
-
+            I agree to <a href="#">Term and Condition</a> and
+            <a href="#"> Private Policy</a>
           </span>
-
         </label>
 
-
-        {/* =========================================
-            REGISTER BUTTON
-        ========================================= */}
+        {error && (
+          <p
+            role="alert"
+            style={{
+              color: "#c62828",
+              fontSize: "14px",
+              marginTop: "10px",
+            }}
+          >
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"
           className="register-button"
+          disabled={loading}
         >
-          Register →
+          {loading ? "Registering..." : "Register →"}
         </button>
 
-
-        {/* =========================================
-            LOGIN
-        ========================================= */}
-
         <div className="login-link-section">
-
-          <span>
-            Already have an account ?
-          </span>
-
-          <Link to="/">
-            Login Here
-          </Link>
-
+          <span>Already have an account?</span>
+          <Link to="/">Login Here</Link>
         </div>
-
       </form>
-
     </div>
   );
 }

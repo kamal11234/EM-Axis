@@ -1,0 +1,28 @@
+
+.editor-dashboard {
+  width: 100%;
+  min-height: 100vh;
+  padding: 32px;
+  box-sizing: border-box;
+  background: #f5f7fb;
+  color: #243247;
+  font-family: Arial, sans-serif;
+}
+
+.editor-dashboard h1 {
+  margin: 0 0 12px;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.editor-dashboard h2 {
+  margin: 0 0 16px;
+  font-size: 23px;
+  color: #2457a7;
+}
+
+.editor-dashboard p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+}

@@ -1,8 +1,15 @@
-import { Routes, Route, Navigate, BrowserRouter } from "react-router-dom";
+
+import {
+  Routes,
+  Route,
+  Navigate,
+  BrowserRouter,
+} from "react-router-dom";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
+// Reporter pages
 import Dashboard from "./reporter/Dashboard/Dashboard";
 import CheckNewsStatus from "./reporter/CheckNewsStatus/CheckNewsStatus";
 import TotalNews from "./reporter/TotalNews/TotalNews";
@@ -12,124 +19,147 @@ import Notification from "./reporter/Notifications/Notifications";
 import Profile from "./reporter/Profile/Profile";
 import Settings from "./reporter/Settings/Settings";
 import CreateNews from "./reporter/CreateNews/CreateNews";
-
-import DashboardLayout from "./layout/DashboardLayout/DashboardLayout";
 import NewsWorkspace from "./reporter/NewsWorkspace/NewsWorkspace";
 
+// Shared layout
+import DashboardLayout from "./layout/DashboardLayout/DashboardLayout";
+
+// Editor dashboard
+import EditorDashboard from "./editor/dashboard/dashboard.jsx";
+
+// Channel Head dashboard
+import ChannelHeadDashboard from "./channel-head/dashboard/dashboard.jsx";
+
 function App() {
-return ( <BrowserRouter> <Routes>
-{/* Login */}
-<Route path="/" element={<Login />} />
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Login */}
+        <Route path="/" element={<Login />} />
 
-```
-    {/* Register */}
-    <Route path="/register" element={<Register />} />
+        {/* Register */}
+        <Route path="/register" element={<Register />} />
 
-    {/* Dashboard */}
-    <Route
-      path="/dashboard"
-      element={
-        <DashboardLayout>
-          <Dashboard />
-        </DashboardLayout>
-      }
-    />
+        {/* Reporter Dashboard */}
+        <Route
+          path="/dashboard"
+          element={
+            <DashboardLayout>
+              <Dashboard />
+            </DashboardLayout>
+          }
+        />
 
-    {/* Create News */}
-    <Route
-      path="/reporter/create-news"
-      element={
-        <DashboardLayout>
-          <CreateNews />
-        </DashboardLayout>
-      }
-    />
+        {/* Reporter: Create News */}
+        <Route
+          path="/reporter/create-news"
+          element={
+            <DashboardLayout>
+              <CreateNews />
+            </DashboardLayout>
+          }
+        />
 
-    {/* Check News Status */}
-    <Route
-      path="/reporter/check-news-status"
-      element={
-        <DashboardLayout>
-          <CheckNewsStatus />
-        </DashboardLayout>
-      }
-    />
+        {/* Reporter: Check News Status */}
+        <Route
+          path="/reporter/check-news-status"
+          element={
+            <DashboardLayout>
+              <CheckNewsStatus />
+            </DashboardLayout>
+          }
+        />
 
-    {/* Total News */}
-    <Route
-      path="/reporter/total-news"
-      element={
-        <DashboardLayout>
-          <TotalNews />
-        </DashboardLayout>
-      }
-    />
+        {/* Reporter: Total News */}
+        <Route
+          path="/reporter/total-news"
+          element={
+            <DashboardLayout>
+              <TotalNews />
+            </DashboardLayout>
+          }
+        />
 
-    {/* My News */}
-    <Route
-      path="/reporter/my-news"
-      element={
-        <DashboardLayout>
-          <MyNews />
-        </DashboardLayout>
-      }
-    />
+        {/* Reporter: My News */}
+        <Route
+          path="/reporter/my-news"
+          element={
+            <DashboardLayout>
+              <MyNews />
+            </DashboardLayout>
+          }
+        />
 
-    {/* Draft */}
-    <Route
-      path="/reporter/draft"
-      element={
-        <DashboardLayout>
-          <Draft />
-        </DashboardLayout>
-      }
-    />
+        {/* Reporter: Draft */}
+        <Route
+          path="/reporter/draft"
+          element={
+            <DashboardLayout>
+              <Draft />
+            </DashboardLayout>
+          }
+        />
 
-    {/* Notifications */}
-    <Route
-      path="/reporter/notifications"
-      element={
-        <DashboardLayout>
-          <Notification />
-        </DashboardLayout>
-      }
-    />
+        {/* Reporter: Notifications */}
+        <Route
+          path="/reporter/notifications"
+          element={
+            <DashboardLayout>
+              <Notification />
+            </DashboardLayout>
+          }
+        />
 
-    {/* Profile */}
-    <Route
-      path="/profile"
-      element={
-        <DashboardLayout>
-          <Profile />
-        </DashboardLayout>
-      }
-    />
+        {/* Profile */}
+        <Route
+          path="/profile"
+          element={
+            <DashboardLayout>
+              <Profile />
+            </DashboardLayout>
+          }
+        />
 
-    {/* Settings */}
-    <Route
-      path="/settings"
-      element={
-        <DashboardLayout>
-          <Settings />
-        </DashboardLayout>
-      }
-    />
+        {/* Settings */}
+        <Route
+          path="/settings"
+          element={
+            <DashboardLayout>
+              <Settings />
+            </DashboardLayout>
+          }
+        />
 
-      <Route
-  path="/reporter/news-workspace"
-  element={
-    <DashboardLayout>
-      <NewsWorkspace />
-    </DashboardLayout>
-  }
-/>
+        {/* Reporter: News Workspace */}
+        <Route
+          path="/reporter/news-workspace"
+          element={
+            <DashboardLayout>
+              <NewsWorkspace />
+            </DashboardLayout>
+          }
+        />
 
-    {/* Unknown URL */}
-    <Route path="*" element={<Navigate to="/" replace />} />
-  </Routes>
-</BrowserRouter>
+        {/* Editor Dashboard */}
+        <Route
+          path="/editor-dashboard"
+          element={<EditorDashboard />}
+        />
 
-);
+        {/* Channel Head Dashboard */}
+        <Route
+          path="/channel-head-dashboard"
+          element={<ChannelHeadDashboard />}
+        />
+
+        {/* Unknown URL */}
+        <Route
+          path="*"
+          element={<Navigate to="/" replace />}
+        />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;
