@@ -30,17 +30,22 @@ app.get("/", (req, res) => {
 // =====================================
 app.get("/api/health/db", async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT current_database() AS database"
-    );
+    const result = await pool.query(`
+      SELECT
+        current_database() AS database,
+        current_schema() AS schema,
+        to_regclass('public.users') AS users_table
+    `);
 
     return res.status(200).json({
       success: true,
       message: "PostgreSQL connected successfully!",
       database: result.rows[0].database,
+      schema: result.rows[0].schema,
+      users_table: result.rows[0].users_table,
     });
   } catch (error) {
-    console.error("DATABASE ERROR:", error);
+    console.error("DATABASE ERROR:", error.message);
 
     return res.status(500).json({
       success: false,
@@ -94,7 +99,6 @@ app.post("/api/auth/register", async (req, res) => {
       });
     }
 
-    // Email validation
     if (
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail) ||
       cleanEmail.length > 150
@@ -149,8 +153,9 @@ app.post("/api/auth/register", async (req, res) => {
       });
     }
 
+    // Check existing email
     const existingUser = await pool.query(
-      "SELECT id FROM users WHERE email = $1",
+      "SELECT id FROM public.users WHERE email = $1",
       [cleanEmail]
     );
 
@@ -161,10 +166,12 @@ app.post("/api/auth/register", async (req, res) => {
       });
     }
 
+    // Hash password
     const passwordHash = await bcrypt.hash(password, 12);
 
+    // Insert new user
     const result = await pool.query(
-      `INSERT INTO users
+      `INSERT INTO public.users
         (
           full_name,
           email,
@@ -175,12 +182,12 @@ app.post("/api/auth/register", async (req, res) => {
         )
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING
-          id,
-          full_name,
-          email,
-          mobile,
-          role,
-          joining_date`,
+         id,
+         full_name,
+         email,
+         mobile,
+         role,
+         joining_date`,
       [
         cleanName,
         cleanEmail,
@@ -197,7 +204,7 @@ app.post("/api/auth/register", async (req, res) => {
       user: result.rows[0],
     });
   } catch (error) {
-    console.error("REGISTRATION ERROR:", error);
+    console.error("REGISTRATION ERROR:", error.message);
 
     if (error.code === "23505") {
       return res.status(409).json({
@@ -241,6 +248,7 @@ app.post("/api/auth/login", async (req, res) => {
       .toLowerCase()
       .replace(/[\s-]+/g, "_");
 
+    // Find user in Neon database
     const result = await pool.query(
       `SELECT
          id,
@@ -250,8 +258,8 @@ app.post("/api/auth/login", async (req, res) => {
          password_hash,
          role,
          joining_date
-       FROM users
-       WHERE email = $1`,
+       FROM public.users
+       WHERE LOWER(email) = $1`,
       [cleanEmail]
     );
 
@@ -271,6 +279,7 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
+    // Verify password
     const passwordMatch = await bcrypt.compare(
       password,
       user.password_hash
@@ -283,7 +292,13 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
-    if (user.role !== cleanRole) {
+    // Verify selected role
+    const registeredRole = String(user.role)
+      .trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, "_");
+
+    if (registeredRole !== cleanRole) {
       return res.status(403).json({
         success: false,
         message: "Selected role does not match your registered role.",
@@ -298,12 +313,12 @@ app.post("/api/auth/login", async (req, res) => {
         full_name: user.full_name,
         email: user.email,
         mobile: user.mobile,
-        role: user.role,
+        role: registeredRole,
         joining_date: user.joining_date,
       },
     });
   } catch (error) {
-    console.error("LOGIN ERROR:", error);
+    console.error("LOGIN ERROR:", error.message);
 
     return res.status(500).json({
       success: false,
@@ -313,9 +328,7 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 // =====================================
-// EXISTING USER PROFILE API
-// REPORTER / OTHER EXISTING FLOWS
-// LEFT AS-IS
+// USER PROFILE API
 // =====================================
 app.get("/api/users/:id", async (req, res) => {
   try {
@@ -336,7 +349,7 @@ app.get("/api/users/:id", async (req, res) => {
          mobile,
          role,
          joining_date
-       FROM users
+       FROM public.users
        WHERE id = $1`,
       [userId]
     );
@@ -353,7 +366,7 @@ app.get("/api/users/:id", async (req, res) => {
       user: result.rows[0],
     });
   } catch (error) {
-    console.error("PROFILE FETCH ERROR:", error);
+    console.error("PROFILE FETCH ERROR:", error.message);
 
     return res.status(500).json({
       success: false,
@@ -386,7 +399,7 @@ app.get("/api/editor/profile/:id", async (req, res) => {
          joining_date,
          gender,
          account_status
-       FROM users
+       FROM public.users
        WHERE id = $1 AND role = 'editor'`,
       [userId]
     );
@@ -403,7 +416,7 @@ app.get("/api/editor/profile/:id", async (req, res) => {
       user: result.rows[0],
     });
   } catch (error) {
-    console.error("EDITOR PROFILE FETCH ERROR:", error);
+    console.error("EDITOR PROFILE FETCH ERROR:", error.message);
 
     return res.status(500).json({
       success: false,
@@ -477,7 +490,7 @@ app.patch("/api/editor/profile/:id", async (req, res) => {
     }
 
     const result = await pool.query(
-      `UPDATE users
+      `UPDATE public.users
        SET
          full_name = $1,
          mobile = $2,
@@ -515,7 +528,7 @@ app.patch("/api/editor/profile/:id", async (req, res) => {
       user: result.rows[0],
     });
   } catch (error) {
-    console.error("EDITOR PROFILE UPDATE ERROR:", error);
+    console.error("EDITOR PROFILE UPDATE ERROR:", error.message);
 
     return res.status(500).json({
       success: false,
