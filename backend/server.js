@@ -63,7 +63,6 @@ app.post("/api/auth/register", async (req, res) => {
       joining_date,
     } = req.body;
 
-    // Required fields
     if (
       typeof full_name !== "string" ||
       typeof email !== "string" ||
@@ -88,7 +87,6 @@ app.post("/api/auth/register", async (req, res) => {
       .toLowerCase()
       .replace(/[\s-]+/g, "_");
 
-    // Name validation
     if (cleanName.length > 100) {
       return res.status(400).json({
         success: false,
@@ -107,7 +105,6 @@ app.post("/api/auth/register", async (req, res) => {
       });
     }
 
-    // Password validation
     if (password.length < 8) {
       return res.status(400).json({
         success: false,
@@ -115,7 +112,6 @@ app.post("/api/auth/register", async (req, res) => {
       });
     }
 
-    // Mobile validation
     const cleanMobile =
       typeof mobile === "string" ? mobile.trim() : "";
 
@@ -126,7 +122,6 @@ app.post("/api/auth/register", async (req, res) => {
       });
     }
 
-    // Allowed roles
     const allowedRoles = [
       "reporter",
       "editor",
@@ -140,7 +135,6 @@ app.post("/api/auth/register", async (req, res) => {
       });
     }
 
-    // Joining date
     const cleanJoiningDate =
       joining_date || new Date().toISOString().slice(0, 10);
 
@@ -155,7 +149,6 @@ app.post("/api/auth/register", async (req, res) => {
       });
     }
 
-    // Check duplicate email
     const existingUser = await pool.query(
       "SELECT id FROM users WHERE email = $1",
       [cleanEmail]
@@ -168,10 +161,8 @@ app.post("/api/auth/register", async (req, res) => {
       });
     }
 
-    // Hash password
     const passwordHash = await bcrypt.hash(password, 12);
 
-    // Insert user into PostgreSQL
     const result = await pool.query(
       `INSERT INTO users
         (
@@ -206,9 +197,7 @@ app.post("/api/auth/register", async (req, res) => {
       user: result.rows[0],
     });
   } catch (error) {
-    console.error("REGISTRATION ERROR FULL DETAILS:", error);
-    console.error("REGISTRATION ERROR CODE:", error?.code);
-    console.error("REGISTRATION ERROR STACK:", error?.stack);
+    console.error("REGISTRATION ERROR:", error);
 
     if (error.code === "23505") {
       return res.status(409).json({
@@ -231,7 +220,6 @@ app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
-    // Required fields
     if (
       typeof email !== "string" ||
       typeof password !== "string" ||
@@ -253,7 +241,6 @@ app.post("/api/auth/login", async (req, res) => {
       .toLowerCase()
       .replace(/[\s-]+/g, "_");
 
-    // Find user
     const result = await pool.query(
       `SELECT
          id,
@@ -277,20 +264,13 @@ app.post("/api/auth/login", async (req, res) => {
 
     const user = result.rows[0];
 
-    // Check stored password hash
     if (!user.password_hash) {
-      console.error(
-        "LOGIN ERROR: password_hash is missing for user ID:",
-        user.id
-      );
-
       return res.status(500).json({
         success: false,
-        message: "Account configuration error. Please contact support.",
+        message: "Account configuration error.",
       });
     }
 
-    // Compare password
     const passwordMatch = await bcrypt.compare(
       password,
       user.password_hash
@@ -303,7 +283,6 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
-    // Check role
     if (user.role !== cleanRole) {
       return res.status(403).json({
         success: false,
@@ -311,7 +290,6 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
-    // Login successful
     return res.status(200).json({
       success: true,
       message: "Login successful!",
@@ -325,11 +303,7 @@ app.post("/api/auth/login", async (req, res) => {
       },
     });
   } catch (error) {
-    // Detailed debugging in backend terminal
-    console.error("LOGIN ERROR FULL DETAILS:", error);
-    console.error("LOGIN ERROR MESSAGE:", error?.message);
-    console.error("LOGIN ERROR CODE:", error?.code);
-    console.error("LOGIN ERROR STACK:", error?.stack);
+    console.error("LOGIN ERROR:", error);
 
     return res.status(500).json({
       success: false,
@@ -339,7 +313,9 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 // =====================================
-// GET USER PROFILE API
+// EXISTING USER PROFILE API
+// REPORTER / OTHER EXISTING FLOWS
+// LEFT AS-IS
 // =====================================
 app.get("/api/users/:id", async (req, res) => {
   try {
@@ -377,11 +353,173 @@ app.get("/api/users/:id", async (req, res) => {
       user: result.rows[0],
     });
   } catch (error) {
-    console.error("PROFILE FETCH ERROR FULL DETAILS:", error);
+    console.error("PROFILE FETCH ERROR:", error);
 
     return res.status(500).json({
       success: false,
       message: "Unable to load profile.",
+    });
+  }
+});
+
+// =====================================
+// EDITOR PROFILE - GET API
+// =====================================
+app.get("/api/editor/profile/:id", async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+
+    if (!Number.isInteger(userId) || userId < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid editor ID.",
+      });
+    }
+
+    const result = await pool.query(
+      `SELECT
+         id,
+         full_name,
+         email,
+         mobile,
+         role,
+         joining_date,
+         gender,
+         account_status
+       FROM users
+       WHERE id = $1 AND role = 'editor'`,
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Editor profile not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user: result.rows[0],
+    });
+  } catch (error) {
+    console.error("EDITOR PROFILE FETCH ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to load editor profile.",
+    });
+  }
+});
+
+// =====================================
+// EDITOR PROFILE - UPDATE API
+// =====================================
+app.patch("/api/editor/profile/:id", async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+
+    if (!Number.isInteger(userId) || userId < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid editor ID.",
+      });
+    }
+
+    const {
+      full_name,
+      mobile,
+      gender,
+      account_status,
+    } = req.body;
+
+    if (
+      typeof full_name !== "string" ||
+      !full_name.trim() ||
+      full_name.trim().length > 100
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid name.",
+      });
+    }
+
+    if (
+      typeof mobile !== "string" ||
+      !/^\d{10}$/.test(mobile.trim())
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid 10-digit mobile number.",
+      });
+    }
+
+    const allowedGenders = ["Male", "Female", "Other"];
+
+    if (
+      gender != null &&
+      gender !== "" &&
+      !allowedGenders.includes(gender)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select a valid gender.",
+      });
+    }
+
+    const allowedStatuses = ["Active", "Inactive"];
+
+    if (!allowedStatuses.includes(account_status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select a valid account status.",
+      });
+    }
+
+    const result = await pool.query(
+      `UPDATE users
+       SET
+         full_name = $1,
+         mobile = $2,
+         gender = $3,
+         account_status = $4
+       WHERE id = $5 AND role = 'editor'
+       RETURNING
+         id,
+         full_name,
+         email,
+         mobile,
+         role,
+         joining_date,
+         gender,
+         account_status`,
+      [
+        full_name.trim(),
+        mobile.trim(),
+        gender || null,
+        account_status,
+        userId,
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Editor profile not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Editor profile updated successfully.",
+      user: result.rows[0],
+    });
+  } catch (error) {
+    console.error("EDITOR PROFILE UPDATE ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to update editor profile.",
     });
   }
 });

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./dashboard.css";
-import repoimg from "../../assets/repoimg.png";
+import repoimg from "../../assets/repoimg.jpeg";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -13,6 +13,29 @@ function Dashboard() {
   const [status, setStatus] = useState("All");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+
+  // Get the currently logged-in user
+  const storedUser = (() => {
+    try {
+      return JSON.parse(
+        sessionStorage.getItem("emAxisUser") || "null"
+      );
+    } catch (error) {
+      return null;
+    }
+  })();
+
+  // Support different user object structures
+  const userName =
+    storedUser?.fullName ||
+    storedUser?.full_name ||
+    storedUser?.name ||
+    storedUser?.username ||
+    storedUser?.user?.fullName ||
+    storedUser?.user?.full_name ||
+    storedUser?.user?.name ||
+    storedUser?.user?.username ||
+    "Reporter";
 
   const newsData = [
     {
@@ -102,7 +125,7 @@ function Dashboard() {
       <div className="welcome-section">
         <div className="welcome-text">
           <h1>Welcome to EM-AXIS</h1>
-          <h3>Kamal Vadar</h3>
+          <h3>{userName}</h3>
 
           <p>
             Create and manage your news
@@ -122,6 +145,7 @@ function Dashboard() {
         <div className="dashboard-left">
           <div className="action-section">
             <button
+              type="button"
               className="create-news-btn"
               onClick={() => navigate("/reporter/create-news")}
             >
@@ -130,7 +154,6 @@ function Dashboard() {
 
             <div className="search-box">
               <span>⌕</span>
-
               <input
                 type="text"
                 placeholder="Search by title, category, or ID"
@@ -140,6 +163,7 @@ function Dashboard() {
             </div>
 
             <button
+              type="button"
               className={`filter-btn ${
                 showFilters ? "active-filter" : ""
               }`}
@@ -158,7 +182,6 @@ function Dashboard() {
             <div className="filter-section">
               <div className="filter-field">
                 <label>News Type</label>
-
                 <select
                   value={newsType}
                   onChange={(e) => setNewsType(e.target.value)}
@@ -177,7 +200,6 @@ function Dashboard() {
 
               <div className="filter-field">
                 <label>Status</label>
-
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
@@ -193,11 +215,9 @@ function Dashboard() {
 
               <div className="filter-field date-field">
                 <label>Date range</label>
-
                 <div className="date-range-box">
                   <div className="date-part">
                     <span>▣</span>
-
                     <input
                       type="date"
                       value={fromDate}
@@ -218,6 +238,7 @@ function Dashboard() {
               </div>
 
               <button
+                type="button"
                 className="clear-filter-btn"
                 onClick={clearFilters}
               >
@@ -261,7 +282,13 @@ function Dashboard() {
                       </div>
                     </div>
 
-                    <button className="view-news-btn">
+                    <button
+                      type="button"
+                      className="view-news-btn"
+                      onClick={() =>
+                        navigate("/reporter/my-news")
+                      }
+                    >
                       View
                     </button>
                   </div>
@@ -270,10 +297,8 @@ function Dashboard() {
                 <div className="no-news">
                   <div className="no-news-icon">🔍</div>
                   <h3>No news found</h3>
-
                   <p>
-                    Try changing your search or
-                    filter options.
+                    Try changing your search or filter options.
                   </p>
                 </div>
               )}
@@ -342,9 +367,7 @@ function Dashboard() {
               <button
                 type="button"
                 className="view-all-btn"
-                onClick={() =>
-                  navigate("/reporter/notifications")
-                }
+                onClick={() => navigate("/reporter/notifications")}
               >
                 View All
               </button>
@@ -353,7 +376,6 @@ function Dashboard() {
             <div className="notification-list">
               <div className="notification-card unread">
                 <div className="notification-icon">✓</div>
-
                 <div className="notification-content">
                   <h3>News Submitted</h3>
                   <p>City Development Update submitted.</p>
@@ -363,7 +385,6 @@ function Dashboard() {
 
               <div className="notification-card unread">
                 <div className="notification-icon warning">!</div>
-
                 <div className="notification-content">
                   <h3>Correction Required</h3>
                   <p>Correction requested in Traffic Update.</p>
@@ -373,7 +394,6 @@ function Dashboard() {
 
               <div className="notification-card">
                 <div className="notification-icon">✓</div>
-
                 <div className="notification-content">
                   <h3>News Approved</h3>
                   <p>Local Sports Event approved.</p>
@@ -383,7 +403,6 @@ function Dashboard() {
 
               <div className="notification-card">
                 <div className="notification-icon">✓</div>
-
                 <div className="notification-content">
                   <h3>News Published</h3>
                   <p>Local Event Report published.</p>

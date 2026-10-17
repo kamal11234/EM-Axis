@@ -6,6 +6,7 @@ import {
   BrowserRouter,
 } from "react-router-dom";
 
+// Login and Register
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
@@ -21,8 +22,11 @@ import Settings from "./reporter/Settings/Settings";
 import CreateNews from "./reporter/CreateNews/CreateNews";
 import NewsWorkspace from "./reporter/NewsWorkspace/NewsWorkspace";
 
-// Shared layout
+// Reporter layout
 import DashboardLayout from "./layout/DashboardLayout/DashboardLayout";
+
+// Editor layout
+import EditorLayout from "./layout/EditorLayout/EditorLayout";
 
 // Editor dashboard
 import EditorDashboard from "./editor/dashboard/dashboard.jsx";
@@ -30,133 +34,366 @@ import EditorDashboard from "./editor/dashboard/dashboard.jsx";
 // Channel Head dashboard
 import ChannelHeadDashboard from "./channel-head/dashboard/dashboard.jsx";
 
+import AllNews from "./editor/AllNews/AllNews.jsx";
+import EditorProfile from "./editor/Profile/EditorProfile.jsx";
+// ============================================
+// NORMALIZE USER ROLE
+// ============================================
+
+function normalizeRole(role) {
+  const value = String(role || "")
+    .toLowerCase()
+    .replace(/[\s_-]/g, "");
+
+  if (value === "reporter") {
+    return "reporter";
+  }
+
+  if (value === "editor") {
+    return "editor";
+  }
+
+  if (value === "channelhead") {
+    return "channel_head";
+  }
+
+  return "";
+}
+
+
+// ============================================
+// GET ROLE DASHBOARD
+// ============================================
+
+function getRoleHome(role) {
+  switch (role) {
+    case "reporter":
+      return "/dashboard";
+
+    case "editor":
+      return "/editor-dashboard";
+
+    case "channel_head":
+      return "/channel-head-dashboard";
+
+    default:
+      return "/";
+  }
+}
+
+
+// ============================================
+// ROLE PROTECTION
+// ============================================
+
+function RoleGuard({ allowedRole, children }) {
+  let user = null;
+
+  try {
+    const storedUser = sessionStorage.getItem("emAxisUser");
+
+    if (storedUser) {
+      user = JSON.parse(storedUser);
+    }
+  } catch (error) {
+    console.error("Unable to read logged-in user:", error);
+  }
+
+  const role = normalizeRole(
+    user?.role ??
+    user?.user?.role ??
+    user?.data?.role
+  );
+
+  // Not logged in
+  if (!user || !role) {
+    return <Navigate to="/" replace />;
+  }
+
+  // Wrong role
+  if (role !== allowedRole) {
+    return (
+      <Navigate
+        to={getRoleHome(role)}
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
+
+// ============================================
+// REPORTER ROUTE HELPER
+// ============================================
+
+function ReporterRoute({ children }) {
+  return (
+    <RoleGuard allowedRole="reporter">
+      <DashboardLayout>
+        {children}
+      </DashboardLayout>
+    </RoleGuard>
+  );
+}
+
+
+// ============================================
+// EDITOR ROUTE HELPER
+// ============================================
+
+function EditorRoute({ children }) {
+  return (
+    <RoleGuard allowedRole="editor">
+      <EditorLayout>
+        {children}
+      </EditorLayout>
+    </RoleGuard>
+  );
+}
+
+
+// ============================================
+// CHANNEL HEAD ROUTE HELPER
+// ============================================
+
+function ChannelHeadRoute({ children }) {
+  return (
+    <RoleGuard allowedRole="channel_head">
+      {children}
+    </RoleGuard>
+  );
+}
+
+
+// ============================================
+// MAIN APP
+// ============================================
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Login */}
-        <Route path="/" element={<Login />} />
 
-        {/* Register */}
-        <Route path="/register" element={<Register />} />
+        {/* ==================================
+            PUBLIC ROUTES
+        ================================== */}
 
-        {/* Reporter Dashboard */}
+        <Route
+          path="/"
+          element={<Login />}
+        />
+
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+
+
+        {/* ==================================
+            REPORTER MODULE
+        ================================== */}
+
         <Route
           path="/dashboard"
           element={
-            <DashboardLayout>
+            <ReporterRoute>
               <Dashboard />
-            </DashboardLayout>
+            </ReporterRoute>
           }
         />
 
-        {/* Reporter: Create News */}
         <Route
           path="/reporter/create-news"
           element={
-            <DashboardLayout>
+            <ReporterRoute>
               <CreateNews />
-            </DashboardLayout>
+            </ReporterRoute>
           }
         />
 
-        {/* Reporter: Check News Status */}
         <Route
           path="/reporter/check-news-status"
           element={
-            <DashboardLayout>
+            <ReporterRoute>
               <CheckNewsStatus />
-            </DashboardLayout>
+            </ReporterRoute>
           }
         />
 
-        {/* Reporter: Total News */}
         <Route
           path="/reporter/total-news"
           element={
-            <DashboardLayout>
+            <ReporterRoute>
               <TotalNews />
-            </DashboardLayout>
+            </ReporterRoute>
           }
         />
 
-        {/* Reporter: My News */}
         <Route
           path="/reporter/my-news"
           element={
-            <DashboardLayout>
+            <ReporterRoute>
               <MyNews />
-            </DashboardLayout>
+            </ReporterRoute>
           }
         />
 
-        {/* Reporter: Draft */}
         <Route
           path="/reporter/draft"
           element={
-            <DashboardLayout>
+            <ReporterRoute>
               <Draft />
-            </DashboardLayout>
+            </ReporterRoute>
           }
         />
 
-        {/* Reporter: Notifications */}
         <Route
           path="/reporter/notifications"
           element={
-            <DashboardLayout>
+            <ReporterRoute>
               <Notification />
-            </DashboardLayout>
+            </ReporterRoute>
           }
         />
 
-        {/* Profile */}
         <Route
           path="/profile"
           element={
-            <DashboardLayout>
+            <ReporterRoute>
               <Profile />
-            </DashboardLayout>
+            </ReporterRoute>
           }
         />
 
-        {/* Settings */}
         <Route
           path="/settings"
           element={
-            <DashboardLayout>
+            <ReporterRoute>
               <Settings />
-            </DashboardLayout>
+            </ReporterRoute>
           }
         />
 
-        {/* Reporter: News Workspace */}
         <Route
           path="/reporter/news-workspace"
           element={
-            <DashboardLayout>
+            <ReporterRoute>
               <NewsWorkspace />
-            </DashboardLayout>
+            </ReporterRoute>
           }
         />
 
-        {/* Editor Dashboard */}
+
+        {/* ==================================
+            EDITOR MODULE
+        ================================== */}
+
         <Route
           path="/editor-dashboard"
-          element={<EditorDashboard />}
+          element={
+            <EditorRoute>
+              <EditorDashboard />
+            </EditorRoute>
+          }
         />
 
-        {/* Channel Head Dashboard */}
+        
+          <Route
+            path="/editor/all-news"
+            element={
+              <EditorRoute>
+                <AllNews />
+              </EditorRoute>
+            }
+          />
+
+
+        <Route
+          path="/editor/reporters"
+          element={
+            <EditorRoute>
+              <div>
+                <h2>Reporters</h2>
+                <p>
+                  Reporter information will appear here.
+                </p>
+              </div>
+            </EditorRoute>
+          }
+        />
+
+        <Route
+          path="/editor/notifications"
+          element={
+            <EditorRoute>
+              <div>
+                <h2>Notifications</h2>
+                <p>
+                  Editor notifications will appear here.
+                </p>
+              </div>
+            </EditorRoute>
+          }
+        />
+
+                    <Route
+              path="/editor/profile"
+              element={
+                <EditorRoute>
+                  <EditorProfile />
+                </EditorRoute>
+              }
+            />
+
+        <Route
+          path="/editor/settings"
+          element={
+            <EditorRoute>
+              <div>
+                <h2>Editor Settings</h2>
+              </div>
+            </EditorRoute>
+          }
+        />
+
+
+        {/* ==================================
+            CHANNEL HEAD MODULE
+        ================================== */}
+
         <Route
           path="/channel-head-dashboard"
-          element={<ChannelHeadDashboard />}
+          element={
+            <ChannelHeadRoute>
+              <ChannelHeadDashboard />
+            </ChannelHeadRoute>
+          }
         />
 
-        {/* Unknown URL */}
+
+        {/* ==================================
+            UNKNOWN ROUTES
+        ================================== */}
+
         <Route
           path="*"
-          element={<Navigate to="/" replace />}
+          element={
+            <Navigate to="/" replace />
+          }
         />
+
+
+          <Route
+  path="/editor/all-news"
+  element={
+    <EditorRoute>
+      <AllNews />
+    </EditorRoute>
+  }
+/>
+
       </Routes>
     </BrowserRouter>
   );

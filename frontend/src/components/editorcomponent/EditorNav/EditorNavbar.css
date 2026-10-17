@@ -1,0 +1,349 @@
+
+/* =========================================
+   EDITOR NAVBAR
+========================================= */
+
+.editor-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 76px;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 28px 0 35px;
+  background: #ffffff;
+  border-bottom: 1px solid #e9edf3;
+  box-sizing: border-box;
+}
+
+/* =========================================
+   BRAND / LOGO
+========================================= */
+
+.editor-navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.editor-navbar-brand img {
+  width: 66px;
+  height: 52px;
+  object-fit: contain;
+  transform: rotate(-18deg);
+}
+
+.editor-navbar-brand span {
+  color: #182238;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+}
+
+/* =========================================
+   NAVBAR ACTIONS
+========================================= */
+
+.editor-navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  height: 100%;
+}
+
+/* =========================================
+   NOTIFICATION BUTTON
+========================================= */
+
+.editor-notification-btn {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+
+  border: none;
+  border-radius: 50%;
+  background: #fff0f2;
+  cursor: pointer;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 22px;
+}
+
+.editor-notification-btn:hover {
+  background: #ffe2e7;
+}
+
+/* =========================================
+   NAVBAR DIVIDER
+========================================= */
+
+.editor-navbar-divider {
+  width: 1px;
+  height: 34px;
+  background: #e0e5ed;
+  flex-shrink: 0;
+}
+
+/* =========================================
+   PROFILE CONTAINER
+========================================= */
+
+.editor-profile-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* =========================================
+   PROFILE BUTTON
+========================================= */
+
+.editor-profile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  padding: 4px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.editor-profile-btn:hover {
+  background: #f7f9fc;
+}
+
+/* =========================================
+   PROFILE AVATAR / PHOTO
+========================================= */
+
+.editor-profile-avatar {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  flex-shrink: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  overflow: hidden;
+  border-radius: 50%;
+  background: #edf1f6;
+  border: 2px solid #e2e8f0;
+
+  font-size: 21px;
+  box-sizing: border-box;
+}
+
+.editor-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.editor-default-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  line-height: 1;
+}
+
+/* =========================================
+   USER NAME AND DESIGNATION
+========================================= */
+
+.editor-profile-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+
+  min-width: 0;
+  max-width: 160px;
+  text-align: left;
+}
+
+.editor-profile-name {
+  display: block;
+  max-width: 160px;
+
+  color: #182238;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editor-profile-designation {
+  display: block;
+
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+/* =========================================
+   DROPDOWN ARROW
+========================================= */
+
+.editor-dropdown-arrow {
+  color: #64748b;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+/* =========================================
+   PROFILE DROPDOWN MENU
+========================================= */
+
+.editor-profile-menu {
+  position: absolute;
+  top: 49px;
+  right: 0;
+  z-index: 1100;
+
+  width: 150px;
+  padding: 6px;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px #00000015;
+
+  box-sizing: border-box;
+}
+
+.editor-profile-menu button {
+  display: block;
+  width: 100%;
+  padding: 11px;
+
+  text-align: left;
+  border: none;
+  border-radius: 5px;
+
+  background: transparent;
+  color: #263449;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.editor-profile-menu button:hover {
+  background: #edf3ff;
+}
+
+/* =========================================
+   RESPONSIVE - TABLET AND MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+  .editor-navbar {
+    padding: 0 12px;
+  }
+
+  .editor-navbar-brand {
+    gap: 6px;
+  }
+
+  .editor-navbar-brand img {
+    width: 43px;
+    height: 42px;
+  }
+
+  .editor-navbar-brand span {
+    font-size: 20px;
+  }
+
+  .editor-navbar-actions {
+    gap: 9px;
+  }
+
+  .editor-notification-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 19px;
+  }
+
+  .editor-navbar-divider {
+    height: 28px;
+  }
+
+  .editor-profile-btn {
+    gap: 6px;
+    padding: 4px;
+  }
+
+  .editor-profile-avatar {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+
+  .editor-profile-details {
+    max-width: 95px;
+  }
+
+  .editor-profile-name {
+    max-width: 95px;
+    font-size: 12px;
+  }
+
+  .editor-profile-designation {
+    font-size: 10px;
+  }
+
+  .editor-dropdown-arrow {
+    font-size: 12px;
+  }
+}
+
+/* =========================================
+   VERY SMALL MOBILE SCREENS
+========================================= */
+
+@media (max-width: 380px) {
+  .editor-navbar {
+    padding: 0 8px;
+  }
+
+  .editor-navbar-brand img {
+    width: 34px;
+    height: 36px;
+  }
+
+  .editor-navbar-brand span {
+    font-size: 17px;
+  }
+
+  .editor-navbar-actions {
+    gap: 5px;
+  }
+
+  .editor-profile-details {
+    max-width: 76px;
+  }
+
+  .editor-profile-name {
+    max-width: 76px;
+    font-size: 11px;
+  }
+}

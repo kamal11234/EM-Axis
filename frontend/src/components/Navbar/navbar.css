@@ -1,7 +1,15 @@
 
+/* =========================================
+   GLOBAL
+========================================= */
+
 * {
   box-sizing: border-box;
 }
+
+/* =========================================
+   NAVBAR
+========================================= */
 
 .navbar {
   position: fixed;
@@ -9,15 +17,21 @@
   left: 0;
   width: 100%;
   height: 76px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   padding: 0 32px;
   background: #ffffff;
   border-bottom: 1px solid #e5e7eb;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   z-index: 1000;
 }
+
+/* =========================================
+   LEFT SIDE / LOGO
+========================================= */
 
 .navbar-left {
   display: flex;
@@ -59,19 +73,29 @@
   letter-spacing: 0.2px;
 }
 
+/* =========================================
+   RIGHT SIDE
+========================================= */
+
 .navbar-right {
   display: flex;
   align-items: center;
   gap: 18px;
 }
 
+/* =========================================
+   NOTIFICATION
+========================================= */
+
 .navbar-notification {
   width: 42px;
   height: 42px;
   position: relative;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   border: none;
   border-radius: 50%;
   background: transparent;
@@ -89,19 +113,42 @@
   line-height: 1;
 }
 
+/* =========================================
+   DIVIDER
+========================================= */
+
 .navbar-divider {
   width: 1px;
   height: 32px;
   background: #e5e7eb;
+  flex-shrink: 0;
 }
 
+/* =========================================
+   PROFILE DROPDOWN WRAPPER
+   Added for My Profile and Logout
+========================================= */
+
+.navbar-profile-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* =========================================
+   PROFILE BUTTON
+========================================= */
+
 .navbar-profile {
-  height: 50px;
+  min-height: 50px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  padding: 0 10px;
+  gap: 10px;
+
+  padding: 4px 10px;
   border: none;
   background: transparent;
   border-radius: 24px;
@@ -110,42 +157,94 @@
   flex-shrink: 0;
 }
 
-.navbar-profile:hover {
+.navbar-profile:hover,
+.navbar-profile[aria-expanded="true"] {
   background: #f3f5f8;
 }
 
+/* Keyboard focus */
+
+.navbar-profile:focus-visible,
+.navbar-notification:focus-visible,
+.profile-dropdown-item:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}
+
+/* =========================================
+   PROFILE PHOTO
+========================================= */
+
 .profile-icon {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  overflow: hidden;
   border-radius: 50%;
   background: #eef2f7;
+  border: 2px solid #e2e8f0;
+
   font-size: 19px;
   flex-shrink: 0;
 }
+
+.profile-icon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-default-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  line-height: 1;
+}
+
+/* =========================================
+   USER NAME AND DESIGNATION
+========================================= */
 
 .profile-info {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  gap: 3px;
+
+  min-width: 0;
+  max-width: 160px;
+  text-align: left;
   line-height: 1.2;
-  min-width: 120px;
 }
 
 .profile-name {
-  font-size: 14px;
-  font-weight: 600;
+  display: block;
+  max-width: 160px;
+
+  font-size: 13px;
+  font-weight: 700;
   color: #172033;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .profile-role {
-  margin-top: 3px;
+  display: block;
+  margin-top: 0;
+
   font-size: 11px;
-  font-weight: 400;
+  font-weight: 500;
   color: #7b8494;
   white-space: nowrap;
 }
@@ -154,7 +253,115 @@
   font-size: 8px;
   color: #697386;
   margin-left: 2px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
 }
+
+.navbar-profile[aria-expanded="true"] .profile-arrow {
+  transform: rotate(180deg);
+}
+
+/* =========================================
+   PROFILE DROPDOWN MENU
+   Added
+========================================= */
+
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+
+  width: 200px;
+  padding: 7px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
+  box-shadow: 0 12px 30px rgba(23, 32, 51, 0.14);
+  z-index: 2000;
+
+  animation: profileDropdownOpen 0.18s ease-out;
+}
+
+/* =========================================
+   DROPDOWN ITEMS
+   My Profile and Logout
+========================================= */
+
+.profile-dropdown-item {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px 13px;
+
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+
+  color: #172033;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.profile-dropdown-item:hover {
+  background: #eff6ff;
+  color: #144db1;
+}
+
+/* Dropdown icons */
+
+.dropdown-item-icon {
+  width: 22px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+/* =========================================
+   LOGOUT ITEM
+========================================= */
+
+.profile-dropdown-item.logout-item {
+  color: #dc2626;
+}
+
+.profile-dropdown-item.logout-item:hover {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+/* =========================================
+   DROPDOWN ANIMATION
+========================================= */
+
+@keyframes profileDropdownOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================
+   TABLET
+========================================= */
 
 @media (max-width: 768px) {
   .navbar {
@@ -183,16 +390,22 @@
     display: none;
   }
 
+  .navbar-profile {
+    gap: 7px;
+    padding: 4px 6px;
+  }
+
   .profile-info {
-    min-width: auto;
+    max-width: 115px;
   }
 
   .profile-name {
+    max-width: 115px;
     font-size: 12px;
   }
 
   .profile-role {
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .profile-arrow {
@@ -200,39 +413,133 @@
   }
 }
 
+/* =========================================
+   MOBILE
+========================================= */
+
 @media (max-width: 480px) {
   .navbar {
-    padding: 0 12px;
+    padding: 0 10px;
   }
 
   .navbar-left {
-    gap: 8px;
+    gap: 6px;
+  }
+
+  .navbar-logo {
+    width: 36px;
+    height: 40px;
+  }
+
+  .navbar-brand h2 {
+    font-size: 16px;
+    letter-spacing: 0;
   }
 
   .navbar-brand p {
     display: none;
   }
 
-  .navbar-brand h2 {
-    font-size: 17px;
+  .navbar-right {
+    gap: 5px;
   }
 
   .navbar-notification {
-    width: 38px;
-    height: 38px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .notification-icon {
+    font-size: 18px;
   }
 
   .navbar-profile {
-    padding: 0;
-  }
-
-  .profile-info {
-    display: none;
+    gap: 5px;
+    padding: 3px;
   }
 
   .profile-icon {
     width: 34px;
     height: 34px;
-    font-size: 17px;
+    min-width: 34px;
+  }
+
+  .profile-info {
+    max-width: 90px;
+  }
+
+  .profile-name {
+    max-width: 90px;
+    font-size: 11px;
+  }
+
+  .profile-role {
+    font-size: 9px;
+  }
+
+  .profile-dropdown {
+    top: calc(100% + 8px);
+    width: 180px;
+  }
+
+  .profile-dropdown-item {
+    padding: 12px 10px;
+  }
+}
+
+/* =========================================
+   VERY SMALL MOBILE
+========================================= */
+
+@media (max-width: 360px) {
+  .navbar {
+    padding: 0 6px;
+  }
+
+  .navbar-left {
+    gap: 4px;
+  }
+
+  .navbar-logo {
+    width: 30px;
+    height: 36px;
+  }
+
+  .navbar-brand h2 {
+    font-size: 14px;
+  }
+
+  .navbar-right {
+    gap: 3px;
+  }
+
+  .profile-info {
+    max-width: 72px;
+  }
+
+  .profile-name {
+    max-width: 72px;
+    font-size: 10px;
+  }
+
+  .profile-role {
+    font-size: 9px;
+  }
+}
+
+/* =========================================
+   REDUCED MOTION
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar-notification,
+  .navbar-profile,
+  .profile-arrow,
+  .profile-dropdown-item {
+    transition: none;
+  }
+
+  .profile-dropdown {
+    animation: none;
   }
 }

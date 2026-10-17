@@ -6,6 +6,15 @@ import "./CreateNews.css";
 function CreateNews() {
   const navigate = useNavigate();
 
+  // Get current local date and time in datetime-local format
+  const getCurrentDateTime = () => {
+    const now = new Date();
+    const offset = now.getTimezoneOffset();
+    const localTime = new Date(now.getTime() - offset * 60000);
+
+    return localTime.toISOString().slice(0, 16);
+  };
+
   const [formData, setFormData] = useState({
     newsFormat: "",
     newsSlug: "",
@@ -14,6 +23,7 @@ function CreateNews() {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [dateError, setDateError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,6 +32,14 @@ function CreateNews() {
       ...prev,
       [name]: value,
     }));
+
+    if (name === "eventDate") {
+      if (value && value > getCurrentDateTime()) {
+        setDateError("Future date and time cannot be selected.");
+      } else {
+        setDateError("");
+      }
+    }
 
     setSubmitted(false);
   };
@@ -41,6 +59,14 @@ function CreateNews() {
       return;
     }
 
+    // Extra validation to prevent future event date/time
+    if (eventDate > getCurrentDateTime()) {
+      setDateError("Future date and time are not allowed.");
+      return;
+    }
+
+    setDateError("");
+
     const newsDetails = {
       newsId: "Auto Generated",
       newsFormat,
@@ -49,10 +75,10 @@ function CreateNews() {
       eventDate,
     };
 
-    // Open News Workspace and pass the entered details
+    // Open News Workspace and pass entered details
     navigate("/reporter/news-workspace", {
       state: {
-        newsDetails: newsDetails,
+        newsDetails,
       },
     });
   };
@@ -86,9 +112,7 @@ function CreateNews() {
           <div>
             <h2>News Information</h2>
 
-            <p>
-              Provide the basic information of your news.
-            </p>
+            <p>Provide the basic information of your news.</p>
           </div>
         </div>
 
@@ -171,19 +195,27 @@ function CreateNews() {
             </div>
           </div>
 
-          {/* EVENT DATE */}
+          {/* EVENT DATE & TIME */}
           <div className="form-group">
-            <label>
+            <label htmlFor="eventDate">
               Event Date &amp; Time <span>*</span>
             </label>
 
             <input
+              id="eventDate"
               type="datetime-local"
               name="eventDate"
               value={formData.eventDate}
+              max={getCurrentDateTime()}
               onChange={handleChange}
               required
             />
+
+            {dateError && (
+              <small className="date-error">
+                {dateError}
+              </small>
+            )}
           </div>
         </div>
 
@@ -216,9 +248,7 @@ function CreateNews() {
             <div>
               <strong>News Created Successfully!</strong>
 
-              <p>
-                Your news has been created successfully.
-              </p>
+              <p>Your news has been created successfully.</p>
             </div>
           </div>
         )}

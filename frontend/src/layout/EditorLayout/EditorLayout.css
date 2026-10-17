@@ -1,0 +1,67 @@
+
+/* ===== EDITOR LAYOUT ===== */
+
+.editor-layout {
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+  background: #f5f7fb;
+
+  overflow: visible;
+  position: relative;
+}
+
+/* ===== ALL EDITOR PAGES ===== */
+
+.editor-main-content {
+  margin-left: 240px;
+  width: calc(100% - 240px);
+
+  min-height: 100vh;
+  height: auto;
+
+  padding: 96px 25px 50px;
+  box-sizing: border-box;
+
+  background: #f5f7fb;
+
+  overflow: visible;
+  position: relative;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  .editor-main-content {
+    margin-left: 190px;
+    width: calc(100% - 190px);
+    padding: 92px 12px 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .editor-main-content {
+    margin-left: 66px;
+    width: calc(100% - 66px);
+    padding: 90px 10px 35px;
+  }
+}
+
+/* ===== EDITOR MODULE SCROLLING ===== */
+
+html,
+body,
+#root {
+  min-height: 100%;
+  height: auto;
+}
+
+html,
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+#root {
+  overflow: visible;
+}
