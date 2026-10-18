@@ -1,0 +1,47 @@
+/* Global EM-AXIS theme */
+
+:root,
+:root[data-theme="light"] {
+  --app-bg: #f0f6fd;
+  --app-card: #ffffff;
+  --app-text: #173766;
+  --app-muted: #6783a8;
+  --app-border: #dce8f6;
+  --app-hover: #f3f8ff;
+}
+
+:root[data-theme="dark"] {
+  --app-bg: #111b2b;
+  --app-card: #1b293d;
+  --app-text: #e6efff;
+  --app-muted: #a6bad5;
+  --app-border: #344761;
+  --app-hover: #243650;
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--app-text);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Common page containers and panels */
+[data-theme="dark"] .dashboard-main,
+[data-theme="dark"] main,
+[data-theme="dark"] .editor-settings-page {
+  background-color: var(--app-bg);
+  color: var(--app-text);
+}
+
+[data-theme="dark"] .settings-section,
+[data-theme="dark"] .card,
+[data-theme="dark"] .dashboard-card {
+  background-color: var(--app-card);
+  color: var(--app-text);
+  border-color: var(--app-border);
+}
+
+[data-theme="dark"] .setting-description p,
+[data-theme="dark"] .settings-page-header p {
+  color: var(--app-muted);
+}

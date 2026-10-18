@@ -33,9 +33,11 @@ import EditorDashboard from "./editor/dashboard/dashboard.jsx";
 
 // Channel Head dashboard
 import ChannelHeadDashboard from "./channel-head/dashboard/dashboard.jsx";
-
+import "./theme.css";
 import AllNews from "./editor/AllNews/AllNews.jsx";
 import EditorProfile from "./editor/Profile/EditorProfile.jsx";
+import EditorSettings from "./editor/Settings/Settings.jsx";
+import { ThemeProvider } from "./context/ThemeContext";
 // ============================================
 // NORMALIZE USER ROLE
 // ============================================
@@ -173,8 +175,9 @@ function ChannelHeadRoute({ children }) {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
 
         {/* ==================================
             PUBLIC ROUTES
@@ -347,16 +350,16 @@ function App() {
               }
             />
 
-        <Route
-          path="/editor/settings"
-          element={
-            <EditorRoute>
-              <div>
-                <h2>Editor Settings</h2>
-              </div>
-            </EditorRoute>
-          }
-        />
+       
+<Route
+  path="/editor/settings"
+  element={
+    <EditorRoute>
+      <EditorSettings />
+    </EditorRoute>
+  }
+/>
+
 
 
         {/* ==================================
@@ -394,8 +397,9 @@ function App() {
   }
 />
 
-      </Routes>
-    </BrowserRouter>
+             </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
