@@ -34,6 +34,8 @@ import EditorDashboard from "./editor/dashboard/dashboard.jsx";
 import ChannelHeadDashboard from "./channel-head/dashboard/dashboard.jsx";
 import "./theme.css";
 import AllNews from "./editor/AllNews/AllNews.jsx";
+import AllReporter from "./editor/AllReporter/AllReporter";
+import Notifications from "./editor/Notifications/Notifications.jsx";
 import EditorProfile from "./editor/Profile/EditorProfile.jsx";
 import EditorSettings from "./editor/Settings/Settings.jsx";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -309,12 +311,7 @@ function App() {
           path="/editor/reporters"
           element={
             <EditorRoute>
-              <div>
-                <h2>Reporters</h2>
-                <p>
-                  Reporter information will appear here.
-                </p>
-              </div>
+              <AllReporter />
             </EditorRoute>
           }
         />
@@ -323,12 +320,7 @@ function App() {
           path="/editor/notifications"
           element={
             <EditorRoute>
-              <div>
-                <h2>Notifications</h2>
-                <p>
-                  Editor notifications will appear here.
-                </p>
-              </div>
+              <Notifications />
             </EditorRoute>
           }
         />
