@@ -1,0 +1,24 @@
+.notif-page{ background:#eef4ff; min-height:100vh; padding:20px; font-family: sans-serif; }
+.notif-header{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+.notif-header h1{ font-size:22px; color:#0f2a5e; margin:0; font-weight:bold; }
+.notif-header p{ font-size:13px; color:gray; margin-top:4px; }
+.mark-btn{ background:#1e5ad1; color:white; border:none; padding:10px 18px; border-radius:8px; font-size:13px; cursor:pointer; }
+.notif-stats{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-bottom:20px; }
+.stat-card{ background:white; border-radius:12px; padding:18px; display:flex; gap:14px; align-items:center; border:1px solid #e5e7eb; }
+.stat-icon{ width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; }
+.stat-icon.blue{ background:#dbeafe; } .orange-bg{ background:#ffedd5; } .green-bg{ background:#dcfce7; }
+.stat-card small{ display:block; color:gray; font-size:13px; } .stat-card b{ font-size:24px; } .orange{ color:#ff6a00; } .green{ color:green; }
+.notif-filters{ display:flex; gap:12px; margin-bottom:15px; }
+.search-box{ flex:1; background:white; border:1px solid #ddd; border-radius:8px; padding:10px 12px; display:flex; gap:8px; align-items:center; }
+.search-box input{ border:none; outline:none; width:100%; font-size:13px; }
+.filter-tabs{ background:white; border:1px solid #ddd; border-radius:20px; padding:4px; display:flex; }
+.filter-tabs button{ border:none; background:transparent; padding:6px 18px; border-radius:20px; cursor:pointer; font-size:13px; }
+.filter-tabs button.active{ background:#1e5ad1; color:white; }
+.notif-list{ background:white; border-radius:12px; border:1px solid #e5e7eb; overflow:hidden; }
+.notif-item{ display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid #f0f0f0; border-left:4px solid transparent; }
+.notif-item.unread{ background:#f3f7ff; border-left-color:#1e5ad1; }
+.notif-item .left{ display:flex; gap:12px; align-items:center; } .dot{ width:8px; height:8px; background:#1e5ad1; border-radius:50%; }
+.n-icon{ width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+.badge{ font-size:11px; padding:4px 10px; border-radius:12px; } .badge.Unread{ background:#dbeafe; color:#1e5ad1; } .badge.Read{ background:#dcfce7; color:green; }
+.time{ font-size:12px; color:gray; } .view-btn{ border:1px solid #1e5ad1; color:#1e5ad1; background:white; padding:6px 12px; border-radius:6px; font-size:11px; }
+.right{ display:flex; gap:14px; align-items:center; }
