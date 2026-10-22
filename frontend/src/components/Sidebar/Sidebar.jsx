@@ -1,3 +1,4 @@
+
 import "./Sidebar.css";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -7,11 +8,26 @@ function Sidebar() {
 
   const menuItems = [
     { name: "Dashboard", icon: "🏠", path: "/dashboard" },
-    { name: "Check News Status", icon: "📊", path: "/reporter/check-news-status" },
-    { name: "Total News", icon: "📰", path: "/reporter/total-news" },
-    { name: "My News", icon: "📄", path: "/reporter/my-news" },
-    { name: "Draft", icon: "📝", path: "/reporter/draft" },
-    { name: "Notifications", icon: "🔔", path: "/reporter/notifications" },
+    {
+      name: "Check News Status",
+      icon: "📊",
+      path: "/reporter/check-news-status",
+    },
+    {
+      name: "Total News",
+      icon: "📰",
+      path: "/reporter/total-news",
+    },
+    {
+      name: "Draft",
+      icon: "📝",
+      path: "/reporter/draft",
+    },
+    {
+      name: "Notifications",
+      icon: "🔔",
+      path: "/reporter/notifications",
+    },
     { name: "Profile", icon: "👤", path: "/profile" },
     { name: "Settings", icon: "⚙️", path: "/settings" },
   ];

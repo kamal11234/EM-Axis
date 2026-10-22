@@ -15,7 +15,6 @@ import Dashboard from "./reporter/Dashboard/Dashboard";
 import CheckNewsStatus from "./reporter/CheckNewsStatus/CheckNewsStatus";
 import TotalNews from "./reporter/TotalNews/TotalNews";
 import Draft from "./reporter/draft/Draft";
-import MyNews from "./reporter/MyNews/MyNews";
 import Notification from "./reporter/Notifications/Notifications";
 import Profile from "./reporter/Profile/Profile";
 import Settings from "./reporter/Settings/Settings";
@@ -234,14 +233,7 @@ function App() {
           }
         />
 
-        <Route
-          path="/reporter/my-news"
-          element={
-            <ReporterRoute>
-              <MyNews />
-            </ReporterRoute>
-          }
-        />
+        
 
         <Route
           path="/reporter/draft"
