@@ -1,351 +1,442 @@
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./AllReporter.css";
 
-const newsData = [
-  { id: "N001", slug: "local-road-development-project", format: "AV", submitted: "15 Oct 2026", updated: "16 Oct 2026", status: "Pending Review" },
-  { id: "N002", slug: "education-policy-update", format: "AVB", submitted: "14 Oct 2026", updated: "15 Oct 2026", status: "Published" },
-  { id: "N003", slug: "city-sports-event", format: "PKG", submitted: "12 Oct 2026", updated: "14 Oct 2026", status: "Correction Required" },
-  { id: "N004", slug: "new-highway-connectivity", format: "WKT", submitted: "10 Oct 2026", updated: "11 Oct 2026", status: "Rejected" },
+
+const initialReporters = [
+  {
+    name: "Tanavi Vanjare",
+    id: "REP-001",
+    email: "tanavi@example.com",
+    total: 32,
+    pending: 4,
+    approved: 10,
+    rejected: 3,
+    published: 15,
+    status: "Active",
+    icon: "👩",
+  },
+  {
+    name: "Kamal Vadar",
+    id: "REP-002",
+    email: "kamal@example.com",
+    total: 27,
+    pending: 3,
+    approved: 8,
+    rejected: 2,
+    published: 14,
+    status: "Active",
+    icon: "👨",
+  },
+  {
+    name: "Vaishnavi Varak",
+    id: "REP-003",
+    email: "vaishnavi@example.com",
+    total: 19,
+    pending: 2,
+    approved: 7,
+    rejected: 1,
+    published: 9,
+    status: "Active",
+    icon: "👧",
+  },
+  {
+    name: "Tanashri Zarapkar",
+    id: "REP-004",
+    email: "tanashri@example.com",
+    total: 24,
+    pending: 3,
+    approved: 6,
+    rejected: 2,
+    published: 13,
+    status: "Inactive",
+    icon: "👩‍🎓",
+  },
 ];
 
-const activities = [
-  { title: "News Submitted", slug: "local-road-development-project", date: "15 Oct 2026, 10:24 AM", icon: "▤" },
-  { title: "News Sent for Correction", slug: "city-sports-event", date: "14 Oct 2026, 04:32 PM", icon: "↻" },
-  { title: "Corrected News Resubmitted", slug: "city-sports-event", date: "15 Oct 2026, 11:15 AM", icon: "✎" },
-  { title: "News Approved", slug: "education-policy-update", date: "16 Oct 2026, 09:20 AM", icon: "✓" },
-  { title: "News Sent to Output Team", slug: "education-policy-update", date: "16 Oct 2026, 11:45 AM", icon: "➤" },
-];
+export default function AllReporter() {
+  const navigate = useNavigate();
 
-function AllReporter() {
+  const [reporters] = useState(initialReporters);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("All Status");
-  const [format, setFormat] = useState("All Formats");
-  const [date, setDate] = useState("All Dates");
-  const [sort, setSort] = useState("Newest First");
-  const [selectedNews, setSelectedNews] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [sortBy, setSortBy] = useState("id-asc");
+  const [appliedSearch, setAppliedSearch] = useState("");
+  const [appliedStatus, setAppliedStatus] = useState("All");
+  const [appliedSort, setAppliedSort] = useState("id-asc");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [selected, setSelected] = useState([]);
 
-  const filteredNews = newsData
-    .filter((item) =>
-      `${item.id} ${item.slug}`
-        .toLowerCase()
-        .includes(search.trim().toLowerCase())
-    )
-    .filter((item) =>
-      status === "All Status" || item.status === status
-    )
-    .filter((item) =>
-      format === "All Formats" || item.format === format
-    )
-    .filter((item) => {
-      if (date === "All Dates") return true;
+  const filtered = useMemo(() => {
+    const result = reporters.filter((reporter) => {
+      const term = appliedSearch.toLowerCase();
 
-      const daysOld =
-        (new Date("16 Oct 2026") - new Date(item.submitted)) /
-        (1000 * 60 * 60 * 24);
+      const matchesSearch =
+        reporter.name.toLowerCase().includes(term) ||
+        reporter.id.toLowerCase().includes(term) ||
+        reporter.email.toLowerCase().includes(term);
 
-      if (date === "Last 7 Days") return daysOld <= 7;
-      if (date === "Last 30 Days") return daysOld <= 30;
+      const matchesStatus =
+        appliedStatus === "All" ||
+        reporter.status === appliedStatus;
 
-      return true;
-    })
-    .sort((a, b) => {
-      const first = new Date(a.submitted);
-      const second = new Date(b.submitted);
-
-      return sort === "Newest First"
-        ? second - first
-        : first - second;
+      return matchesSearch && matchesStatus;
     });
+
+    return [...result].sort((a, b) => {
+      if (appliedSort === "id-asc") {
+        return a.id.localeCompare(b.id);
+      }
+
+      if (appliedSort === "id-desc") {
+        return b.id.localeCompare(a.id);
+      }
+
+      if (appliedSort === "name-desc") {
+        return b.name.localeCompare(a.name);
+      }
+
+      if (appliedSort === "news-high") {
+        return b.total - a.total;
+      }
+
+      if (appliedSort === "news-low") {
+        return a.total - b.total;
+      }
+
+      return a.name.localeCompare(b.name);
+    });
+  }, [reporters, appliedSearch, appliedStatus, appliedSort]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filtered.length / perPage)
+  );
+
+  const currentPage = Math.min(page, totalPages);
+
+  const visibleReporters = filtered.slice(
+    (currentPage - 1) * perPage,
+    currentPage * perPage
+  );
+
+  const applyFilters = () => {
+    setAppliedSearch(search.trim());
+    setAppliedStatus(statusFilter);
+    setAppliedSort(sortBy);
+    setPage(1);
+  };
 
   const resetFilters = () => {
     setSearch("");
-    setStatus("All Status");
-    setFormat("All Formats");
-    setDate("All Dates");
-    setSort("Newest First");
+    setStatusFilter("All");
+    setSortBy("id-asc");
+    setAppliedSearch("");
+    setAppliedStatus("All");
+    setAppliedSort("id-asc");
+    setPage(1);
+    setSelected([]);
+  };
+
+  const toggleReporter = (id) => {
+    setSelected((previous) =>
+      previous.includes(id)
+        ? previous.filter((item) => item !== id)
+        : [...previous, id]
+    );
+  };
+
+  const toggleAll = (checked) => {
+    if (checked) {
+      setSelected((previous) => [
+        ...new Set([
+          ...previous,
+          ...visibleReporters.map((reporter) => reporter.id),
+        ]),
+      ]);
+    } else {
+      setSelected((previous) =>
+        previous.filter(
+          (id) =>
+            !visibleReporters.some((reporter) => reporter.id === id)
+        )
+      );
+    }
   };
 
   return (
-    <main className="allreporter-page">
-      <header className="allreporter-heading">
-        <div>
-          <h1>Reporter Profile &amp; News History</h1>
+    <main className="reporters-page">
+      <section className="reporters-banner">
+        <div className="banner-icon">♟</div>
+
+        <div className="banner-text">
+          <h1>All Reporters</h1>
           <p>
-            View reporter details and track submitted news activities.
+            Manage registered reporters and track their news submissions.
           </p>
         </div>
-      </header>
 
-      <section className="allreporter-profile-card">
-        <div className="allreporter-avatar">👤</div>
-
-        <div className="allreporter-reporter-info">
-          <h2>Tanavi Vanjare</h2>
-          <p>REP-001</p>
-          <p>✉ tanavi@example.com</p>
-          <span className="allreporter-role">Reporter</span>
-        </div>
-
-        <div className="allreporter-profile-details">
-          <div>
-            <span>Account Status</span>
-            <strong className="allreporter-active">● Active</strong>
-          </div>
-
-          <div>
-            <span>Registration Date</span>
-            <strong>▦ &nbsp; 10 Jan 2026</strong>
-          </div>
-        </div>
-      </section>
-
-      <section className="allreporter-stats">
-        <div className="allreporter-stat-card">
-          <span className="allreporter-stat-icon blue">▤</span>
-          <p>Total News</p>
-          <h2>32</h2>
-        </div>
-
-        <div className="allreporter-stat-card">
-          <span className="allreporter-stat-icon orange">◷</span>
-          <p>Pending Review</p>
-          <h2>4</h2>
-        </div>
-
-        <div className="allreporter-stat-card">
-          <span className="allreporter-stat-icon blue">⌕</span>
-          <p>Under Review</p>
-          <h2>2</h2>
-        </div>
-
-        <div className="allreporter-stat-card">
-          <span className="allreporter-stat-icon green">✓</span>
-          <p>Approved</p>
-          <h2>10</h2>
-        </div>
-
-        <div className="allreporter-stat-card">
-          <span className="allreporter-stat-icon red">×</span>
-          <p>Rejected</p>
-          <h2>3</h2>
-        </div>
-
-        <div className="allreporter-stat-card">
-          <span className="allreporter-stat-icon purple">↻</span>
-          <p>Correction Required</p>
-          <h2>3</h2>
-        </div>
-
-        <div className="allreporter-stat-card">
-          <span className="allreporter-stat-icon green">⚑</span>
-          <p>Published</p>
-          <h2>10</h2>
-        </div>
-      </section>
-
-      <section className="allreporter-main-grid">
-        <div className="allreporter-history-card">
-          <h2>News History</h2>
-
-          <input
-            className="allreporter-search"
-            type="search"
-            placeholder="Search by News ID or slug..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
-          <div className="allreporter-filters">
-            <label>
-              Status
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option>All Status</option>
-                <option>Pending Review</option>
-                <option>Published</option>
-                <option>Correction Required</option>
-                <option>Rejected</option>
-              </select>
-            </label>
-
-            <label>
-              News Format
-              <select
-                value={format}
-                onChange={(e) => setFormat(e.target.value)}
-              >
-                <option>All Formats</option>
-                <option>AV</option>
-                <option>AVB</option>
-                <option>PKG</option>
-                <option>WKT</option>
-              </select>
-            </label>
-
-            <label>
-              Submission Date
-              <select
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-              >
-                <option>All Dates</option>
-                <option>Last 7 Days</option>
-                <option>Last 30 Days</option>
-              </select>
-            </label>
-
-            <label>
-              Sort
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
-              >
-                <option>Newest First</option>
-                <option>Oldest First</option>
-              </select>
-            </label>
-          </div>
-
-          <div className="allreporter-filter-actions">
-            <button
-              className="allreporter-apply-btn"
-              onClick={() => setSearch(search.trim())}
-            >
-              Apply Filters
-            </button>
-
-            <button
-              className="allreporter-reset-btn"
-              onClick={resetFilters}
-            >
-              Reset Filters
-            </button>
-          </div>
-
-          <div className="allreporter-table-wrapper">
-            <table className="allreporter-table">
-              <thead>
-                <tr>
-                  <th>News ID</th>
-                  <th>News Slug</th>
-                  <th>Format</th>
-                  <th>Submitted Date</th>
-                  <th>Last Updated</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {filteredNews.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.id}</td>
-                    <td>{item.slug}</td>
-                    <td>{item.format}</td>
-                    <td>{item.submitted}</td>
-                    <td>{item.updated}</td>
-                    <td>
-                      <span
-                        className={`allreporter-status ${item.status
-                          .toLowerCase()
-                          .replaceAll(" ", "-")}`}
-                      >
-                        {item.status}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        className="allreporter-view-btn"
-                        onClick={() => setSelectedNews(item)}
-                      >
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-
-                {filteredNews.length === 0 && (
-                  <tr>
-                    <td colSpan="7" className="allreporter-empty">
-                      No news records found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="allreporter-table-footer">
-            Showing {filteredNews.length} of {newsData.length} records
-          </div>
-        </div>
-
-        <aside className="allreporter-timeline-card">
-          <h2>Reporter Activity Timeline</h2>
-
-          <div className="allreporter-timeline">
-            {activities.map((activity, index) => (
-              <div
-                className="allreporter-timeline-item"
-                key={`${activity.title}-${index}`}
-              >
-                <div
-                  className={`allreporter-timeline-icon icon-${index}`}
-                >
-                  {activity.icon}
-                </div>
-
-                <div className="allreporter-timeline-content">
-                  <h3>{activity.title}</h3>
-                  <p>{activity.slug}</p>
-                  <span>{activity.date}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </aside>
-      </section>
-
-      {selectedNews && (
-        <div
-          className="allreporter-modal-overlay"
-          onClick={() => setSelectedNews(null)}
+        <button
+          className="refresh-button"
+          onClick={() => window.location.reload()}
         >
-          <section
-            className="allreporter-modal"
-            role="dialog"
-            aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="allreporter-modal-close"
-              onClick={() => setSelectedNews(null)}
-            >
-              ×
-            </button>
+          ⟳ Refresh
+        </button>
+      </section>
 
-            <h2>News Details</h2>
-            <p><strong>News ID:</strong> {selectedNews.id}</p>
-            <p><strong>News Slug:</strong> {selectedNews.slug}</p>
-            <p><strong>Format:</strong> {selectedNews.format}</p>
-            <p><strong>Submitted:</strong> {selectedNews.submitted}</p>
-            <p><strong>Last Updated:</strong> {selectedNews.updated}</p>
-            <p><strong>Status:</strong> {selectedNews.status}</p>
+      <section className="reporter-stats">
+        <article className="stat-card blue">
+          <div className="stat-icon blue-icon">♟</div>
+          <div>
+            <p>Total Reporters</p>
+            <h2>24</h2>
+          </div>
+          <span className="stat-arrow">›</span>
+        </article>
 
-            <button
-              className="allreporter-apply-btn"
-              onClick={() => setSelectedNews(null)}
+        <article className="stat-card green">
+          <div className="stat-icon green-icon">✓</div>
+          <div>
+            <p>Active Reporters</p>
+            <h2>20</h2>
+          </div>
+          <span className="stat-arrow">›</span>
+        </article>
+
+        <article className="stat-card purple">
+          <div className="stat-icon purple-icon">▤</div>
+          <div>
+            <p>Total News Submitted</p>
+            <h2>156</h2>
+          </div>
+          <span className="stat-arrow">›</span>
+        </article>
+
+        <article className="stat-card orange">
+          <div className="stat-icon orange-icon">◷</div>
+          <div>
+            <p>Pending Review</p>
+            <h2>18</h2>
+          </div>
+          <span className="stat-arrow">›</span>
+        </article>
+      </section>
+
+      <section className="filter-panel">
+        <input
+          className="reporter-search"
+          type="text"
+          placeholder="⌕ Search by reporter name, ID, or email..."
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") applyFilters();
+          }}
+        />
+
+        <div className="filter-row">
+          <label className="filter-field">
+            <span>Account Status</span>
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
             >
-              Close
-            </button>
-          </section>
+              <option value="All">All</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </label>
+
+          <label className="filter-field sort-field">
+            <span>Sort By</span>
+            <select
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value)}
+            >
+              <option value="id-asc">Reporter ID A-Z</option>
+              <option value="id-desc">Reporter ID Z-A</option>
+              <option value="name-asc">Name A-Z</option>
+              <option value="name-desc">Name Z-A</option>
+              <option value="news-high">Most News</option>
+              <option value="news-low">Least News</option>
+            </select>
+          </label>
+
+          <button className="apply-button" onClick={applyFilters}>
+            Apply Filters
+          </button>
+
+          <button className="reset-button" onClick={resetFilters}>
+            Reset Filters
+          </button>
         </div>
-      )}
+      </section>
+
+      <section className="reporters-table-card">
+        <div className="table-heading">
+          <div className="table-heading-title">
+            <h2>All Reporters</h2>
+          </div>
+          <span>Showing {filtered.length} records</span>
+        </div>
+
+        <div className="table-scroll">
+          <table className="reporters-table">
+            <thead>
+              <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    aria-label="Select all reporters on this page"
+                    checked={
+                      visibleReporters.length > 0 &&
+                      visibleReporters.every((reporter) =>
+                        selected.includes(reporter.id)
+                      )
+                    }
+                    onChange={(event) => toggleAll(event.target.checked)}
+                  />
+                </th>
+                <th>Reporter</th>
+                <th>Reporter ID</th>
+                <th>Email</th>
+                <th>Total</th>
+                <th>Pending</th>
+                <th>Approved</th>
+                <th>Rejected</th>
+                <th>Published</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {visibleReporters.map((reporter) => (
+                <tr key={reporter.id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      aria-label={`Select ${reporter.name}`}
+                      checked={selected.includes(reporter.id)}
+                      onChange={() => toggleReporter(reporter.id)}
+                    />
+                  </td>
+
+                  <td>
+                    <div className="reporter-name-cell">
+                      <span className="reporter-avatar">
+                        {reporter.icon}
+                      </span>
+                      <strong>{reporter.name}</strong>
+                    </div>
+                  </td>
+
+                  <td>{reporter.id}</td>
+                  <td>{reporter.email}</td>
+                  <td>{reporter.total}</td>
+                  <td>{reporter.pending}</td>
+                  <td>{reporter.approved}</td>
+                  <td>{reporter.rejected}</td>
+                  <td>{reporter.published}</td>
+
+                  <td>
+                    <span
+                      className={`status-pill ${
+                        reporter.status === "Active"
+                          ? "status-active"
+                          : "status-inactive"
+                      }`}
+                    >
+                      {reporter.status}
+                    </span>
+                  </td>
+
+                  <td>
+                    <button
+  className="view-profile-button"
+  onClick={() => {
+  navigate("/editor/reporter-profile", {
+    state: { reporter },
+  });
+}}
+>
+  View Profile
+</button>
+                  </td>
+                </tr>
+              ))}
+
+              {visibleReporters.length === 0 && (
+                <tr>
+                  <td colSpan="11" className="no-reporters">
+                    No reporters found. Try changing your filters.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="table-footer">
+          <div className="rows-control">
+            <span>Rows per page:</span>
+
+            <select
+              value={perPage}
+              onChange={(event) => {
+                setPerPage(Number(event.target.value));
+                setPage(1);
+              }}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+
+          <span className="page-summary">
+            Showing{" "}
+            {filtered.length ? (currentPage - 1) * perPage + 1 : 0}
+            {" – "}
+            {Math.min(currentPage * perPage, filtered.length)}
+            {" of "}
+            {filtered.length} records
+          </span>
+
+          <div className="pagination">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setPage((previous) => previous - 1)}
+            >
+              ‹ Previous
+            </button>
+
+            {Array.from(
+              { length: totalPages },
+              (_, index) => index + 1
+            ).map((pageNumber) => (
+              <button
+                key={pageNumber}
+                className={
+                  currentPage === pageNumber ? "page-active" : ""
+                }
+                onClick={() => setPage(pageNumber)}
+              >
+                {pageNumber}
+              </button>
+            ))}
+
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setPage((previous) => previous + 1)}
+            >
+              Next ›
+            </button>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
-
-export default AllReporter;

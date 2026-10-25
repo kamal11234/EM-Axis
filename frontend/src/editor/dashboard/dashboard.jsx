@@ -1,5 +1,7 @@
+
 import React from "react";
 import "./dashboard.css";
+import bannerImage from "../../assets/banner.jpg";
 
 const stats = [
   { title: "Total News", count: 102, icon: "▤", color: "blue" },
@@ -72,30 +74,51 @@ const activities = [
 function Dashboard() {
   return (
     <main className="editor-dashboard">
-      <section className="editor-welcome">
-        <div className="welcome-icon">▤</div>
-        <div className="welcome-text">
-          <h2>Welcome Back, Editor!</h2>
-          <p>Here's an overview of your news management activities.</p>
-        </div>
-        <div className="welcome-art" aria-hidden="true">
-          <div className="art-window">
-            <span />
-            <span />
-            <span />
-            <div className="art-content">
-              <i />
-              <div>
-                <b />
-                <b />
-                <b />
-                <b />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
+      {/* Welcome Banner */}
+      
+<section className="editor-welcome premium-welcome">
+  <div className="welcome-glow welcome-glow-one" aria-hidden="true" />
+  <div className="welcome-glow welcome-glow-two" aria-hidden="true" />
+
+  <div className="welcome-text premium-welcome-text">
+    <span className="welcome-eyebrow">
+      <span className="welcome-live-dot" />
+      EM-AXIS <span className="welcome-eyebrow-divider">/</span> EDITOR WORKSPACE
+    </span>
+
+    <h2>
+      Welcome Back,
+      <span className="welcome-title-highlight"> Editor!</span>
+    </h2>
+
+    <p>
+      Your newsroom at a glance. Review stories, manage submissions,
+      and keep the news moving.
+    </p>
+
+    <div className="welcome-bottom-line">
+      <span className="welcome-bottom-mark" />
+      <span>YOUR NEWSROOM. YOUR CONTROL.</span>
+    </div>
+  </div>
+
+  <div className="welcome-image premium-welcome-image">
+    <img src={bannerImage} alt="EM-AXIS News Studio" />
+
+    <div className="welcome-image-shade" />
+
+    <div className="welcome-image-label">
+      <span className="welcome-label-dot" />
+      EDITORIAL DESK
+    </div>
+  </div>
+
+  <div className="welcome-bottom-accent" aria-hidden="true" />
+</section>
+
+
+      {/* Statistics Cards */}
       <section className="editor-stats" aria-label="News statistics">
         {stats.map((stat) => (
           <article className={`editor-stat-card ${stat.color}`} key={stat.title}>
@@ -109,6 +132,7 @@ function Dashboard() {
         ))}
       </section>
 
+      {/* Recent News and Activity */}
       <section className="editor-dashboard-bottom">
         <article className="recent-news-panel">
           <div className="panel-heading">
@@ -116,6 +140,7 @@ function Dashboard() {
               <span className="heading-icon">▤</span>
               <h3>Recent News Submissions</h3>
             </div>
+
             <button
               className="view-all-button"
               onClick={() => window.location.assign("/editor/all-news")}
@@ -136,6 +161,7 @@ function Dashboard() {
                   <th>Action</th>
                 </tr>
               </thead>
+
               <tbody>
                 {news.map((item) => (
                   <tr key={item.slug}>
@@ -177,6 +203,7 @@ function Dashboard() {
                 <span className={`activity-icon ${activity.color}`}>
                   {activity.icon}
                 </span>
+
                 <div className="activity-content">
                   <h4>{activity.title}</h4>
                   <p>{activity.description}</p>

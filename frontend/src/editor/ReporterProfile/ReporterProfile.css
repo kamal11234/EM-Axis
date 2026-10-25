@@ -1,0 +1,966 @@
+
+/* ==========================================
+   EM-AXIS REPORTER PROFILE
+   Editor Dashboard Matching Theme
+   ========================================== */
+
+/* Main Page */
+.reporterprofile-page {
+  min-height: calc(100vh - 80px);
+  padding: 28px 26px;
+  background: linear-gradient(135deg, #f3f7ff 0%, #edf4fd 100%);
+  color: #123568;
+  font-family: Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
+}
+
+.reporterprofile-page *,
+.reporterprofile-page *::before,
+.reporterprofile-page *::after {
+  box-sizing: border-box;
+}
+
+/* ==========================================
+   PROFILE BANNER
+   ========================================== */
+
+.reporterprofile-profile-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 28px;
+  margin-bottom: 24px;
+  color: #ffffff;
+  background:
+    radial-gradient(ellipse at 15% 110%, rgba(36,124,255,.35), transparent 44%),
+    linear-gradient(115deg, #071b3c 0%, #0b2c60 48%, #124d91 100%);
+  border: 1px solid rgba(117,174,255,.35);
+  border-radius: 18px;
+  box-shadow: 0 12px 30px rgba(10,42,91,.16);
+  transition: box-shadow .3s ease, transform .3s ease;
+}
+
+.reporterprofile-profile-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 17px 38px rgba(10,42,91,.23);
+}
+
+.reporterprofile-banner-glow {
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  top: -140px;
+  right: 18%;
+  border-radius: 50%;
+  background: rgba(55,143,255,.18);
+  pointer-events: none;
+}
+
+.reporterprofile-avatar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 82px;
+  height: 82px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #3989ed, #80bdff);
+  border: 3px solid rgba(255,255,255,.65);
+  border-radius: 50%;
+  box-shadow: 0 6px 18px rgba(0,0,0,.18);
+  font-size: 25px;
+  font-weight: 700;
+}
+
+.reporterprofile-avatar-online {
+  position: absolute;
+  right: 1px;
+  bottom: 3px;
+  width: 15px;
+  height: 15px;
+  background: #20b77b;
+  border: 3px solid #0b2c60;
+  border-radius: 50%;
+}
+
+.reporterprofile-reporter-info {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+}
+
+.reporterprofile-eyebrow {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #b9d8ff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+}
+
+.reporterprofile-reporter-info h2 {
+  margin: 0 0 12px;
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.reporterprofile-identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+}
+
+.reporterprofile-id,
+.reporterprofile-role {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  color: #e1efff;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(207,229,255,.22);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.reporterprofile-email {
+  margin: 0;
+  color: #c3d5ee;
+  font-size: 13px;
+}
+
+.reporterprofile-email span {
+  margin-right: 7px;
+}
+
+.reporterprofile-profile-details {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.reporterprofile-detail-box {
+  min-width: 145px;
+  padding: 15px;
+  background: rgba(255,255,255,.09);
+  border: 1px solid rgba(207,229,255,.22);
+  border-radius: 10px;
+}
+
+.reporterprofile-detail-label {
+  display: block;
+  margin-bottom: 10px;
+  color: #b9d8ff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.reporterprofile-active,
+.reporterprofile-registration {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.reporterprofile-active i {
+  width: 8px;
+  height: 8px;
+  background: #59e5a7;
+  border-radius: 50%;
+}
+
+.reporterprofile-registration span {
+  color: #80bdff;
+}
+
+.reporterprofile-banner-decoration {
+  position: absolute;
+  right: 20px;
+  bottom: -38px;
+  color: rgba(255,255,255,.045);
+  font-size: 150px;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+/* ==========================================
+   STATISTICS CARDS - BASE DESIGN
+   ========================================== */
+
+.reporterprofile-page .reporterprofile-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.reporterprofile-page .reporterprofile-stat-card {
+  min-width: 0;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #e0eaf6;
+  border-bottom: 6px solid #4b98f6;
+  border-radius: 12px;
+  box-shadow: 0 3px 9px rgba(39,83,139,.04);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.reporterprofile-page .reporterprofile-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 26px rgba(36,82,143,.12);
+}
+
+.reporterprofile-page .reporterprofile-stat-icon {
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 30px;
+  font-weight: 600;
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+
+.reporterprofile-page
+.reporterprofile-stat-card:hover
+.reporterprofile-stat-icon {
+  transform: scale(1.08) rotate(-4deg);
+  box-shadow: 0 4px 12px rgba(40,100,180,.09);
+}
+
+/* Total News - Blue */
+.reporterprofile-page .reporterprofile-stat-icon.blue {
+  color: #0a4c9d;
+  background: #e3efff;
+}
+
+.reporterprofile-page
+.reporterprofile-stat-card:has(.reporterprofile-stat-icon.blue) {
+  border-bottom-color: #4b98f6;
+}
+
+/* Pending Review - Yellow
+   Supports both yellow and orange class names */
+.reporterprofile-page .reporterprofile-stat-icon.yellow,
+.reporterprofile-page .reporterprofile-stat-icon.orange {
+  color: #e2db0c;
+  background: #fff1d0;
+}
+
+.reporterprofile-page
+.reporterprofile-stat-card:has(.reporterprofile-stat-icon.yellow),
+.reporterprofile-page
+.reporterprofile-stat-card:has(.reporterprofile-stat-icon.orange) {
+  border-bottom-color: #f4f142;
+}
+
+/* Under Review - Purple */
+.reporterprofile-page .reporterprofile-stat-icon.purple {
+  color: #9149eb;
+  background: #f0e4ff;
+}
+
+.reporterprofile-page
+.reporterprofile-stat-card:has(.reporterprofile-stat-icon.purple) {
+  border-bottom-color: #9b52f5;
+}
+
+/* Approved - Green */
+.reporterprofile-page .reporterprofile-stat-icon.green {
+  color: #19a96f;
+  background: #d9f5e8;
+}
+
+.reporterprofile-page
+.reporterprofile-stat-card:has(.reporterprofile-stat-icon.green) {
+  border-bottom-color: #20b77b;
+}
+
+/* Rejected - Red */
+.reporterprofile-page .reporterprofile-stat-icon.red {
+  color: #ed5062;
+  background: #ffe2e6;
+}
+
+.reporterprofile-page
+.reporterprofile-stat-card:has(.reporterprofile-stat-icon.red) {
+  border-bottom-color: #f35e70;
+}
+
+/* Correction Required - Orange */
+.reporterprofile-page .reporterprofile-stat-icon.correction-orange {
+  color: #e87916;
+  background: #ffead8;
+}
+
+.reporterprofile-page
+.reporterprofile-stat-card:has(.reporterprofile-stat-icon.correction-orange) {
+  border-bottom-color: #ffa544;
+}
+
+/* Published - Sky Blue
+   Supports skyblue and sky-blue class names */
+.reporterprofile-page .reporterprofile-stat-icon.skyblue,
+.reporterprofile-page .reporterprofile-stat-icon.sky-blue {
+  color: #1595c4;
+  background: #dff5ff;
+}
+
+.reporterprofile-page
+.reporterprofile-stat-card:has(.reporterprofile-stat-icon.skyblue),
+.reporterprofile-page
+.reporterprofile-stat-card:has(.reporterprofile-stat-icon.sky-blue) {
+  border-bottom-color: #55bce8;
+}
+
+/* Statistics text */
+.reporterprofile-page .reporterprofile-stat-info {
+  min-width: 0;
+}
+
+.reporterprofile-page .reporterprofile-stat-info p {
+  margin: 0 0 10px;
+  color: #315782;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.reporterprofile-page .reporterprofile-stat-info h2 {
+  margin: 0;
+  color: #10356f;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+/* ==========================================
+   MAIN HISTORY AND TIMELINE LAYOUT
+   ========================================== */
+
+.reporterprofile-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2.15fr) minmax(280px, .95fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.reporterprofile-history-card,
+.reporterprofile-timeline-card {
+  min-width: 0;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #dfe9f5;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(35,74,125,.04);
+  transition: box-shadow .25s ease, border-color .25s ease;
+}
+
+.reporterprofile-history-card:hover,
+.reporterprofile-timeline-card:hover {
+  border-color: #cbdff7;
+  box-shadow: 0 8px 22px rgba(36,82,143,.07);
+}
+
+/* ==========================================
+   SECTION HEADINGS
+   ========================================== */
+
+.reporterprofile-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.reporterprofile-section-heading h2 {
+  margin: 0 0 7px;
+  color: #15386e;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.reporterprofile-section-heading p {
+  margin: 0;
+  color: #6b8bb4;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.reporterprofile-record-count {
+  flex-shrink: 0;
+  padding: 8px 10px;
+  color: #1970dc;
+  background: #e3efff;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.reporterprofile-timeline-badge {
+  flex-shrink: 0;
+  padding: 7px 9px;
+  color: #168e5d;
+  background: #dff7eb;
+  border: 1px solid #bdebd5;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ==========================================
+   SEARCH AND FILTERS
+   ========================================== */
+
+.reporterprofile-search,
+.reporterprofile-filters select {
+  width: 100%;
+  min-width: 0;
+  padding: 11px 12px;
+  color: #244d81;
+  background: #ffffff;
+  border: 1px solid #d5e3f4;
+  border-radius: 8px;
+  outline: none;
+  font: inherit;
+  font-size: 12px;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.reporterprofile-search {
+  margin-bottom: 14px;
+}
+
+.reporterprofile-search:focus,
+.reporterprofile-filters select:focus {
+  border-color: #3989ed;
+  box-shadow: 0 0 0 3px rgba(57,137,237,.12);
+}
+
+.reporterprofile-search::placeholder {
+  color: #8aa2bf;
+}
+
+.reporterprofile-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.reporterprofile-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #315782;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.reporterprofile-filters select {
+  cursor: pointer;
+}
+
+.reporterprofile-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 15px 0 18px;
+}
+
+.reporterprofile-apply-btn,
+.reporterprofile-reset-btn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease,
+    transform .2s ease, box-shadow .2s ease;
+}
+
+.reporterprofile-apply-btn {
+  color: #ffffff;
+  background: #3989ed;
+  border: 1px solid #3989ed;
+}
+
+.reporterprofile-apply-btn:hover {
+  background: #1769ce;
+  box-shadow: 0 5px 12px rgba(45,126,229,.24);
+  transform: translateY(-2px);
+}
+
+.reporterprofile-reset-btn {
+  color: #285282;
+  background: #f7fbff;
+  border: 1px solid #cbdff7;
+}
+
+.reporterprofile-reset-btn:hover {
+  color: #1769ce;
+  background: #edf5ff;
+  transform: translateY(-1px);
+}
+
+/* ==========================================
+   NEWS TABLE
+   ========================================== */
+
+.reporterprofile-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #dce8f6;
+  border-radius: 10px;
+}
+
+.reporterprofile-table {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.reporterprofile-table thead {
+  background: #edf5ff;
+}
+
+.reporterprofile-table th {
+  padding: 14px 12px;
+  color: #285282;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.reporterprofile-table td {
+  padding: 14px 12px;
+  color: #315781;
+  border-top: 1px solid #e2ebf6;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.reporterprofile-table tbody tr {
+  transition: background .2s ease;
+}
+
+.reporterprofile-table tbody tr:hover {
+  background: #f0f6ff;
+}
+
+.reporterprofile-news-id {
+  color: #176ed0 !important;
+  font-weight: 700;
+}
+
+.reporterprofile-format {
+  display: inline-block;
+  padding: 5px 8px;
+  color: #1970dc;
+  background: #e3efff;
+  border: 1px solid #c8e0ff;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* General status badge */
+.reporterprofile-status {
+  display: inline-block;
+  padding: 6px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Pending Review - Yellow */
+.reporterprofile-table .reporterprofile-status.pending-review,
+.reporterprofile-table .status.pending,
+.reporterprofile-table .status.pending-review {
+  color: #c58b00 !important;
+  background: #fff1d0 !important;
+  border: 1px solid #ffe3a0 !important;
+}
+
+/* Under Review - Purple */
+.reporterprofile-table .reporterprofile-status.under-review,
+.reporterprofile-table .status.under-review {
+  color: #9149eb !important;
+  background: #f0e4ff !important;
+  border: 1px solid #dfc5ff !important;
+}
+
+/* Correction Required - Orange */
+.reporterprofile-table .reporterprofile-status.correction-required,
+.reporterprofile-table .status.correction-required {
+  color: #e87916 !important;
+  background: #ffead8 !important;
+  border: 1px solid #ffd4ad !important;
+}
+
+/* Published - Sky Blue */
+.reporterprofile-table .reporterprofile-status.published,
+.reporterprofile-table .status.published {
+  color: #1595c4 !important;
+  background: #dff5ff !important;
+  border: 1px solid #bceaff !important;
+}
+
+/* Rejected - Red */
+.reporterprofile-table .reporterprofile-status.rejected,
+.reporterprofile-table .status.rejected {
+  color: #ed5062 !important;
+  background: #ffe2e6 !important;
+  border: 1px solid #ffc7cf !important;
+}
+
+.reporterprofile-view-btn {
+  padding: 7px 13px;
+  color: #3786e7;
+  background: #f7fbff;
+  border: 1px solid #b9d6fa;
+  border-radius: 7px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.reporterprofile-view-btn:hover {
+  color: #ffffff;
+  background: #3989ed;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(45,126,229,.13);
+}
+
+.reporterprofile-empty {
+  padding: 25px !important;
+  color: #7291b5 !important;
+  text-align: center;
+}
+
+.reporterprofile-table-footer {
+  margin-top: 13px;
+  color: #7291b5;
+  font-size: 11px;
+}
+
+/* ==========================================
+   ACTIVITY TIMELINE
+   ========================================== */
+
+.reporterprofile-timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.reporterprofile-timeline-item {
+  display: flex;
+  gap: 12px;
+  padding: 15px 0;
+  border-bottom: 1px solid #e5edf6;
+}
+
+.reporterprofile-timeline-item:last-child {
+  border-bottom: none;
+}
+
+.reporterprofile-timeline-icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 21px;
+  font-weight: 600;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.reporterprofile-timeline-item:hover .reporterprofile-timeline-icon {
+  transform: scale(1.07);
+  box-shadow: 0 4px 10px rgba(36,82,143,.09);
+}
+
+.reporterprofile-timeline-icon.icon-0 {
+  color: #1978e5;
+  background: #e1efff;
+}
+
+.reporterprofile-timeline-icon.icon-1 {
+  color: #ed8b25;
+  background: #fff0df;
+}
+
+.reporterprofile-timeline-icon.icon-2 {
+  color: #9848ed;
+  background: #f0e4ff;
+}
+
+.reporterprofile-timeline-icon.icon-3 {
+  color: #18a66d;
+  background: #def7e9;
+}
+
+.reporterprofile-timeline-icon.icon-4 {
+  color: #1978e5;
+  background: #e1efff;
+}
+
+.reporterprofile-timeline-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.reporterprofile-timeline-content h3 {
+  margin: 1px 0 6px;
+  color: #214879;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.reporterprofile-timeline-content p {
+  margin: 0 0 7px;
+  color: #6b8bb4;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.reporterprofile-timeline-content span {
+  color: #7191b8;
+  font-size: 10px;
+}
+
+/* ==========================================
+   NEWS DETAILS MODAL
+   ========================================== */
+
+.reporterprofile-modal-overlay {
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(7,27,60,.62);
+  backdrop-filter: blur(4px);
+}
+
+.reporterprofile-modal {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  padding: 28px;
+  color: #315781;
+  background: #ffffff;
+  border: 1px solid #dce8f6;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(7,27,60,.24);
+}
+
+.reporterprofile-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  color: #315782;
+  background: #edf5ff;
+  border: none;
+  border-radius: 8px;
+  font-size: 23px;
+  cursor: pointer;
+}
+
+.reporterprofile-modal-eyebrow {
+  color: #3989ed;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.reporterprofile-modal h2 {
+  margin: 10px 0 20px;
+  color: #15386e;
+  font-size: 23px;
+}
+
+.reporterprofile-modal p {
+  padding: 10px 0;
+  margin: 0;
+  color: #315781;
+  border-bottom: 1px solid #e5edf6;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.reporterprofile-modal p strong {
+  color: #15386e;
+}
+
+/* Accessibility */
+.reporterprofile-page button:focus-visible {
+  outline: 3px solid #8bbcff;
+  outline-offset: 3px;
+}
+
+/* ==========================================
+   RESPONSIVE DESIGN
+   ========================================== */
+
+@media (max-width: 1200px) {
+  .reporterprofile-page {
+    padding: 22px 18px;
+  }
+
+  .reporterprofile-page .reporterprofile-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reporterprofile-main-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .reporterprofile-profile-card {
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+
+  .reporterprofile-profile-details {
+    width: 100%;
+  }
+
+  .reporterprofile-detail-box {
+    flex: 1;
+  }
+}
+
+@media (max-width: 650px) {
+  .reporterprofile-page {
+    padding: 14px 10px;
+  }
+
+  .reporterprofile-profile-card {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  .reporterprofile-avatar {
+    width: 58px;
+    height: 58px;
+    font-size: 20px;
+  }
+
+  .reporterprofile-reporter-info h2 {
+    font-size: 21px;
+  }
+
+  .reporterprofile-profile-details {
+    flex-direction: column;
+  }
+
+  .reporterprofile-detail-box {
+    width: 100%;
+  }
+
+  .reporterprofile-banner-decoration {
+    font-size: 100px;
+  }
+
+  .reporterprofile-page .reporterprofile-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .reporterprofile-page .reporterprofile-stat-card {
+    min-height: 100px;
+    gap: 9px;
+    padding: 12px 9px;
+  }
+
+  .reporterprofile-page .reporterprofile-stat-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 24px;
+  }
+
+  .reporterprofile-page .reporterprofile-stat-info p {
+    margin-bottom: 7px;
+    font-size: 11px;
+  }
+
+  .reporterprofile-page .reporterprofile-stat-info h2 {
+    font-size: 25px;
+  }
+
+  .reporterprofile-history-card,
+  .reporterprofile-timeline-card {
+    padding: 12px;
+  }
+
+  .reporterprofile-section-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .reporterprofile-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .reporterprofile-modal {
+    padding: 22px 18px;
+  }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .reporterprofile-page *,
+  .reporterprofile-page *::before,
+  .reporterprofile-page *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+/* Pending Review - YELLOW */
+.reporterprofile-page .reporterprofile-stat-icon.yellow {
+  color: #c58b00 !important;
+  background-color: #fff1d0 !important;
+}
+
+.reporterprofile-page .reporterprofile-stat-card:has(.reporterprofile-stat-icon.yellow) {
+  border-bottom: 6px solid #f4c542 !important;
+}
+
+/* Correction Required - ORANGE */
+.reporterprofile-page .reporterprofile-stat-icon.orange {
+  color: #e87916 !important;
+  background-color: #ffead8 !important;
+}
+
+.reporterprofile-page .reporterprofile-stat-card:has(.reporterprofile-stat-icon.orange) {
+  border-bottom: 6px solid #ffa544 !important;
+}

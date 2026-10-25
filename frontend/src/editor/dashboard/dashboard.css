@@ -752,3 +752,371 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Welcome banner image layout */
+.editor-dashboard .editor-welcome {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 20px;
+  min-height: 180px;
+  padding: 0 0 0 28px;
+  overflow: hidden;
+}
+
+.editor-dashboard .welcome-text {
+  position: relative;
+  z-index: 2;
+  padding: 20px 0;
+}
+
+.editor-dashboard .welcome-image {
+  width: 100%;
+  height: 180px;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 0 11px 11px 0;
+}
+
+.editor-dashboard .welcome-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.4s ease;
+}
+
+.editor-dashboard .editor-welcome:hover .welcome-image img {
+  transform: scale(1.04);
+}
+
+.editor-dashboard .welcome-art,
+.editor-dashboard .welcome-icon {
+  display: none;
+}
+
+@media (max-width: 650px) {
+  .editor-dashboard .editor-welcome {
+    grid-template-columns: 1fr;
+    padding: 18px;
+    gap: 0;
+  }
+
+  .editor-dashboard .welcome-text {
+    padding: 0 0 16px;
+  }
+
+  .editor-dashboard .welcome-image {
+    height: 140px;
+    border-radius: 9px;
+  }
+}
+
+/* ==========================================
+   EM-AXIS PREMIUM BLUE WELCOME BANNER
+   ========================================== */
+
+.editor-dashboard .editor-welcome.premium-welcome {
+  isolation: isolate;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  align-items: stretch;
+  gap: 0;
+  min-height: 228px;
+  padding: 0;
+  margin-bottom: 26px;
+  overflow: hidden;
+  color: #ffffff;
+  background:
+    radial-gradient(
+      ellipse at 15% 110%,
+      rgba(36, 124, 255, 0.35),
+      transparent 44%
+    ),
+    linear-gradient(115deg, #071b3c 0%, #0b2c60 48%, #124d91 100%);
+  border: 1px solid rgba(117, 174, 255, 0.35);
+  border-radius: 18px;
+  box-shadow: 0 12px 30px rgba(10, 42, 91, 0.16);
+  transition:
+    box-shadow 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.3s ease;
+}
+
+/* Decorative blue glow */
+.editor-dashboard .welcome-glow {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(2px);
+}
+
+.editor-dashboard .welcome-glow-one {
+  width: 270px;
+  height: 270px;
+  top: -170px;
+  left: 32%;
+  background: rgba(55, 143, 255, 0.19);
+  box-shadow: 0 0 70px rgba(55, 143, 255, 0.15);
+}
+
+.editor-dashboard .welcome-glow-two {
+  width: 210px;
+  height: 210px;
+  bottom: -165px;
+  left: 4%;
+  background: rgba(41, 113, 237, 0.2);
+}
+
+/* Left content */
+.editor-dashboard .editor-welcome .premium-welcome-text {
+  z-index: 1;
+  align-self: center;
+  min-width: 0;
+  padding: 30px 12px 32px 34px;
+}
+
+.editor-dashboard .welcome-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 20px;
+  color: #b9d8ff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+}
+
+.editor-dashboard .welcome-live-dot,
+.editor-dashboard .welcome-label-dot {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  background: #59e5c1;
+  border-radius: 50%;
+  box-shadow: 0 0 11px rgba(89, 229, 193, 0.65);
+}
+
+.editor-dashboard .welcome-eyebrow-divider {
+  color: #638cbe;
+}
+
+.editor-dashboard .premium-welcome-text h2 {
+  max-width: 480px;
+  margin: 0 0 12px;
+  color: #ffffff;
+  font-size: clamp(25px, 2.2vw, 34px);
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -0.8px;
+}
+
+.editor-dashboard .welcome-title-highlight {
+  color: #80bdff;
+}
+
+.editor-dashboard .premium-welcome-text p {
+  max-width: 420px;
+  margin: 0;
+  color: #c3d5ee;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.editor-dashboard .welcome-bottom-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+  color: #9dbce3;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.editor-dashboard .welcome-bottom-mark {
+  width: 25px;
+  height: 2px;
+  flex-shrink: 0;
+  background: #60b3ff;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(96, 179, 255, 0.55);
+}
+
+/* Right-side image */
+.editor-dashboard .editor-welcome .premium-welcome-image {
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  height: auto;
+  min-height: 228px;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  background: #123b70;
+  border-radius: 0;
+}
+
+.editor-dashboard .premium-welcome-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 228px;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.6s ease;
+}
+
+.editor-dashboard .welcome-image-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(8, 32, 69, 0.35),
+      transparent 48%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(5, 23, 51, 0.55),
+      transparent 45%
+    );
+}
+
+.editor-dashboard .welcome-image-label {
+  position: absolute;
+  right: 18px;
+  bottom: 17px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  color: #ffffff;
+  background: rgba(7, 27, 60, 0.68);
+  border: 1px solid rgba(207, 229, 255, 0.28);
+  border-radius: 8px;
+  backdrop-filter: blur(9px);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+/* Fine blue accent */
+.editor-dashboard .welcome-bottom-accent {
+  position: absolute;
+  z-index: 2;
+  bottom: 0;
+  left: 34px;
+  width: 78px;
+  height: 3px;
+  background: linear-gradient(90deg, #4ba7ff, #8bd8ff);
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 0 14px rgba(75, 167, 255, 0.5);
+}
+
+/* Hover effects */
+.editor-dashboard .editor-welcome.premium-welcome:hover {
+  border-color: rgba(137, 190, 255, 0.65);
+  box-shadow: 0 17px 38px rgba(10, 42, 91, 0.23);
+  transform: translateY(-2px);
+}
+
+.editor-dashboard .editor-welcome.premium-welcome:hover
+.premium-welcome-image img {
+  transform: scale(1.045);
+}
+
+/* Tablet and mobile */
+@media (max-width: 800px) {
+  .editor-dashboard .editor-welcome.premium-welcome {
+    grid-template-columns: 1fr 0.8fr;
+    min-height: 205px;
+  }
+
+  .editor-dashboard .editor-welcome .premium-welcome-text {
+    padding: 24px 8px 26px 22px;
+  }
+
+  .editor-dashboard .welcome-eyebrow {
+    gap: 6px;
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+
+  .editor-dashboard .premium-welcome-text h2 {
+    font-size: 24px;
+  }
+
+  .editor-dashboard .premium-welcome-text p {
+    font-size: 12px;
+  }
+
+  .editor-dashboard .welcome-bottom-line {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+
+  .editor-dashboard .editor-welcome .premium-welcome-image,
+  .editor-dashboard .premium-welcome-image img {
+    min-height: 205px;
+  }
+}
+
+@media (max-width: 560px) {
+  .editor-dashboard .editor-welcome.premium-welcome {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .editor-dashboard .editor-welcome .premium-welcome-text {
+    padding: 25px 22px 22px;
+  }
+
+  .editor-dashboard .welcome-eyebrow {
+    margin-bottom: 14px;
+    font-size: 9px;
+  }
+
+  .editor-dashboard .premium-welcome-text h2 {
+    font-size: 27px;
+  }
+
+  .editor-dashboard .premium-welcome-text p {
+    max-width: 100%;
+    font-size: 12px;
+  }
+
+  .editor-dashboard .welcome-bottom-line {
+    margin-top: 16px;
+  }
+
+  .editor-dashboard .editor-welcome .premium-welcome-image {
+    height: 165px;
+    min-height: 165px;
+  }
+
+  .editor-dashboard .premium-welcome-image img {
+    height: 165px;
+    min-height: 165px;
+  }
+
+  .editor-dashboard .welcome-image-label {
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .editor-dashboard .welcome-bottom-accent {
+    left: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editor-dashboard .editor-welcome.premium-welcome,
+  .editor-dashboard .premium-welcome-image img {
+    transition: none;
+  }
+}

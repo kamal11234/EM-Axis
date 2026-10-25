@@ -1,4 +1,5 @@
 
+import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import "./AllNews.css";
 
@@ -61,6 +62,8 @@ const statusCards = [
 ];
 
 function AllNews() {
+  const navigate = useNavigate();
+
   const [news, setNews] = useState(initialNews);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -82,6 +85,7 @@ function AllNews() {
 
     if (filters.search) {
       const term = filters.search.toLowerCase();
+
       result = result.filter(
         (item) =>
           item.slug.toLowerCase().includes(term) ||
@@ -93,10 +97,7 @@ function AllNews() {
       result = result.filter((item) => item.status === filters.status);
     }
 
-    if (
-      filters.reporter &&
-      filters.reporter !== "All Reporters"
-    ) {
+    if (filters.reporter && filters.reporter !== "All Reporters") {
       result = result.filter(
         (item) => item.reporter === filters.reporter
       );
@@ -110,8 +111,7 @@ function AllNews() {
 
     if (filters.date === "Today") {
       result = result.filter(
-        (item) =>
-          item.submitted === "16 Oct 2026"
+        (item) => item.submitted === "16 Oct 2026"
       );
     } else if (filters.date === "Last 7 Days") {
       result = result.filter((item) =>
@@ -130,9 +130,7 @@ function AllNews() {
     if (filters.sort === "Oldest First") {
       result.reverse();
     } else if (filters.sort === "Reporter A-Z") {
-      result.sort((a, b) =>
-        a.reporter.localeCompare(b.reporter)
-      );
+      result.sort((a, b) => a.reporter.localeCompare(b.reporter));
     }
 
     return result;
@@ -145,6 +143,7 @@ function AllNews() {
 
   const safePage = Math.min(page, totalPages);
   const startIndex = (safePage - 1) * rowsPerPage;
+
   const visibleNews = filteredNews.slice(
     startIndex,
     startIndex + rowsPerPage
@@ -159,6 +158,7 @@ function AllNews() {
       date: dateFilter,
       sort: sortBy,
     });
+
     setPage(1);
     setSelectedNews([]);
   };
@@ -190,6 +190,7 @@ function AllNews() {
 
   const toggleAll = () => {
     const visibleIds = visibleNews.map((item) => item.id);
+
     const allSelected = visibleIds.every((id) =>
       selectedNews.includes(id)
     );
@@ -201,9 +202,14 @@ function AllNews() {
     );
   };
 
+  // Selected news details NewsReview page la pass hotil.
   const handleReview = (item) => {
-    setDetailsNews(item);
     setMenuNewsId(null);
+    setDetailsNews(null);
+
+    navigate("/editor/news-review", {
+      state: { news: item },
+    });
   };
 
   const statusClass = (status) =>
@@ -253,6 +259,7 @@ function AllNews() {
                 card.label === "All News" ? "All" : card.label;
 
               setStatusFilter(nextStatus);
+
               setAppliedFilters((current) => ({
                 ...current,
                 status: nextStatus,
@@ -262,6 +269,7 @@ function AllNews() {
                 date: dateFilter,
                 sort: sortBy,
               }));
+
               setPage(1);
             }}
           >
@@ -276,6 +284,7 @@ function AllNews() {
       <section className="all-news-filter-panel">
         <label className="all-news-search">
           <span>⌕</span>
+
           <input
             type="search"
             placeholder="Search by news slug or reporter name..."
@@ -290,6 +299,7 @@ function AllNews() {
         <div className="all-news-filter-grid">
           <label>
             <span>Status</span>
+
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
@@ -306,13 +316,13 @@ function AllNews() {
 
           <label>
             <span>Reporter</span>
+
             <select
               value={reporterFilter}
-              onChange={(event) =>
-                setReporterFilter(event.target.value)
-              }
+              onChange={(event) => setReporterFilter(event.target.value)}
             >
               <option>All Reporters</option>
+
               {[...new Set(news.map((item) => item.reporter))]
                 .sort()
                 .map((reporter) => (
@@ -323,11 +333,13 @@ function AllNews() {
 
           <label>
             <span>News Format</span>
+
             <select
               value={formatFilter}
               onChange={(event) => setFormatFilter(event.target.value)}
             >
               <option>All Formats</option>
+
               {[...new Set(news.map((item) => item.format))]
                 .sort()
                 .map((format) => (
@@ -338,6 +350,7 @@ function AllNews() {
 
           <label>
             <span>Submission Date</span>
+
             <select
               value={dateFilter}
               onChange={(event) => setDateFilter(event.target.value)}
@@ -350,6 +363,7 @@ function AllNews() {
 
           <label>
             <span>Sort By</span>
+
             <select
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value)}
@@ -395,6 +409,7 @@ function AllNews() {
         {selectedNews.length > 0 && (
           <div className="all-news-selection-bar">
             {selectedNews.length} news item(s) selected
+
             <button
               type="button"
               onClick={() => setSelectedNews([])}
@@ -452,9 +467,7 @@ function AllNews() {
 
                   <td>
                     <span
-                      className={`all-news-status ${statusClass(
-                        item.status
-                      )}`}
+                      className={`all-news-status ${statusClass(item.status)}`}
                     >
                       {item.status}
                     </span>
@@ -464,17 +477,21 @@ function AllNews() {
                     <button
                       type="button"
                       className={
-                        item.status === "Pending Review" ||
-                        item.status === "Correction Required" ||
-                        item.status === "Under Review"
+                        [
+                          "Pending Review",
+                          "Correction Required",
+                          "Under Review",
+                        ].includes(item.status)
                           ? "all-news-review-btn"
                           : "all-news-details-btn"
                       }
                       onClick={() => handleReview(item)}
                     >
-                      {item.status === "Pending Review" ||
-                      item.status === "Correction Required" ||
-                      item.status === "Under Review"
+                      {[
+                        "Pending Review",
+                        "Correction Required",
+                        "Under Review",
+                      ].includes(item.status)
                         ? "Review News"
                         : "View Details"}
                     </button>
@@ -502,14 +519,12 @@ function AllNews() {
                         >
                           View details
                         </button>
+
                         <button
                           type="button"
-                          onClick={() => {
-                            setDetailsNews(item);
-                            setMenuNewsId(null);
-                          }}
+                          onClick={() => handleReview(item)}
                         >
-                          Review news
+                          Review News
                         </button>
                       </div>
                     )}
@@ -531,6 +546,7 @@ function AllNews() {
         <div className="all-news-table-footer">
           <label className="all-news-rows-select">
             <span>Rows per page:</span>
+
             <select
               value={rowsPerPage}
               onChange={(event) => {
@@ -559,9 +575,7 @@ function AllNews() {
                 <button
                   type="button"
                   key={pageNumber}
-                  className={
-                    safePage === pageNumber ? "current-page" : ""
-                  }
+                  className={safePage === pageNumber ? "current-page" : ""}
                   onClick={() => setPage(pageNumber)}
                 >
                   {pageNumber}
@@ -656,6 +670,7 @@ function AllNews() {
                           : item
                       )
                     );
+
                     setDetailsNews({
                       ...detailsNews,
                       status: "Under Review",

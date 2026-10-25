@@ -35,8 +35,10 @@ import ChannelHeadDashboard from "./channel-head/dashboard/dashboard.jsx";
 import "./theme.css";
 import AllNews from "./editor/AllNews/AllNews.jsx";
 import AllReporter from "./editor/AllReporter/AllReporter";
+import ReporterProfile from "./editor/ReporterProfile/ReporterProfile";
 import Notifications from "./editor/Notifications/Notifications.jsx";
 import EditorProfile from "./editor/Profile/EditorProfile.jsx";
+import NewsReview from "./editor/NewsReview/NewsReview.jsx";
 import EditorSettings from "./editor/Settings/Settings.jsx";
 import { ThemeProvider } from "./context/ThemeContext";
 // ============================================
@@ -325,6 +327,15 @@ function App() {
           }
         />
 
+        <Route
+  path="/editor/reporter-profile"
+  element={
+    <EditorRoute>
+      <ReporterProfile />
+    </EditorRoute>
+  }
+/>
+
                     <Route
               path="/editor/profile"
               element={
@@ -344,7 +355,14 @@ function App() {
   }
 />
 
-
+<Route
+  path="/editor/news-review"
+  element={
+    <EditorRoute>
+      <NewsReview />
+    </EditorRoute>
+  }
+/>
 
         {/* ==================================
             CHANNEL HEAD MODULE
