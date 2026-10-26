@@ -6,6 +6,9 @@ import {
   BrowserRouter,
 } from "react-router-dom";
 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 // Login and Register
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -27,12 +30,8 @@ import DashboardLayout from "./layout/DashboardLayout/DashboardLayout";
 // Editor layout
 import EditorLayout from "./layout/EditorLayout/EditorLayout";
 
-// Editor dashboard
+// Editor pages
 import EditorDashboard from "./editor/dashboard/dashboard.jsx";
-
-// Channel Head dashboard
-import ChannelHeadDashboard from "./channel-head/dashboard/dashboard.jsx";
-import "./theme.css";
 import AllNews from "./editor/AllNews/AllNews.jsx";
 import AllReporter from "./editor/AllReporter/AllReporter";
 import ReporterProfile from "./editor/ReporterProfile/ReporterProfile";
@@ -40,7 +39,13 @@ import Notifications from "./editor/Notifications/Notifications.jsx";
 import EditorProfile from "./editor/Profile/EditorProfile.jsx";
 import NewsReview from "./editor/NewsReview/NewsReview.jsx";
 import EditorSettings from "./editor/Settings/Settings.jsx";
+
+// Channel Head dashboard
+import ChannelHeadDashboard from "./channel-head/dashboard/dashboard.jsx";
+
+import "./theme.css";
 import { ThemeProvider } from "./context/ThemeContext";
+
 // ============================================
 // NORMALIZE USER ROLE
 // ============================================
@@ -65,7 +70,6 @@ function normalizeRole(role) {
   return "";
 }
 
-
 // ============================================
 // GET ROLE DASHBOARD
 // ============================================
@@ -86,7 +90,6 @@ function getRoleHome(role) {
   }
 }
 
-
 // ============================================
 // ROLE PROTECTION
 // ============================================
@@ -106,8 +109,8 @@ function RoleGuard({ allowedRole, children }) {
 
   const role = normalizeRole(
     user?.role ??
-    user?.user?.role ??
-    user?.data?.role
+      user?.user?.role ??
+      user?.data?.role
   );
 
   // Not logged in
@@ -117,17 +120,11 @@ function RoleGuard({ allowedRole, children }) {
 
   // Wrong role
   if (role !== allowedRole) {
-    return (
-      <Navigate
-        to={getRoleHome(role)}
-        replace
-      />
-    );
+    return <Navigate to={getRoleHome(role)} replace />;
   }
 
   return children;
 }
-
 
 // ============================================
 // REPORTER ROUTE HELPER
@@ -143,7 +140,6 @@ function ReporterRoute({ children }) {
   );
 }
 
-
 // ============================================
 // EDITOR ROUTE HELPER
 // ============================================
@@ -158,7 +154,6 @@ function EditorRoute({ children }) {
   );
 }
 
-
 // ============================================
 // CHANNEL HEAD ROUTE HELPER
 // ============================================
@@ -171,7 +166,6 @@ function ChannelHeadRoute({ children }) {
   );
 }
 
-
 // ============================================
 // MAIN APP
 // ============================================
@@ -180,125 +174,128 @@ function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        {/* ToastContainer must be outside Routes */}
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          theme="light"
+          newestOnTop
+          pauseOnHover
+        />
+
         <Routes>
+          {/* ==================================
+              PUBLIC ROUTES
+          ================================== */}
 
-        {/* ==================================
-            PUBLIC ROUTES
-        ================================== */}
+          <Route
+            path="/"
+            element={<Login />}
+          />
 
-        <Route
-          path="/"
-          element={<Login />}
-        />
+          <Route
+            path="/register"
+            element={<Register />}
+          />
 
-        <Route
-          path="/register"
-          element={<Register />}
-        />
+          {/* ==================================
+              REPORTER MODULE
+          ================================== */}
 
+          <Route
+            path="/dashboard"
+            element={
+              <ReporterRoute>
+                <Dashboard />
+              </ReporterRoute>
+            }
+          />
 
-        {/* ==================================
-            REPORTER MODULE
-        ================================== */}
+          <Route
+            path="/reporter/create-news"
+            element={
+              <ReporterRoute>
+                <CreateNews />
+              </ReporterRoute>
+            }
+          />
 
-        <Route
-          path="/dashboard"
-          element={
-            <ReporterRoute>
-              <Dashboard />
-            </ReporterRoute>
-          }
-        />
+          <Route
+            path="/reporter/check-news-status"
+            element={
+              <ReporterRoute>
+                <CheckNewsStatus />
+              </ReporterRoute>
+            }
+          />
 
-        <Route
-          path="/reporter/create-news"
-          element={
-            <ReporterRoute>
-              <CreateNews />
-            </ReporterRoute>
-          }
-        />
+          <Route
+            path="/reporter/total-news"
+            element={
+              <ReporterRoute>
+                <TotalNews />
+              </ReporterRoute>
+            }
+          />
 
-        <Route
-          path="/reporter/check-news-status"
-          element={
-            <ReporterRoute>
-              <CheckNewsStatus />
-            </ReporterRoute>
-          }
-        />
+          <Route
+            path="/reporter/draft"
+            element={
+              <ReporterRoute>
+                <Draft />
+              </ReporterRoute>
+            }
+          />
 
-        <Route
-          path="/reporter/total-news"
-          element={
-            <ReporterRoute>
-              <TotalNews />
-            </ReporterRoute>
-          }
-        />
+          <Route
+            path="/reporter/notifications"
+            element={
+              <ReporterRoute>
+                <Notification />
+              </ReporterRoute>
+            }
+          />
 
-        
+          <Route
+            path="/profile"
+            element={
+              <ReporterRoute>
+                <Profile />
+              </ReporterRoute>
+            }
+          />
 
-        <Route
-          path="/reporter/draft"
-          element={
-            <ReporterRoute>
-              <Draft />
-            </ReporterRoute>
-          }
-        />
+          <Route
+            path="/settings"
+            element={
+              <ReporterRoute>
+                <Settings />
+              </ReporterRoute>
+            }
+          />
 
-        <Route
-          path="/reporter/notifications"
-          element={
-            <ReporterRoute>
-              <Notification />
-            </ReporterRoute>
-          }
-        />
+          <Route
+            path="/reporter/news-workspace"
+            element={
+              <ReporterRoute>
+                <NewsWorkspace />
+              </ReporterRoute>
+            }
+          />
 
-        <Route
-          path="/profile"
-          element={
-            <ReporterRoute>
-              <Profile />
-            </ReporterRoute>
-          }
-        />
+          {/* ==================================
+              EDITOR MODULE
+          ================================== */}
 
-        <Route
-          path="/settings"
-          element={
-            <ReporterRoute>
-              <Settings />
-            </ReporterRoute>
-          }
-        />
+          <Route
+            path="/editor-dashboard"
+            element={
+              <EditorRoute>
+                <EditorDashboard />
+              </EditorRoute>
+            }
+          />
 
-        <Route
-          path="/reporter/news-workspace"
-          element={
-            <ReporterRoute>
-              <NewsWorkspace />
-            </ReporterRoute>
-          }
-        />
-
-
-        {/* ==================================
-            EDITOR MODULE
-        ================================== */}
-
-        <Route
-          path="/editor-dashboard"
-          element={
-            <EditorRoute>
-              <EditorDashboard />
-            </EditorRoute>
-          }
-        />
-
-        
           <Route
             path="/editor/all-news"
             element={
@@ -308,98 +305,82 @@ function App() {
             }
           />
 
-
-        <Route
-          path="/editor/reporters"
-          element={
-            <EditorRoute>
-              <AllReporter />
-            </EditorRoute>
-          }
-        />
-
-        <Route
-          path="/editor/notifications"
-          element={
-            <EditorRoute>
-              <Notifications />
-            </EditorRoute>
-          }
-        />
-
-        <Route
-  path="/editor/reporter-profile"
-  element={
-    <EditorRoute>
-      <ReporterProfile />
-    </EditorRoute>
-  }
-/>
-
-                    <Route
-              path="/editor/profile"
-              element={
-                <EditorRoute>
-                  <EditorProfile />
-                </EditorRoute>
-              }
-            />
-
-       
-<Route
-  path="/editor/settings"
-  element={
-    <EditorRoute>
-      <EditorSettings />
-    </EditorRoute>
-  }
-/>
-
-<Route
-  path="/editor/news-review"
-  element={
-    <EditorRoute>
-      <NewsReview />
-    </EditorRoute>
-  }
-/>
-
-        {/* ==================================
-            CHANNEL HEAD MODULE
-        ================================== */}
-
-        <Route
-          path="/channel-head-dashboard"
-          element={
-            <ChannelHeadRoute>
-              <ChannelHeadDashboard />
-            </ChannelHeadRoute>
-          }
-        />
-
-
-        {/* ==================================
-            UNKNOWN ROUTES
-        ================================== */}
-
-        <Route
-          path="*"
-          element={
-            <Navigate to="/" replace />
-          }
-        />
-
+          <Route
+            path="/editor/reporters"
+            element={
+              <EditorRoute>
+                <AllReporter />
+              </EditorRoute>
+            }
+          />
 
           <Route
-  path="/editor/all-news"
-  element={
-    <EditorRoute>
-      <AllNews />
-    </EditorRoute>
-  }
-/>
+            path="/editor/notifications"
+            element={
+              <EditorRoute>
+                <Notifications />
+              </EditorRoute>
+            }
+          />
 
-             </Routes>
+          <Route
+            path="/editor/reporter-profile"
+            element={
+              <EditorRoute>
+                <ReporterProfile />
+              </EditorRoute>
+            }
+          />
+
+          <Route
+            path="/editor/profile"
+            element={
+              <EditorRoute>
+                <EditorProfile />
+              </EditorRoute>
+            }
+          />
+
+          <Route
+            path="/editor/settings"
+            element={
+              <EditorRoute>
+                <EditorSettings />
+              </EditorRoute>
+            }
+          />
+
+          <Route
+            path="/editor/news-review"
+            element={
+              <EditorRoute>
+                <NewsReview />
+              </EditorRoute>
+            }
+          />
+
+          {/* ==================================
+              CHANNEL HEAD MODULE
+          ================================== */}
+
+          <Route
+            path="/channel-head-dashboard"
+            element={
+              <ChannelHeadRoute>
+                <ChannelHeadDashboard />
+              </ChannelHeadRoute>
+            }
+          />
+
+          {/* ==================================
+              UNKNOWN ROUTES
+          ================================== */}
+
+          <Route
+            path="*"
+            element={<Navigate to="/" replace />}
+          />
+        </Routes>
       </BrowserRouter>
     </ThemeProvider>
   );

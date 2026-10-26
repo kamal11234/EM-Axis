@@ -1,6 +1,7 @@
 import "./login.css";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import bg from "../assets/bg.jpeg";
 import logo1 from "../assets/logo1.png";
 
@@ -70,9 +71,7 @@ function Login() {
       setPasswordError("Password is required.");
       isValid = false;
     } else if (password.length < 8) {
-      setPasswordError(
-        "Password must contain at least 8 characters."
-      );
+      setPasswordError("Password must contain at least 8 characters.");
       isValid = false;
     }
 
@@ -81,7 +80,10 @@ function Login() {
       isValid = false;
     }
 
-    if (!isValid) return;
+    if (!isValid) {
+      toast.warning("Please correct the highlighted fields.");
+      return;
+    }
 
     const roleMap = {
       reporter: "reporter",
@@ -110,9 +112,9 @@ function Login() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError(
-          data.message || "Login failed. Please try again."
-        );
+        const message = data.message || "Login failed. Please try again.";
+        setError(message);
+        toast.error(message);
         return;
       }
 
@@ -126,36 +128,39 @@ function Login() {
         localStorage.removeItem("emAxisRole");
       }
 
-      // Save the logged-in user for the current browser tab.
-      sessionStorage.setItem(
-        "emAxisUser",
-        JSON.stringify(data.user)
-      );
+      // Save logged-in user for the current browser tab.
+      sessionStorage.setItem("emAxisUser", JSON.stringify(data.user));
 
-      // Navigate using the verified database role.
+      // Show success notification before navigating.
       switch (data.user.role) {
         case "reporter":
+          toast.success("Reporter login successful!");
           navigate("/dashboard");
           break;
 
         case "editor":
+          toast.success("Editor login successful!");
           navigate("/editor-dashboard");
           break;
 
         case "channel_head":
+          toast.success("Channel Head login successful!");
           navigate("/channel-head-dashboard");
           break;
 
         default:
           sessionStorage.removeItem("emAxisUser");
           setError("Your account has an unsupported role.");
+          toast.error("Your account has an unsupported role.");
       }
     } catch (err) {
       console.error("Login API error:", err);
 
-      setError(
-        "Cannot connect to the server. Please make sure the backend is running."
-      );
+      const message =
+        "Cannot connect to the server. Please make sure the backend is running.";
+
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -168,17 +173,21 @@ function Login() {
 
     if (!email.trim()) {
       setEmailError("Enter your registered email first.");
+      toast.warning("Enter your registered email first.");
       return;
     }
 
     if (!validateEmail(email.trim())) {
       setEmailError("Please enter a valid email address.");
+      toast.warning("Please enter a valid email address.");
       return;
     }
 
-    setForgotMessage(
-      "Password reset is not connected yet. Please contact your administrator."
-    );
+    const message =
+      "Password reset is not connected yet. Please contact your administrator.";
+
+    setForgotMessage(message);
+    toast.info(message);
   };
 
   return (

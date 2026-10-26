@@ -1,6 +1,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./dashboard.css";
 import repoimg from "../../assets/repoimg.jpeg";
 
@@ -47,7 +48,10 @@ function timeAgo(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Recently";
 
-  const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+  const seconds = Math.max(
+    0,
+    Math.floor((Date.now() - date.getTime()) / 1000)
+  );
 
   if (seconds < 60) return "Just now";
   if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
@@ -69,7 +73,6 @@ function Dashboard() {
 
   const storedUser = useMemo(() => getStoredUser(), []);
   const currentUser = storedUser?.user || storedUser;
-
   const reporterId = currentUser?.id;
 
   const userName =
@@ -88,10 +91,7 @@ function Dashboard() {
   const [newsError, setNewsError] = useState("");
   const [notificationError, setNotificationError] = useState("");
 
-  // =====================================
   // FETCH REAL NEWS AND DRAFTS
-  // =====================================
-
   useEffect(() => {
     let cancelled = false;
 
@@ -101,6 +101,7 @@ function Dashboard() {
         setDrafts([]);
         setNewsError("Please log in again to load your news.");
         setLoadingNews(false);
+        toast.error("Please log in again to load your news.");
         return;
       }
 
@@ -150,12 +151,14 @@ function Dashboard() {
         setDrafts(reporterDrafts);
       } catch (error) {
         if (!cancelled) {
-          setNewsError(
+          const message =
             error.message ||
-              "Could not connect to the backend. Please check the server."
-          );
+            "Could not connect to the backend. Please check the server.";
+
+          setNewsError(message);
           setNews([]);
           setDrafts([]);
+          toast.error(message);
         }
       } finally {
         if (!cancelled) setLoadingNews(false);
@@ -169,10 +172,7 @@ function Dashboard() {
     };
   }, [reporterId]);
 
-  // =====================================
   // FETCH REAL NOTIFICATIONS
-  // =====================================
-
   useEffect(() => {
     let cancelled = false;
 
@@ -201,12 +201,15 @@ function Dashboard() {
         if (!cancelled) {
           setNotifications(data.notifications || []);
         }
-      } catch {
+      } catch (error) {
         if (!cancelled) {
+          const message =
+            error.message ||
+            "Notifications could not be loaded. Please check the backend.";
+
           setNotifications([]);
-          setNotificationError(
-            "Notifications could not be loaded. Check whether the notification API is available."
-          );
+          setNotificationError(message);
+          toast.error(message);
         }
       } finally {
         if (!cancelled) setLoadingNotifications(false);
@@ -220,26 +223,15 @@ function Dashboard() {
     };
   }, [reporterId]);
 
-  // =====================================
   // COMBINE NEWS AND DRAFTS
-  // =====================================
+  const allNews = useMemo(() => [...drafts, ...news], [drafts, news]);
 
-  const allNews = useMemo(
-    () => [...drafts, ...news],
-    [drafts, news]
-  );
-
-  // =====================================
   // SEARCH AND FILTERS
-  // =====================================
-
   const filteredNews = useMemo(() => {
     const search = searchText.toLowerCase().trim();
 
     return allNews.filter((item) => {
-      const itemDate = item.date
-        ? String(item.date).slice(0, 10)
-        : "";
+      const itemDate = item.date ? String(item.date).slice(0, 10) : "";
 
       const matchesSearch =
         item.title.toLowerCase().includes(search) ||
@@ -275,12 +267,10 @@ function Dashboard() {
     setStatus("All");
     setFromDate("");
     setToDate("");
+    toast.info("All filters have been cleared.");
   };
 
-  // =====================================
   // LIVE STATUS COUNTS
-  // =====================================
-
   const statusCounts = useMemo(() => {
     const count = (statusName) =>
       allNews.filter(
@@ -305,10 +295,7 @@ function Dashboard() {
     { name: "Rejected", icon: "!", className: "rejected" },
   ];
 
-  // =====================================
   // NOTIFICATION DISPLAY HELPERS
-  // =====================================
-
   const getNotificationTitle = (item) =>
     item.title || item.notification_title || item.type || "Notification";
 
@@ -484,7 +471,10 @@ function Dashboard() {
                 </div>
               ) : filteredNews.length > 0 ? (
                 filteredNews.map((item) => (
-                  <div className="news-card" key={`${item.isDraft ? "draft" : "news"}-${item.id}`}>
+                  <div
+                    className="news-card"
+                    key={`${item.isDraft ? "draft" : "news"}-${item.id}`}
+                  >
                     <div className="news-card-left">
                       <div className="news-title-row">
                         <h3>{item.title}</h3>
@@ -509,7 +499,12 @@ function Dashboard() {
                     <button
                       type="button"
                       className="view-news-btn"
-                      onClick={() => navigate("/reporter/my-news")}
+                      onClick={() => {
+                        toast.info(`Opening your news list: ${item.title}`);
+                        navigate("/reporter/my-news", {
+                          state: { newsId: item.id, isDraft: item.isDraft },
+                        });
+                      }}
                     >
                       View
                     </button>
@@ -532,7 +527,7 @@ function Dashboard() {
 
         {/* RIGHT COLUMN */}
         <div className="dashboard-right">
-          {/* REAL QUICK STATUS */}
+          {/* QUICK STATUS */}
           <div className="quick-status-section">
             <div className="quick-status-header">
               <h2>Quick Status</h2>
@@ -547,9 +542,7 @@ function Dashboard() {
                 <div>
                   <h3>{card.name}</h3>
                   <p>
-                    {loadingNews
-                      ? "..."
-                      : `${statusCounts[card.name]} News`}
+                    {loadingNews ? "..." : `${statusCounts[card.name]} News`}
                   </p>
                 </div>
               </div>
@@ -566,7 +559,7 @@ function Dashboard() {
             )}
           </div>
 
-          {/* REAL RECENT NOTIFICATIONS */}
+          {/* RECENT NOTIFICATIONS */}
           <div className="notification-section">
             <div className="notification-header">
               <div>

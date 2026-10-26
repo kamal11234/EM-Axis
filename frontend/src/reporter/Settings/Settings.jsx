@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import "./settings.css";
 
 function Settings() {
@@ -20,40 +21,63 @@ function Settings() {
   });
 
   const [showHelp, setShowHelp] = useState(false);
-  const [savedMessage, setSavedMessage] = useState("");
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark-theme", darkMode);
   }, [darkMode]);
 
+  // UPDATE ACCOUNT STATUS
   const updateAccountStatus = (active) => {
-    setAccountActive(active);
-    localStorage.setItem(
-      "reporterAccountStatus",
-      active ? "Active" : "Inactive"
-    );
-    setSavedMessage("Account status updated.");
+    try {
+      localStorage.setItem(
+        "reporterAccountStatus",
+        active ? "Active" : "Inactive"
+      );
+
+      setAccountActive(active);
+      toast.success(
+        `Account status updated to ${active ? "Active" : "Inactive"}.`
+      );
+    } catch (error) {
+      console.error("Account status update error:", error);
+      toast.error("Unable to save account status.");
+    }
   };
 
+  // UPDATE LANGUAGE
   const updateLanguage = (value) => {
-    setLanguage(value);
-    localStorage.setItem("reporterLanguage", value);
-    setSavedMessage("Language preference saved.");
+    try {
+      localStorage.setItem("reporterLanguage", value);
+      setLanguage(value);
+      toast.success(`Language preference saved: ${value}.`);
+    } catch (error) {
+      console.error("Language update error:", error);
+      toast.error("Unable to save language preference.");
+    }
   };
 
+  // UPDATE THEME
   const handleTheme = (dark) => {
     setDarkMode(dark);
-    setSavedMessage(`${dark ? "Dark" : "Light"} appearance selected.`);
+    toast.info(`${dark ? "Dark" : "Light"} appearance selected.`);
   };
 
+  // UPDATE NOTIFICATION PREFERENCE
   const updateNotifications = (enabled) => {
-    setNotifications(enabled);
-    localStorage.setItem("reporterNotifications", String(enabled));
-    setSavedMessage(
-      `Notifications turned ${enabled ? "ON" : "OFF"}.`
-    );
+    try {
+      localStorage.setItem("reporterNotifications", String(enabled));
+      setNotifications(enabled);
+
+      toast.success(
+        `Notifications turned ${enabled ? "ON" : "OFF"}.`
+      );
+    } catch (error) {
+      console.error("Notification preference update error:", error);
+      toast.error("Unable to save notification preference.");
+    }
   };
 
+  // HELP & GUIDELINES
   const handleHelp = () => {
     setShowHelp((current) => !current);
   };
@@ -64,8 +88,8 @@ function Settings() {
         <section className="settings-page-heading">
           <div className="settings-heading-left">
             <div className="settings-heading-icon">⚙</div>
+
             <div>
-              
               <h1>Settings</h1>
               <p>Customize your account and workspace preferences.</p>
             </div>
@@ -79,6 +103,7 @@ function Settings() {
 
         <section className="settings-overview">
           <div className="settings-overview-icon">🛡️</div>
+
           <div>
             <h2>Your workspace, your preferences</h2>
             <p>
@@ -95,13 +120,16 @@ function Settings() {
           </div>
 
           <div className="settings-container">
-            {/* Account status */}
+            {/* ACCOUNT STATUS */}
             <div className="setting-row">
               <div className="setting-left">
                 <div className="setting-icon account-icon">👤</div>
+
                 <div className="setting-info">
                   <h3>Account Status</h3>
-                  <p>Choose whether your account is marked active or inactive.</p>
+                  <p>
+                    Choose whether your account is marked active or inactive.
+                  </p>
                 </div>
               </div>
 
@@ -115,6 +143,7 @@ function Settings() {
                   >
                     <span>●</span> Active
                   </button>
+
                   <button
                     type="button"
                     aria-pressed={!accountActive}
@@ -124,16 +153,18 @@ function Settings() {
                     Inactive
                   </button>
                 </div>
+
                 <span className="setting-current-value">
                   Currently {accountActive ? "Active" : "Inactive"}
                 </span>
               </div>
             </div>
 
-            {/* Language */}
+            {/* LANGUAGE */}
             <div className="setting-row">
               <div className="setting-left">
                 <div className="setting-icon language-icon">🌐</div>
+
                 <div className="setting-info">
                   <h3>Language</h3>
                   <p>Select your preferred language.</p>
@@ -142,7 +173,10 @@ function Settings() {
 
               <div className="setting-control">
                 <label className="settings-select-wrap">
-                  <span className="settings-sr-only">Preferred language</span>
+                  <span className="settings-sr-only">
+                    Preferred language
+                  </span>
+
                   <select
                     className="language-select"
                     value={language}
@@ -153,14 +187,18 @@ function Settings() {
                     <option value="Hindi">Hindi</option>
                   </select>
                 </label>
-                <span className="setting-current-value">Display preference</span>
+
+                <span className="setting-current-value">
+                  Display preference
+                </span>
               </div>
             </div>
 
-            {/* Appearance */}
+            {/* APPEARANCE */}
             <div className="setting-row">
               <div className="setting-left">
                 <div className="setting-icon appearance-icon">◐</div>
+
                 <div className="setting-info">
                   <h3>Appearance</h3>
                   <p>Choose the theme that feels comfortable to you.</p>
@@ -177,6 +215,7 @@ function Settings() {
                   >
                     ☀ Light
                   </button>
+
                   <button
                     type="button"
                     aria-pressed={darkMode}
@@ -186,19 +225,23 @@ function Settings() {
                     ☾ Dark
                   </button>
                 </div>
+
                 <span className="setting-current-value">
                   {darkMode ? "Dark theme enabled" : "Light theme enabled"}
                 </span>
               </div>
             </div>
 
-            {/* Notifications */}
+            {/* NOTIFICATIONS */}
             <div className="setting-row">
               <div className="setting-left">
                 <div className="setting-icon notification-icon">🔔</div>
+
                 <div className="setting-info">
                   <h3>Notifications</h3>
-                  <p>Choose whether to receive news and system notifications.</p>
+                  <p>
+                    Choose whether to receive news and system notifications.
+                  </p>
                 </div>
               </div>
 
@@ -212,6 +255,7 @@ function Settings() {
                   >
                     ON
                   </button>
+
                   <button
                     type="button"
                     aria-pressed={!notifications}
@@ -221,38 +265,58 @@ function Settings() {
                     OFF
                   </button>
                 </div>
+
                 <span className="setting-current-value">
                   Notifications {notifications ? "enabled" : "disabled"}
                 </span>
               </div>
             </div>
 
-            {/* Help */}
+            {/* HELP & GUIDELINES */}
             <button
               type="button"
-              className={`setting-row help-row ${showHelp ? "help-expanded" : ""}`}
+              className={`setting-row help-row ${
+                showHelp ? "help-expanded" : ""
+              }`}
               onClick={handleHelp}
               aria-expanded={showHelp}
             >
               <div className="setting-left">
                 <div className="setting-icon help-icon">?</div>
+
                 <div className="setting-info">
                   <h3>Help &amp; Guidelines</h3>
-                  <p>Learn about news submission and workspace usage.</p>
+                  <p>
+                    Learn about news submission and workspace usage.
+                  </p>
                 </div>
               </div>
-              <span className="help-arrow">{showHelp ? "⌄" : "›"}</span>
+
+              <span className="help-arrow">
+                {showHelp ? "⌄" : "›"}
+              </span>
             </button>
 
             {showHelp && (
               <div className="settings-help-content">
                 <h3>Reporter Guidelines</h3>
+
                 <ul>
-                  <li>Use a clear and accurate headline for every news story.</li>
-                  <li>Check the news details and location before submitting.</li>
-                  <li>Attach the required script, audio, video and related files.</li>
-                  <li>Track your submission status and respond to editor corrections.</li>
+                  <li>
+                    Use a clear and accurate headline for every news story.
+                  </li>
+                  <li>
+                    Check the news details and location before submitting.
+                  </li>
+                  <li>
+                    Attach the required script, audio, video and related files.
+                  </li>
+                  <li>
+                    Track your submission status and respond to editor
+                    corrections.
+                  </li>
                 </ul>
+
                 <p>
                   If you need assistance with your account, contact your
                   channel editor or administrator.
@@ -264,25 +328,13 @@ function Settings() {
 
         <div className="settings-bottom-note">
           <span className="settings-note-icon">ℹ</span>
+
           <p>
             These preferences are stored in this browser. Account status and
             notification settings here do not change your server account or
             notification delivery by themselves.
           </p>
         </div>
-
-        {savedMessage && (
-          <div className="settings-toast" role="status">
-            <span>✓</span> {savedMessage}
-            <button
-              type="button"
-              onClick={() => setSavedMessage("")}
-              aria-label="Dismiss message"
-            >
-              ×
-            </button>
-          </div>
-        )}
       </main>
     </div>
   );

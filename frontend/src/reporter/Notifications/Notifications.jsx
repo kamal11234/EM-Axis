@@ -1,13 +1,16 @@
 
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 import "./Notifications.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000"
+).replace(/\/+$/, "");
 
 function getReporterId() {
   try {
     const user = JSON.parse(sessionStorage.getItem("emAxisUser") || "{}");
-    return user.id || user.userId || user.user_id || null;
+    return user.id || user.userId || user.user_id || user.user?.id || null;
   } catch {
     return null;
   }
@@ -32,23 +35,37 @@ function formatDate(dateValue) {
 function normalizeNotification(item) {
   return {
     ...item,
-    id: item.id,
+    id: item.id ?? item.notification_id,
+    title: item.title || item.notification_title || "Notification",
+    message:
+      item.message ||
+      item.description ||
+      item.notification_message ||
+      item.details ||
+      "",
     newsId: item.news_id ?? item.newsId ?? null,
-    read: item.read === true || item.is_read === true,
-    time: formatDate(item.created_at || item.time),
-    type: item.type || "info",
+    read:
+      item.read === true ||
+      item.is_read === true ||
+      Boolean(item.read_at),
+    time: formatDate(item.created_at || item.time || item.timestamp),
+    type: String(item.type || "info").toLowerCase(),
     category: item.category || "System",
-    details: item.details || item.message || "",
+    details:
+      item.details ||
+      item.message ||
+      item.description ||
+      item.notification_message ||
+      "",
   };
 }
 
 function Notifications() {
-  const reporterId = getReporterId();
+  const [reporterId] = useState(() => getReporterId());
 
   const [notifications, setNotifications] = useState([]);
   const [activeFilter, setActiveFilter] = useState("All");
   const [search, setSearch] = useState("");
-  const [notice, setNotice] = useState("");
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -57,7 +74,8 @@ function Notifications() {
   // FETCH NOTIFICATIONS FROM BACKEND
   const fetchNotifications = async () => {
     if (!reporterId) {
-      setNotice("Reporter login details not found. Please log in again.");
+      toast.error("Reporter login details not found. Please log in again.");
+      setNotifications([]);
       setLoading(false);
       return;
     }
@@ -69,17 +87,20 @@ function Notifications() {
         `${API_URL}/api/notifications/reporter/${reporterId}`
       );
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
-      if (!response.ok || !data.success) {
+      if (!response.ok || data.success === false) {
         throw new Error(data.message || "Failed to load notifications.");
       }
 
       setNotifications(
-        (data.notifications || []).map(normalizeNotification)
+        Array.isArray(data.notifications)
+          ? data.notifications.map(normalizeNotification)
+          : []
       );
     } catch (error) {
-      setNotice(error.message || "Unable to load notifications.");
+      toast.error(error.message || "Unable to load notifications.");
+      setNotifications([]);
     } finally {
       setLoading(false);
     }
@@ -87,7 +108,6 @@ function Notifications() {
 
   useEffect(() => {
     fetchNotifications();
-    // Load notifications when this page mounts.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -135,28 +155,28 @@ function Notifications() {
         }
       );
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
-      if (!response.ok || !data.success) {
+      if (!response.ok || data.success === false) {
         throw new Error(data.message || "Could not mark as read.");
       }
 
       setNotifications((previous) =>
         previous.map((item) =>
-          item.id === notification.id ? { ...item, read: true } : item
+          item.id === notification.id
+            ? { ...item, read: true }
+            : item
         )
       );
 
       return true;
     } catch (error) {
-      setNotice(error.message || "Failed to update notification.");
+      toast.error(error.message || "Failed to update notification.");
       return false;
     }
   };
 
   const openDetails = async (notification) => {
-    setNotice("");
-
     const success = await markAsRead(notification);
 
     if (success) {
@@ -174,16 +194,15 @@ function Notifications() {
 
     try {
       setActionLoading(true);
-      setNotice("");
 
       const response = await fetch(
         `${API_URL}/api/notifications/reporter/${reporterId}/read-all`,
         { method: "PATCH" }
       );
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
-      if (!response.ok || !data.success) {
+      if (!response.ok || data.success === false) {
         throw new Error(data.message || "Failed to update notifications.");
       }
 
@@ -195,9 +214,9 @@ function Notifications() {
         previous ? { ...previous, read: true } : null
       );
 
-      setNotice("All notifications marked as read.");
+      toast.success("All notifications marked as read.");
     } catch (error) {
-      setNotice(error.message || "Failed to mark notifications as read.");
+      toast.error(error.message || "Failed to mark notifications as read.");
     } finally {
       setActionLoading(false);
     }
@@ -205,7 +224,6 @@ function Notifications() {
 
   const askDeleteConfirmation = (notification) => {
     setPendingDelete(notification);
-    setNotice("");
   };
 
   // DELETE ONE NOTIFICATION
@@ -216,16 +234,17 @@ function Notifications() {
 
     try {
       setActionLoading(true);
-      setNotice("");
 
       const response = await fetch(
-        `${API_URL}/api/notifications/${notificationToDelete.id}?reporterId=${reporterId}`,
+        `${API_URL}/api/notifications/${notificationToDelete.id}?reporterId=${encodeURIComponent(
+          reporterId
+        )}`,
         { method: "DELETE" }
       );
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
-      if (!response.ok || !data.success) {
+      if (!response.ok || data.success === false) {
         throw new Error(data.message || "Failed to delete notification.");
       }
 
@@ -238,15 +257,16 @@ function Notifications() {
       }
 
       setPendingDelete(null);
-      setNotice(`"${notificationToDelete.title}" deleted successfully.`);
+      toast.success("Notification deleted successfully.");
     } catch (error) {
-      setNotice(error.message || "Failed to delete notification.");
+      toast.error(error.message || "Failed to delete notification.");
     } finally {
       setActionLoading(false);
     }
   };
 
   const cancelDelete = () => {
+    if (actionLoading) return;
     setPendingDelete(null);
   };
 
@@ -256,16 +276,15 @@ function Notifications() {
 
     try {
       setActionLoading(true);
-      setNotice("");
 
       const response = await fetch(
         `${API_URL}/api/notifications/reporter/${reporterId}/read`,
         { method: "DELETE" }
       );
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
-      if (!response.ok || !data.success) {
+      if (!response.ok || data.success === false) {
         throw new Error(data.message || "Failed to clear read notifications.");
       }
 
@@ -274,9 +293,9 @@ function Notifications() {
       );
 
       setSelectedNotification(null);
-      setNotice("Read notifications cleared.");
+      toast.success("Read notifications cleared.");
     } catch (error) {
-      setNotice(error.message || "Failed to clear read notifications.");
+      toast.error(error.message || "Failed to clear read notifications.");
     } finally {
       setActionLoading(false);
     }
@@ -284,7 +303,6 @@ function Notifications() {
 
   const handleFilterChange = (filter) => {
     setActiveFilter(filter);
-    setNotice("");
   };
 
   return (
@@ -412,19 +430,6 @@ function Notifications() {
             ))}
           </div>
         </div>
-
-        {notice && (
-          <div className="notifications-notice" role="status">
-            <span>{notice}</span>
-            <button
-              type="button"
-              onClick={() => setNotice("")}
-              aria-label="Dismiss message"
-            >
-              ×
-            </button>
-          </div>
-        )}
 
         <div className="notifications-list">
           {loading ? (

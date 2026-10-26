@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./CreateNews.css";
 
 function CreateNews() {
@@ -49,6 +50,7 @@ function CreateNews() {
 
     const { newsFormat, newsSlug, location, eventDate } = formData;
 
+    // Validate required fields
     if (
       !newsFormat ||
       !newsSlug.trim() ||
@@ -56,12 +58,14 @@ function CreateNews() {
       !eventDate
     ) {
       setSubmitted(false);
+      toast.warning("Please fill in all required fields.");
       return;
     }
 
-    // Extra validation to prevent future event date/time
+    // Validate event date and time
     if (eventDate > getCurrentDateTime()) {
       setDateError("Future date and time are not allowed.");
+      toast.warning("Future date and time are not allowed.");
       return;
     }
 
@@ -74,6 +78,9 @@ function CreateNews() {
       location: location.trim(),
       eventDate,
     };
+
+    setSubmitted(true);
+    toast.success("News details added successfully!");
 
     // Open News Workspace and pass entered details
     navigate("/reporter/news-workspace", {
@@ -248,7 +255,7 @@ function CreateNews() {
             <div>
               <strong>News Created Successfully!</strong>
 
-              <p>Your news has been created successfully.</p>
+              <p>Your news details have been added successfully.</p>
             </div>
           </div>
         )}

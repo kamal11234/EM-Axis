@@ -18,7 +18,7 @@
   background:
     radial-gradient(ellipse at 95% 0%, rgba(75, 132, 245, 0.10), transparent 30%),
     var(--page-bg);
-  font-family: Inter, "Segoe UI", Arial, sans-serif;
+   font-family: "Segoe UI", Arial, sans-serif;  
   box-sizing: border-box;
 }
 

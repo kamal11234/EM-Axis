@@ -13,6 +13,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 900;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
 .sidebar-menu {
@@ -33,7 +34,7 @@
   border-radius: 10px;
   background: transparent;
   color: white;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -56,7 +57,14 @@
   justify-content: center;
   width: 24px;
   min-width: 24px;
-  font-size: 18px;
+  height: 24px;
+  font-size: 16px;
+}
+
+.sidebar-icon svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
@@ -70,5 +78,17 @@
     gap: 10px;
     padding: 10px;
     font-size: 12px;
+  }
+
+  .sidebar-icon {
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    font-size: 16px;
+  }
+
+  .sidebar-icon svg {
+    width: 16px;
+    height: 16px;
   }
 }

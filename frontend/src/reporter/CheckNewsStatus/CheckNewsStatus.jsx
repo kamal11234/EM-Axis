@@ -1,6 +1,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./CheckNewsStatus.css";
 
 const API_BASE = (
@@ -90,9 +91,7 @@ const mapNews = (news) => {
         news.published_at
     ),
     statusText: status,
-    status: `status-${status
-      .toLowerCase()
-      .replace(/\s+/g, "-")}`,
+    status: `status-${status.toLowerCase().replace(/\s+/g, "-")}`,
     correction:
       news.correction_message ??
       news.correction_reason ??
@@ -131,11 +130,13 @@ const CheckNewsStatus = () => {
 
     const fetchNews = async () => {
       if (!reporterId) {
+        const message =
+          "Your reporter account could not be identified. Please log in again.";
+
         setNewsRows([]);
-        setError(
-          "Your reporter account could not be identified. Please log in again."
-        );
+        setError(message);
         setLoading(false);
+        toast.error(message);
         return;
       }
 
@@ -143,20 +144,15 @@ const CheckNewsStatus = () => {
         setLoading(true);
         setError("");
 
-        // This endpoint must return news belonging to this reporter.
         const response = await fetch(
-          `${API_BASE}/api/news/reporter/${encodeURIComponent(
-            reporterId
-          )}`,
+          `${API_BASE}/api/news/reporter/${encodeURIComponent(reporterId)}`,
           {
             method: "GET",
             headers: {
               Accept: "application/json",
               ...(sessionStorage.getItem("token")
                 ? {
-                    Authorization: `Bearer ${sessionStorage.getItem(
-                      "token"
-                    )}`,
+                    Authorization: `Bearer ${sessionStorage.getItem("token")}`,
                   }
                 : {}),
             },
@@ -176,10 +172,7 @@ const CheckNewsStatus = () => {
 
         const records = Array.isArray(result)
           ? result
-          : result.news ??
-            result.data?.news ??
-            result.data ??
-            [];
+          : result.news ?? result.data?.news ?? result.data ?? [];
 
         if (!Array.isArray(records)) {
           throw new Error(
@@ -191,11 +184,12 @@ const CheckNewsStatus = () => {
       } catch (err) {
         if (err.name === "AbortError") return;
 
+        const message =
+          err.message || "Unable to load news. Please try again.";
+
         setNewsRows([]);
-        setError(
-          err.message ||
-            "Unable to load news. Please try again."
-        );
+        setError(message);
+        toast.error(message);
       } finally {
         if (!controller.signal.aborted) {
           setLoading(false);
@@ -236,8 +230,7 @@ const CheckNewsStatus = () => {
         row.editor.toLowerCase().includes(query);
 
       const matchesStatus =
-        statusFilter === "All" ||
-        row.statusText === statusFilter;
+        statusFilter === "All" || row.statusText === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
@@ -275,12 +268,20 @@ const CheckNewsStatus = () => {
       `Last Updated: ${row.updated}`,
       `News Status: ${row.statusText}`,
       `Editor Feedback: ${row.correction}`,
-    ].join("\n");
+    ].join(" | ");
 
-    window.alert(details);
+    toast.info(details, {
+      autoClose: 6000,
+      closeOnClick: false,
+    });
   };
 
   const handleEdit = (row) => {
+    if (row.statusText !== "Draft") {
+      toast.warning("Only draft news can be edited from this page.");
+      return;
+    }
+
     navigate("/reporter/create-news", {
       state: {
         news: row.raw,
@@ -293,6 +294,11 @@ const CheckNewsStatus = () => {
     setSearch("");
     setStatusFilter("All");
     setCurrentPage(1);
+    toast.info("Search and status filters cleared.");
+  };
+
+  const handleRetry = () => {
+    window.location.reload();
   };
 
   return (
@@ -320,9 +326,7 @@ const CheckNewsStatus = () => {
               placeholder="Search by News ID, Title, or Editor..."
               className="search-box"
               value={search}
-              onChange={(event) =>
-                handleSearch(event.target.value)
-              }
+              onChange={(event) => handleSearch(event.target.value)}
               aria-label="Search news"
             />
 
@@ -420,24 +424,16 @@ const CheckNewsStatus = () => {
             {loading
               ? "Loading..."
               : `${filteredRows.length} ${
-                  filteredRows.length === 1
-                    ? "News Item"
-                    : "News Items"
+                  filteredRows.length === 1 ? "News Item" : "News Items"
                 }`}
           </span>
         </div>
 
         {error && (
-          <div
-            className="news-load-error"
-            role="alert"
-          >
+          <div className="news-load-error" role="alert">
             <strong>Could not load news</strong>
             <p>{error}</p>
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-            >
+            <button type="button" onClick={handleRetry}>
               Try Again
             </button>
           </div>
@@ -482,34 +478,24 @@ const CheckNewsStatus = () => {
 
                     <td>
                       <div className="news-title-cell">
-                        <span className="news-title">
-                          {row.title}
-                        </span>
+                        <span className="news-title">{row.title}</span>
                       </div>
                     </td>
 
                     <td>
-                      <span className="date-text">
-                        {row.date}
-                      </span>
+                      <span className="date-text">{row.date}</span>
                     </td>
 
                     <td>
-                      <span className="editor-name">
-                        {row.editor}
-                      </span>
+                      <span className="editor-name">{row.editor}</span>
                     </td>
 
                     <td>
-                      <span className="date-text">
-                        {row.updated}
-                      </span>
+                      <span className="date-text">{row.updated}</span>
                     </td>
 
                     <td>
-                      <span
-                        className={`pill big ${row.status}`}
-                      >
+                      <span className={`pill big ${row.status}`}>
                         <span className="status-dot" />
                         {row.statusText}
                       </span>
@@ -554,10 +540,7 @@ const CheckNewsStatus = () => {
                 ))
               ) : (
                 <tr>
-                  <td
-                    colSpan="8"
-                    className="empty-table-message"
-                  >
+                  <td colSpan="8" className="empty-table-message">
                     <div className="empty-state-icon">⌕</div>
                     <strong>
                       {newsRows.length === 0
@@ -612,9 +595,7 @@ const CheckNewsStatus = () => {
               ‹
             </button>
 
-            <span className="pagination-current">
-              {safePage}
-            </span>
+            <span className="pagination-current">{safePage}</span>
 
             <button
               type="button"

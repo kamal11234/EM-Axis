@@ -4,13 +4,14 @@
 ========================================= */
 
 .settings-page {
-  --settings-bg: #f5f7fb;
+  --settings-bg: #f5f7fc;
   --settings-card: #ffffff;
   --settings-text: #172033;
   --settings-muted: #778197;
   --settings-border: #e6eaf1;
   --settings-blue: #2459c4;
   --settings-blue-light: #edf3ff;
+  
 
   width: 100%;
   min-height: 100vh;

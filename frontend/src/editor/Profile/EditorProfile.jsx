@@ -1,9 +1,12 @@
-
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./EditorProfile.css";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000"
+).replace(/\/+$/, "") + "/api";
+
 const PHOTO_KEY = "editorProfileImage";
 
 function getLoggedInUser() {
@@ -19,13 +22,89 @@ function formatDate(value) {
 
   const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) return value;
+  if (Number.isNaN(date.getTime())) return String(value);
 
   return date.toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
+}
+
+function getNewsArray(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data.news)) return data.news;
+  if (Array.isArray(data.data)) return data.data;
+  if (Array.isArray(data.data?.news)) return data.data.news;
+
+  return [];
+}
+
+function normalizeStatus(status) {
+  return String(status || "Pending")
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+function getActivityDetails(news) {
+  const status = normalizeStatus(news.status);
+  const title = news.title || news.news_slug || "Untitled news";
+  const location = news.location ? ` • ${news.location}` : "";
+  const date = formatDate(news.updated_at || news.created_at);
+
+  if (status === "approved") {
+    return {
+      type: "approved",
+      icon: "✓",
+      title: "News Approved",
+      description: `${title}${location} • ${date}`,
+    };
+  }
+
+  if (status === "published") {
+    return {
+      type: "approved",
+      icon: "✓",
+      title: "News Published",
+      description: `${title}${location} • ${date}`,
+    };
+  }
+
+  if (status === "rejected") {
+    return {
+      type: "rejected",
+      icon: "×",
+      title: "News Rejected",
+      description: `${title}${location} • ${date}`,
+    };
+  }
+
+  if (status === "correction required") {
+    return {
+      type: "correction",
+      icon: "↻",
+      title: "Correction Required",
+      description: `${title}${location} • ${date}`,
+    };
+  }
+
+  if (status === "pending") {
+    return {
+      type: "sent",
+      icon: "◷",
+      title: "Pending Review",
+      description: `${title}${location} • ${date}`,
+    };
+  }
+
+  return {
+    type: "updated",
+    icon: "•",
+    title: `News Status: ${news.status || "Unknown"}`,
+    description: `${title}${location} • ${date}`,
+  };
 }
 
 function EditorProfile() {
@@ -46,6 +125,10 @@ function EditorProfile() {
     () => localStorage.getItem(PHOTO_KEY) || ""
   );
 
+  const [news, setNews] = useState([]);
+  const [newsLoading, setNewsLoading] = useState(true);
+  const [newsError, setNewsError] = useState("");
+
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -60,13 +143,20 @@ function EditorProfile() {
 
     async function loadProfile() {
       if (!loggedInUser.id) {
-        setError("Please log in to view your profile.");
+        const errorMessage = "Please log in to view your profile.";
+
+        setError(errorMessage);
+        toast.error(errorMessage);
         setLoading(false);
         return;
       }
 
       if (loggedInUser.role !== "editor") {
-        setError("This profile is available for Editor accounts only.");
+        const errorMessage =
+          "This profile is available for Editor accounts only.";
+
+        setError(errorMessage);
+        toast.error(errorMessage);
         setLoading(false);
         return;
       }
@@ -79,9 +169,7 @@ function EditorProfile() {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(
-            data.message || "Could not load your profile."
-          );
+          throw new Error(data.message || "Could not load your profile.");
         }
 
         const user = data.user || data;
@@ -90,23 +178,14 @@ function EditorProfile() {
 
         const loadedProfile = {
           id: user.id,
-          name:
-            user.full_name ||
-            user.fullName ||
-            user.name ||
-            "",
+          name: user.full_name || user.fullName || user.name || "",
           email: user.email || "",
           mobile: user.mobile || user.phone || "",
           gender: user.gender || "",
           role: user.role || loggedInUser.role || "editor",
-          joiningDate:
-            user.joining_date ||
-            user.joiningDate ||
-            "",
+          joiningDate: user.joining_date || user.joiningDate || "",
           accountStatus:
-            user.account_status ||
-            user.accountStatus ||
-            "Active",
+            user.account_status || user.accountStatus || "Active",
         };
 
         if (loadedProfile.role !== "editor") {
@@ -123,7 +202,11 @@ function EditorProfile() {
         });
       } catch (err) {
         if (!cancelled) {
-          setError(err.message || "Unable to load profile.");
+          const errorMessage =
+            err.message || "Unable to load profile.";
+
+          setError(errorMessage);
+          toast.error(errorMessage);
         }
       } finally {
         if (!cancelled) {
@@ -138,6 +221,101 @@ function EditorProfile() {
       cancelled = true;
     };
   }, [loggedInUser.id, loggedInUser.role]);
+
+  // =====================================
+  // LOAD REAL NEWS DATA FROM DATABASE
+  // =====================================
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadNews() {
+      if (!loggedInUser.id || loggedInUser.role !== "editor") {
+        setNewsLoading(false);
+        return;
+      }
+
+      try {
+        setNewsLoading(true);
+        setNewsError("");
+
+        const response = await fetch(`${API_URL}/news`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Could not load news statistics.");
+        }
+
+        if (cancelled) return;
+
+        setNews(getNewsArray(data));
+      } catch (err) {
+        if (!cancelled) {
+          const errorMessage =
+            err.message || "Unable to load editorial activity.";
+
+          setNewsError(errorMessage);
+          toast.error(errorMessage);
+        }
+      } finally {
+        if (!cancelled) {
+          setNewsLoading(false);
+        }
+      }
+    }
+
+    loadNews();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loggedInUser.id, loggedInUser.role]);
+
+  // =====================================
+  // CALCULATE STATISTICS FROM REAL NEWS
+  // =====================================
+  const statistics = news.reduce(
+    (result, item) => {
+      const status = normalizeStatus(item.status);
+
+      if (status !== "pending") {
+        result.reviewed += 1;
+      }
+
+      if (status === "approved" || status === "published") {
+        result.approved += 1;
+      }
+
+      if (status === "rejected") {
+        result.rejected += 1;
+      }
+
+      if (status === "correction required") {
+        result.correction += 1;
+      }
+
+      if (status === "pending") {
+        result.pending += 1;
+      }
+
+      return result;
+    },
+    {
+      reviewed: 0,
+      approved: 0,
+      rejected: 0,
+      correction: 0,
+      pending: 0,
+    }
+  );
+
+  const recentNews = [...news]
+    .sort((a, b) => {
+      const dateA = new Date(a.updated_at || a.created_at || 0).getTime();
+      const dateB = new Date(b.updated_at || b.created_at || 0).getTime();
+
+      return dateB - dateA;
+    })
+    .slice(0, 5);
 
   // =====================================
   // UPDATE FORM FIELDS
@@ -163,13 +341,19 @@ function EditorProfile() {
     setError("");
 
     if (!file.type.startsWith("image/")) {
-      setError("Please select a valid image.");
+      const errorMessage = "Please select a valid image.";
+
+      setError(errorMessage);
+      toast.error(errorMessage);
       event.target.value = "";
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      setError("Image size must be 2 MB or less.");
+      const errorMessage = "Image size must be 2 MB or less.";
+
+      setError(errorMessage);
+      toast.error(errorMessage);
       event.target.value = "";
       return;
     }
@@ -183,17 +367,26 @@ function EditorProfile() {
         localStorage.setItem(PHOTO_KEY, imageData);
         setPhoto(imageData);
 
-        setMessage("Profile picture updated successfully.");
+        const successMessage =
+          "Profile picture updated in this browser. It is not saved in the database.";
+
+        setMessage(successMessage);
         setError("");
+        toast.success("Profile picture updated successfully.");
       } catch {
-        setError(
-          "Unable to save this photo. Please choose a smaller image."
-        );
+        const errorMessage =
+          "Unable to save this photo. Please choose a smaller image.";
+
+        setError(errorMessage);
+        toast.error(errorMessage);
       }
     };
 
     reader.onerror = () => {
-      setError("Could not read the selected image.");
+      const errorMessage = "Could not read the selected image.";
+
+      setError(errorMessage);
+      toast.error(errorMessage);
     };
 
     reader.readAsDataURL(file);
@@ -204,10 +397,16 @@ function EditorProfile() {
   // REMOVE PROFILE PHOTO
   // =====================================
   const removePhoto = () => {
-    localStorage.removeItem(PHOTO_KEY);
-    setPhoto("");
-    setMessage("Profile picture removed.");
-    setError("");
+    try {
+      localStorage.removeItem(PHOTO_KEY);
+      setPhoto("");
+      setMessage("");
+      setError("");
+
+      toast.success("Profile picture removed successfully.");
+    } catch {
+      toast.error("Unable to remove the profile picture.");
+    }
   };
 
   // =====================================
@@ -220,7 +419,10 @@ function EditorProfile() {
     setError("");
 
     if (!profile?.id) {
-      setError("Profile is not loaded.");
+      const errorMessage = "Profile is not loaded.";
+
+      setError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
@@ -228,27 +430,43 @@ function EditorProfile() {
     const trimmedMobile = form.mobile.trim();
 
     if (!trimmedName) {
-      setError("Name is required.");
+      const errorMessage = "Name is required.";
+
+      setError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
     if (trimmedName.length > 100) {
-      setError("Name must be 100 characters or fewer.");
+      const errorMessage = "Name must be 100 characters or fewer.";
+
+      setError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
     if (!/^\d{10}$/.test(trimmedMobile)) {
-      setError("Please enter a valid 10-digit mobile number.");
+      const errorMessage =
+        "Please enter a valid 10-digit mobile number.";
+
+      setError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
     if (!["", "Male", "Female", "Other"].includes(form.gender)) {
-      setError("Please select a valid gender.");
+      const errorMessage = "Please select a valid gender.";
+
+      setError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
     if (!["Active", "Inactive"].includes(form.accountStatus)) {
-      setError("Please select a valid account status.");
+      const errorMessage = "Please select a valid account status.";
+
+      setError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
@@ -274,9 +492,7 @@ function EditorProfile() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.message || "Could not save profile."
-        );
+        throw new Error(data.message || "Could not save profile.");
       }
 
       const updatedUser = data.user || data;
@@ -289,11 +505,8 @@ function EditorProfile() {
           updatedUser.fullName ||
           updatedUser.name ||
           trimmedName,
-        email: updatedUser.email || profile.email,
-        mobile:
-          updatedUser.mobile ||
-          updatedUser.phone ||
-          trimmedMobile,
+        email: updatedUser.email ?? profile.email,
+        mobile: updatedUser.mobile ?? trimmedMobile,
         gender: updatedUser.gender ?? form.gender,
         accountStatus:
           updatedUser.account_status ??
@@ -315,13 +528,14 @@ function EditorProfile() {
         accountStatus: updatedProfile.accountStatus,
       });
 
-      // Update session data without changing other user fields.
       const updatedSessionUser = {
         ...loggedInUser,
         id: updatedProfile.id,
         full_name: updatedProfile.name,
         email: updatedProfile.email,
         mobile: updatedProfile.mobile,
+        gender: updatedProfile.gender,
+        account_status: updatedProfile.accountStatus,
         role: updatedProfile.role,
         joining_date: updatedProfile.joiningDate,
       };
@@ -332,10 +546,16 @@ function EditorProfile() {
       );
 
       setEditing(false);
-      setMessage("Profile updated successfully.");
+      setMessage("");
       setError("");
+
+      toast.success("Profile updated successfully.");
     } catch (err) {
-      setError(err.message || "Unable to save profile.");
+      const errorMessage =
+        err.message || "Unable to save profile.";
+
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -550,24 +770,34 @@ function EditorProfile() {
           )}
         </section>
 
-        {/* EDITORIAL ACTIVITY */}
+        {/* EDITORIAL ACTIVITY - DATABASE STATISTICS */}
         <section className="ep-card ep-editorial">
           <h3>Editorial Activity</h3>
+
+          {newsError && (
+            <div className="ep-message ep-error" role="alert">
+              {newsError}
+            </div>
+          )}
 
           <div className="ep-stat-grid">
             <div className="ep-stat ep-stat-wide">
               <span className="ep-stat-icon blue">▤</span>
               <div>
                 <p>Total News Reviewed</p>
-                <strong>48</strong>
+                <strong>
+                  {newsLoading ? "..." : statistics.reviewed}
+                </strong>
               </div>
             </div>
 
             <div className="ep-stat ep-stat-wide">
               <span className="ep-stat-icon green">✓</span>
               <div>
-                <p>Approved</p>
-                <strong className="green-text">32</strong>
+                <p>Approved / Published</p>
+                <strong className="green-text">
+                  {newsLoading ? "..." : statistics.approved}
+                </strong>
               </div>
             </div>
 
@@ -575,26 +805,36 @@ function EditorProfile() {
               <span className="ep-stat-icon red">×</span>
               <div>
                 <p>Rejected</p>
-                <strong className="red-text">7</strong>
+                <strong className="red-text">
+                  {newsLoading ? "..." : statistics.rejected}
+                </strong>
               </div>
             </div>
 
             <div className="ep-stat">
               <span className="ep-stat-icon orange">↻</span>
               <div>
-                <p>Sent for Correction</p>
-                <strong className="orange-text">5</strong>
+                <p>Correction Required</p>
+                <strong className="orange-text">
+                  {newsLoading ? "..." : statistics.correction}
+                </strong>
               </div>
             </div>
 
             <div className="ep-stat">
-              <span className="ep-stat-icon purple">➤</span>
+              <span className="ep-stat-icon purple">◷</span>
               <div>
-                <p>Sent to Output Team</p>
-                <strong className="purple-text">12</strong>
+                <p>Pending Review</p>
+                <strong className="purple-text">
+                  {newsLoading ? "..." : statistics.pending}
+                </strong>
               </div>
             </div>
           </div>
+
+          {!newsLoading && !newsError && news.length === 0 && (
+            <p>No news records are available in the database yet.</p>
+          )}
         </section>
       </div>
 
@@ -662,7 +902,6 @@ function EditorProfile() {
                 </div>
               </div>
 
-              {/* GENDER */}
               <div className="ep-field">
                 <label htmlFor="ep-gender">Gender</label>
 
@@ -725,7 +964,6 @@ function EditorProfile() {
                 </div>
               </div>
 
-              {/* ACCOUNT STATUS */}
               <div className="ep-field">
                 <label htmlFor="ep-status">Account Status</label>
 
@@ -768,33 +1006,44 @@ function EditorProfile() {
           </form>
         </section>
 
-        {/* RECENT ACTIVITY */}
+        {/* RECENT ACTIVITY - ACTUAL DATABASE NEWS */}
         <section className="ep-card ep-activity-card">
-          <h3>Recent Activity</h3>
+          <h3>Recent News Updates</h3>
 
-          <div className="ep-timeline">
-            {[
-              ["approved", "✓", "News Approved", "Editorial activity will appear here."],
-              ["rejected", "×", "News Rejected", "Rejected news activity will appear here."],
-              ["correction", "↻", "Sent for Correction", "Correction activity will appear here."],
-              ["sent", "➤", "Sent to Output Team", "Output team activity will appear here."],
-              ["updated", "✎", "Profile Information", "Your account details are loaded from the database."],
-            ].map(([type, icon, title, description]) => (
-              <div className="ep-timeline-item" key={title}>
-                <div className={`ep-timeline-icon ${type}`}>
-                  {icon}
-                </div>
+          {newsLoading ? (
+            <p>Loading recent news updates...</p>
+          ) : newsError ? (
+            <p>Recent news updates could not be loaded.</p>
+          ) : recentNews.length === 0 ? (
+            <p>No news updates available yet.</p>
+          ) : (
+            <div className="ep-timeline">
+              {recentNews.map((item) => {
+                const activity = getActivityDetails(item);
 
-                <div className="ep-timeline-content">
-                  <div className="ep-activity-title-row">
-                    <h4>{title}</h4>
+                return (
+                  <div
+                    className="ep-timeline-item"
+                    key={item.id}
+                  >
+                    <div
+                      className={`ep-timeline-icon ${activity.type}`}
+                    >
+                      {activity.icon}
+                    </div>
+
+                    <div className="ep-timeline-content">
+                      <div className="ep-activity-title-row">
+                        <h4>{activity.title}</h4>
+                      </div>
+
+                      <p>{activity.description}</p>
+                    </div>
                   </div>
-
-                  <p>{description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </section>
       </div>
 

@@ -1,120 +1,176 @@
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./AllReporter.css";
 
+const API_BASE = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000"
+).replace(/\/+$/, "");
 
-const initialReporters = [
-  {
-    name: "Tanavi Vanjare",
-    id: "REP-001",
-    email: "tanavi@example.com",
-    total: 32,
-    pending: 4,
-    approved: 10,
-    rejected: 3,
-    published: 15,
-    status: "Active",
-    icon: "👩",
-  },
-  {
-    name: "Kamal Vadar",
-    id: "REP-002",
-    email: "kamal@example.com",
-    total: 27,
-    pending: 3,
-    approved: 8,
-    rejected: 2,
-    published: 14,
-    status: "Active",
-    icon: "👨",
-  },
-  {
-    name: "Vaishnavi Varak",
-    id: "REP-003",
-    email: "vaishnavi@example.com",
-    total: 19,
-    pending: 2,
-    approved: 7,
-    rejected: 1,
-    published: 9,
-    status: "Active",
-    icon: "👧",
-  },
-  {
-    name: "Tanashri Zarapkar",
-    id: "REP-004",
-    email: "tanashri@example.com",
-    total: 24,
-    pending: 3,
-    approved: 6,
-    rejected: 2,
-    published: 13,
-    status: "Inactive",
-    icon: "👩‍🎓",
-  },
-];
+const API_URL = `${
+  API_BASE.endsWith("/api") ? API_BASE : `${API_BASE}/api`
+}/reporters`;
 
 export default function AllReporter() {
   const navigate = useNavigate();
 
-  const [reporters] = useState(initialReporters);
+  const [reporters, setReporters] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [sortBy, setSortBy] = useState("id-asc");
+
   const [appliedSearch, setAppliedSearch] = useState("");
   const [appliedStatus, setAppliedStatus] = useState("All");
   const [appliedSort, setAppliedSort] = useState("id-asc");
+
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [selected, setSelected] = useState([]);
 
-  const filtered = useMemo(() => {
-    const result = reporters.filter((reporter) => {
-      const term = appliedSearch.toLowerCase();
+  // FETCH REPORTERS FROM DATABASE
+  const fetchReporters = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
 
+    setError("");
+
+    try {
+      const response = await fetch(API_URL);
+
+      // Handle invalid/non-JSON server responses safely
+      let data;
+
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error(
+          "Invalid server response. Please check your backend API."
+        );
+      }
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Unable to load reporters.");
+      }
+
+      const actualReporters = (data.reporters || []).map((reporter) => {
+        const numericId = Number(reporter.id);
+
+        return {
+          ...reporter,
+          id: numericId,
+          reporterCode:
+            String(reporter.reporterCode || "").trim() ||
+            `REP-${String(numericId).padStart(3, "0")}`,
+          name: String(reporter.name || "Unnamed Reporter"),
+          email: String(reporter.email || ""),
+          total: Number(reporter.total) || 0,
+          pending: Number(reporter.pending) || 0,
+          approved: Number(reporter.approved) || 0,
+          rejected: Number(reporter.rejected) || 0,
+          published: Number(reporter.published) || 0,
+          status: String(reporter.status || "Active"),
+        };
+      });
+
+      setReporters(actualReporters);
+
+      setSelected((previous) =>
+        previous.filter((id) =>
+          actualReporters.some((reporter) => reporter.id === id)
+        )
+      );
+
+      if (isRefresh) {
+        toast.success("Reporter list refreshed successfully.");
+      }
+    } catch (err) {
+      console.error("FETCH REPORTERS ERROR:", err);
+
+      const message =
+        err.message === "Failed to fetch"
+          ? "Backend connection failed. Check whether the server is running."
+          : err.message ||
+            "Could not connect to the backend. Please check your server.";
+
+      setError(message);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchReporters();
+  }, [fetchReporters]);
+
+  // DATABASE STATISTICS
+  const totalReporters = reporters.length;
+
+  const activeReporters = reporters.filter(
+    (reporter) => reporter.status.toLowerCase() === "active"
+  ).length;
+
+  const totalNews = reporters.reduce(
+    (sum, reporter) => sum + reporter.total,
+    0
+  );
+
+  const totalPending = reporters.reduce(
+    (sum, reporter) => sum + reporter.pending,
+    0
+  );
+
+  // SEARCH, FILTER AND SORT
+  const filtered = useMemo(() => {
+    const term = appliedSearch.trim().toLowerCase();
+
+    const result = reporters.filter((reporter) => {
       const matchesSearch =
         reporter.name.toLowerCase().includes(term) ||
-        reporter.id.toLowerCase().includes(term) ||
+        reporter.reporterCode.toLowerCase().includes(term) ||
         reporter.email.toLowerCase().includes(term);
 
       const matchesStatus =
         appliedStatus === "All" ||
-        reporter.status === appliedStatus;
+        reporter.status.toLowerCase() === appliedStatus.toLowerCase();
 
       return matchesSearch && matchesStatus;
     });
 
     return [...result].sort((a, b) => {
-      if (appliedSort === "id-asc") {
-        return a.id.localeCompare(b.id);
-      }
+      switch (appliedSort) {
+        case "id-asc":
+          return a.id - b.id;
 
-      if (appliedSort === "id-desc") {
-        return b.id.localeCompare(a.id);
-      }
+        case "id-desc":
+          return b.id - a.id;
 
-      if (appliedSort === "name-desc") {
-        return b.name.localeCompare(a.name);
-      }
+        case "name-desc":
+          return b.name.localeCompare(a.name);
 
-      if (appliedSort === "news-high") {
-        return b.total - a.total;
-      }
+        case "news-high":
+          return b.total - a.total;
 
-      if (appliedSort === "news-low") {
-        return a.total - b.total;
-      }
+        case "news-low":
+          return a.total - b.total;
 
-      return a.name.localeCompare(b.name);
+        default:
+          return a.name.localeCompare(b.name);
+      }
     });
   }, [reporters, appliedSearch, appliedStatus, appliedSort]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filtered.length / perPage)
-  );
-
+  // PAGINATION
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const currentPage = Math.min(page, totalPages);
 
   const visibleReporters = filtered.slice(
@@ -122,24 +178,34 @@ export default function AllReporter() {
     currentPage * perPage
   );
 
+  // APPLY FILTERS
   const applyFilters = () => {
     setAppliedSearch(search.trim());
     setAppliedStatus(statusFilter);
     setAppliedSort(sortBy);
     setPage(1);
+    setSelected([]);
+
+    toast.success("Reporter filters applied successfully.");
   };
 
+  // RESET FILTERS
   const resetFilters = () => {
     setSearch("");
     setStatusFilter("All");
     setSortBy("id-asc");
+
     setAppliedSearch("");
     setAppliedStatus("All");
     setAppliedSort("id-asc");
+
     setPage(1);
     setSelected([]);
+
+    toast.info("Reporter filters have been reset.");
   };
 
+  // SELECT / DESELECT REPORTER
   const toggleReporter = (id) => {
     setSelected((previous) =>
       previous.includes(id)
@@ -159,15 +225,37 @@ export default function AllReporter() {
     } else {
       setSelected((previous) =>
         previous.filter(
-          (id) =>
-            !visibleReporters.some((reporter) => reporter.id === id)
+          (id) => !visibleReporters.some((reporter) => reporter.id === id)
         )
       );
     }
   };
 
+  // REPORTER INITIALS
+  const getInitials = (name) => {
+    return String(name || "UR")
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part.charAt(0).toUpperCase())
+      .join("");
+  };
+
+  // OPEN REPORTER PROFILE
+  const openReporterProfile = (reporter) => {
+    navigate("/editor/reporter-profile", {
+      state: {
+        reporter: {
+          ...reporter,
+          reporterId: reporter.id,
+        },
+      },
+    });
+  };
+
   return (
     <main className="reporters-page">
+      {/* PAGE BANNER */}
       <section className="reporters-banner">
         <div className="banner-icon">♟</div>
 
@@ -179,19 +267,22 @@ export default function AllReporter() {
         </div>
 
         <button
+          type="button"
           className="refresh-button"
-          onClick={() => window.location.reload()}
+          onClick={() => fetchReporters(true)}
+          disabled={loading || refreshing}
         >
-          ⟳ Refresh
+          {refreshing ? "⟳ Refreshing..." : "⟳ Refresh"}
         </button>
       </section>
 
+      {/* DATABASE STATISTICS */}
       <section className="reporter-stats">
         <article className="stat-card blue">
           <div className="stat-icon blue-icon">♟</div>
           <div>
             <p>Total Reporters</p>
-            <h2>24</h2>
+            <h2>{loading ? "—" : totalReporters}</h2>
           </div>
           <span className="stat-arrow">›</span>
         </article>
@@ -200,7 +291,7 @@ export default function AllReporter() {
           <div className="stat-icon green-icon">✓</div>
           <div>
             <p>Active Reporters</p>
-            <h2>20</h2>
+            <h2>{loading ? "—" : activeReporters}</h2>
           </div>
           <span className="stat-arrow">›</span>
         </article>
@@ -209,7 +300,7 @@ export default function AllReporter() {
           <div className="stat-icon purple-icon">▤</div>
           <div>
             <p>Total News Submitted</p>
-            <h2>156</h2>
+            <h2>{loading ? "—" : totalNews}</h2>
           </div>
           <span className="stat-arrow">›</span>
         </article>
@@ -218,12 +309,13 @@ export default function AllReporter() {
           <div className="stat-icon orange-icon">◷</div>
           <div>
             <p>Pending Review</p>
-            <h2>18</h2>
+            <h2>{loading ? "—" : totalPending}</h2>
           </div>
           <span className="stat-arrow">›</span>
         </article>
       </section>
 
+      {/* SEARCH AND FILTERS */}
       <section className="filter-panel">
         <input
           className="reporter-search"
@@ -232,13 +324,16 @@ export default function AllReporter() {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === "Enter") applyFilters();
+            if (event.key === "Enter") {
+              applyFilters();
+            }
           }}
         />
 
         <div className="filter-row">
           <label className="filter-field">
             <span>Account Status</span>
+
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
@@ -251,6 +346,7 @@ export default function AllReporter() {
 
           <label className="filter-field sort-field">
             <span>Sort By</span>
+
             <select
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value)}
@@ -264,23 +360,62 @@ export default function AllReporter() {
             </select>
           </label>
 
-          <button className="apply-button" onClick={applyFilters}>
+          <button
+            type="button"
+            className="apply-button"
+            onClick={applyFilters}
+          >
             Apply Filters
           </button>
 
-          <button className="reset-button" onClick={resetFilters}>
+          <button
+            type="button"
+            className="reset-button"
+            onClick={resetFilters}
+          >
             Reset Filters
           </button>
         </div>
       </section>
 
+      {/* REPORTERS TABLE */}
       <section className="reporters-table-card">
         <div className="table-heading">
           <div className="table-heading-title">
             <h2>All Reporters</h2>
           </div>
-          <span>Showing {filtered.length} records</span>
+
+          <span>
+            {loading
+              ? "Loading records..."
+              : `Showing ${filtered.length} records`}
+          </span>
         </div>
+
+        {error && (
+          <div
+            role="alert"
+            style={{
+              margin: "16px",
+              padding: "12px 16px",
+              borderRadius: "8px",
+              background: "#fff1f2",
+              color: "#be123c",
+            }}
+          >
+            <strong>Unable to load reporters.</strong>
+            <p>{error}</p>
+
+            <button
+              type="button"
+              className="refresh-button"
+              onClick={() => fetchReporters(true)}
+              disabled={refreshing}
+            >
+              {refreshing ? "Retrying..." : "Try Again"}
+            </button>
+          </div>
+        )}
 
         <div className="table-scroll">
           <table className="reporters-table">
@@ -297,8 +432,10 @@ export default function AllReporter() {
                       )
                     }
                     onChange={(event) => toggleAll(event.target.checked)}
+                    disabled={loading || visibleReporters.length === 0}
                   />
                 </th>
+
                 <th>Reporter</th>
                 <th>Reporter ID</th>
                 <th>Email</th>
@@ -313,64 +450,74 @@ export default function AllReporter() {
             </thead>
 
             <tbody>
-              {visibleReporters.map((reporter) => (
-                <tr key={reporter.id}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      aria-label={`Select ${reporter.name}`}
-                      checked={selected.includes(reporter.id)}
-                      onChange={() => toggleReporter(reporter.id)}
-                    />
-                  </td>
-
-                  <td>
-                    <div className="reporter-name-cell">
-                      <span className="reporter-avatar">
-                        {reporter.icon}
-                      </span>
-                      <strong>{reporter.name}</strong>
-                    </div>
-                  </td>
-
-                  <td>{reporter.id}</td>
-                  <td>{reporter.email}</td>
-                  <td>{reporter.total}</td>
-                  <td>{reporter.pending}</td>
-                  <td>{reporter.approved}</td>
-                  <td>{reporter.rejected}</td>
-                  <td>{reporter.published}</td>
-
-                  <td>
-                    <span
-                      className={`status-pill ${
-                        reporter.status === "Active"
-                          ? "status-active"
-                          : "status-inactive"
-                      }`}
-                    >
-                      {reporter.status}
-                    </span>
-                  </td>
-
-                  <td>
-                    <button
-  className="view-profile-button"
-  onClick={() => {
-  navigate("/editor/reporter-profile", {
-    state: { reporter },
-  });
-}}
->
-  View Profile
-</button>
+              {loading ? (
+                <tr>
+                  <td colSpan={11} className="no-reporters">
+                    Loading reporters from database...
                   </td>
                 </tr>
-              ))}
-
-              {visibleReporters.length === 0 && (
+              ) : error ? (
                 <tr>
-                  <td colSpan="11" className="no-reporters">
+                  <td colSpan={11} className="no-reporters">
+                    Reporter data could not be loaded.
+                  </td>
+                </tr>
+              ) : visibleReporters.length > 0 ? (
+                visibleReporters.map((reporter) => (
+                  <tr key={reporter.id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        aria-label={`Select ${reporter.name}`}
+                        checked={selected.includes(reporter.id)}
+                        onChange={() => toggleReporter(reporter.id)}
+                      />
+                    </td>
+
+                    <td>
+                      <div className="reporter-name-cell">
+                        <span className="reporter-avatar">
+                          {getInitials(reporter.name)}
+                        </span>
+
+                        <strong>{reporter.name}</strong>
+                      </div>
+                    </td>
+
+                    <td>{reporter.reporterCode}</td>
+                    <td>{reporter.email}</td>
+                    <td>{reporter.total}</td>
+                    <td>{reporter.pending}</td>
+                    <td>{reporter.approved}</td>
+                    <td>{reporter.rejected}</td>
+                    <td>{reporter.published}</td>
+
+                    <td>
+                      <span
+                        className={`status-pill ${
+                          reporter.status.toLowerCase() === "active"
+                            ? "status-active"
+                            : "status-inactive"
+                        }`}
+                      >
+                        {reporter.status}
+                      </span>
+                    </td>
+
+                    <td>
+                      <button
+                        type="button"
+                        className="view-profile-button"
+                        onClick={() => openReporterProfile(reporter)}
+                      >
+                        View Profile
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={11} className="no-reporters">
                     No reporters found. Try changing your filters.
                   </td>
                 </tr>
@@ -379,6 +526,7 @@ export default function AllReporter() {
           </table>
         </div>
 
+        {/* TABLE FOOTER */}
         <div className="table-footer">
           <div className="rows-control">
             <span>Rows per page:</span>
@@ -398,7 +546,7 @@ export default function AllReporter() {
 
           <span className="page-summary">
             Showing{" "}
-            {filtered.length ? (currentPage - 1) * perPage + 1 : 0}
+            {filtered.length > 0 ? (currentPage - 1) * perPage + 1 : 0}
             {" – "}
             {Math.min(currentPage * perPage, filtered.length)}
             {" of "}
@@ -407,30 +555,37 @@ export default function AllReporter() {
 
           <div className="pagination">
             <button
-              disabled={currentPage === 1}
-              onClick={() => setPage((previous) => previous - 1)}
+              type="button"
+              disabled={currentPage === 1 || loading}
+              onClick={() =>
+                setPage((previous) => Math.max(1, previous - 1))
+              }
             >
               ‹ Previous
             </button>
 
-            {Array.from(
-              { length: totalPages },
-              (_, index) => index + 1
-            ).map((pageNumber) => (
-              <button
-                key={pageNumber}
-                className={
-                  currentPage === pageNumber ? "page-active" : ""
-                }
-                onClick={() => setPage(pageNumber)}
-              >
-                {pageNumber}
-              </button>
-            ))}
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+              (pageNumber) => (
+                <button
+                  type="button"
+                  key={pageNumber}
+                  className={
+                    currentPage === pageNumber ? "page-active" : ""
+                  }
+                  onClick={() => setPage(pageNumber)}
+                  disabled={loading}
+                >
+                  {pageNumber}
+                </button>
+              )
+            )}
 
             <button
-              disabled={currentPage === totalPages}
-              onClick={() => setPage((previous) => previous + 1)}
+              type="button"
+              disabled={currentPage === totalPages || loading}
+              onClick={() =>
+                setPage((previous) => Math.min(totalPages, previous + 1))
+              }
             >
               Next ›
             </button>

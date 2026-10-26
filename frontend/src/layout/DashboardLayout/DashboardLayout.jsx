@@ -28,35 +28,15 @@ function DashboardLayout({ children }) {
           boxSizing: "border-box",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            padding: "14px 26px",
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
+        <div className="page-back-arrow-wrapper">
           <button
             type="button"
+            className="page-back-arrow"
             onClick={handleBack}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "9px",
-              padding: "10px 18px",
-              background: "linear-gradient(135deg, #397fe5, #2455ad)",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "10px",
-              fontSize: "14px",
-              fontWeight: 600,
-              cursor: "pointer",
-              boxShadow: "0 4px 12px rgba(36, 85, 173, 0.22)",
-            }}
+            aria-label="Go back"
+            title="Go back"
           >
-            <span style={{ fontSize: "20px", lineHeight: 1 }}>←</span>
-            <span>Back</span>
+            ←
           </button>
         </div>
 

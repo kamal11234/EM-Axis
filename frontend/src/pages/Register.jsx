@@ -1,7 +1,7 @@
-
 import "./register.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { toast } from "react-toastify";
 import bg from "../assets/bg.jpeg";
 import logo1 from "../assets/logo1.png";
 
@@ -28,6 +28,7 @@ function Register() {
 
     if (/^[a-zA-Z\s]*$/.test(value)) {
       setFullName(value);
+      setError("");
     }
   };
 
@@ -36,6 +37,7 @@ function Register() {
 
     if (/^\d{0,10}$/.test(value)) {
       setPhone(value);
+      setError("");
     }
   };
 
@@ -44,27 +46,56 @@ function Register() {
     setError("");
 
     if (!fullName.trim() || !email.trim() || !phone || !joiningDate) {
-      setError("Please fill in all personal information fields.");
+      const message = "Please fill in all personal information fields.";
+      setError(message);
+      toast.warning(message);
       return;
     }
 
     if (!/^\d{10}$/.test(phone)) {
-      setError("Please enter a valid 10-digit phone number.");
+      const message = "Please enter a valid 10-digit phone number.";
+      setError(message);
+      toast.warning(message);
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      const message = "Please enter a valid email address.";
+      setError(message);
+      toast.warning(message);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Password and Confirm Password do not match.");
+      const message = "Password and Confirm Password do not match.";
+      setError(message);
+      toast.error(message);
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must contain at least 8 characters.");
+      const message = "Password must contain at least 8 characters.";
+      setError(message);
+      toast.warning(message);
+      return;
+    }
+
+    if (
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&]).{8,}$/.test(
+        password
+      )
+    ) {
+      const message =
+        "Password must include uppercase, lowercase, number and special character.";
+      setError(message);
+      toast.warning(message);
       return;
     }
 
     if (!role) {
-      setError("Please select your role.");
+      const message = "Please select your role.";
+      setError(message);
+      toast.warning(message);
       return;
     }
 
@@ -74,7 +105,6 @@ function Register() {
       reporter: "reporter",
     };
 
-    // All registration details are sent to the backend.
     const userData = {
       full_name: fullName.trim(),
       email: email.trim().toLowerCase(),
@@ -101,17 +131,25 @@ function Register() {
       const data = await response.json();
 
       if (!response.ok || data.success === false) {
-        setError(data.message || "Registration failed. Please try again.");
+        const message =
+          data.message || "Registration failed. Please try again.";
+
+        setError(message);
+        toast.error(message);
         return;
       }
 
-      alert("Registration successful! Please login.");
+      toast.success("Registration successful! Please login.");
+
       navigate("/");
     } catch (err) {
       console.error("Registration request failed:", err);
-      setError(
-        "Cannot connect to the server. Make sure the backend is running."
-      );
+
+      const message =
+        "Cannot connect to the server. Make sure the backend is running.";
+
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -169,7 +207,10 @@ function Register() {
               name="register-role"
               value="channelHead"
               checked={role === "channelHead"}
-              onChange={(e) => setRole(e.target.value)}
+              onChange={(e) => {
+                setRole(e.target.value);
+                setError("");
+              }}
               required
             />
           </label>
@@ -182,7 +223,10 @@ function Register() {
               name="register-role"
               value="editor"
               checked={role === "editor"}
-              onChange={(e) => setRole(e.target.value)}
+              onChange={(e) => {
+                setRole(e.target.value);
+                setError("");
+              }}
               required
             />
           </label>
@@ -195,7 +239,10 @@ function Register() {
               name="register-role"
               value="reporter"
               checked={role === "reporter"}
-              onChange={(e) => setRole(e.target.value)}
+              onChange={(e) => {
+                setRole(e.target.value);
+                setError("");
+              }}
               required
             />
           </label>
@@ -225,7 +272,10 @@ function Register() {
               type="email"
               placeholder="Enter Email Address"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError("");
+              }}
               required
             />
           </div>
@@ -251,7 +301,10 @@ function Register() {
             <input
               type="date"
               value={joiningDate}
-              onChange={(e) => setJoiningDate(e.target.value)}
+              onChange={(e) => {
+                setJoiningDate(e.target.value);
+                setError("");
+              }}
               required
             />
           </div>
@@ -270,7 +323,10 @@ function Register() {
               type={showPassword ? "text" : "password"}
               placeholder="Password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
               minLength={8}
               pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&]).{8,}"
               title="Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one special character."
@@ -280,6 +336,14 @@ function Register() {
             <span
               className="register-eye"
               onClick={() => setShowPassword(!showPassword)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setShowPassword((previous) => !previous);
+                }
+              }}
             >
               {showPassword ? "🙈" : "👀"}
             </span>
@@ -291,7 +355,10 @@ function Register() {
               type={showConfirmPassword ? "text" : "password"}
               placeholder="Confirm Password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setError("");
+              }}
               required
             />
 
@@ -300,6 +367,14 @@ function Register() {
               onClick={() =>
                 setShowConfirmPassword(!showConfirmPassword)
               }
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setShowConfirmPassword((previous) => !previous);
+                }
+              }}
             >
               {showConfirmPassword ? "🙈" : "👀"}
             </span>
@@ -309,8 +384,8 @@ function Register() {
         <label className="terms-row">
           <input type="checkbox" required />
           <span>
-            I agree to <a href="#">Term and Condition</a> and
-            <a href="#"> Private Policy</a>
+            I agree to <a href="#">Term and Condition</a> and{" "}
+            <a href="#">Private Policy</a>
           </span>
         </label>
 

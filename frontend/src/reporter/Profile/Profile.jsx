@@ -1,6 +1,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./profile.css";
 
 function Profile() {
@@ -44,6 +45,7 @@ function Profile() {
         );
 
         if (!storedUser?.id) {
+          toast.error("Please log in to view your profile.");
           navigate("/");
           return;
         }
@@ -52,7 +54,7 @@ function Profile() {
           `http://localhost:5000/api/users/${storedUser.id}`
         );
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
         if (!response.ok || !data.success || !data.user) {
           throw new Error(
@@ -72,7 +74,7 @@ function Profile() {
         setTempName(savedName);
       } catch (error) {
         console.error("Profile loading error:", error);
-        alert(error.message || "Unable to load profile.");
+        toast.error(error.message || "Unable to load profile.");
       } finally {
         setProfileLoading(false);
       }
@@ -131,32 +133,40 @@ function Profile() {
     const trimmedLocation = tempLocation.trim();
 
     if (!trimmedName) {
-      alert("Please enter your name.");
+      toast.warning("Please enter your name.");
       return;
     }
 
     if (!/^[A-Za-z ]+$/.test(trimmedName)) {
-      alert("Name should contain only English letters and spaces.");
+      toast.warning(
+        "Name should contain only English letters and spaces."
+      );
       return;
     }
 
     if (trimmedLocation.length > 150) {
-      alert("Location must be 150 characters or fewer.");
+      toast.warning("Location must be 150 characters or fewer.");
       return;
     }
 
-    localStorage.setItem("reporterName", trimmedName);
-    localStorage.setItem("reporterGender", tempGender);
-    localStorage.setItem("reporterLocation", trimmedLocation);
-    localStorage.setItem("reporterAccountStatus", tempAccountStatus);
+    try {
+      localStorage.setItem("reporterName", trimmedName);
+      localStorage.setItem("reporterGender", tempGender);
+      localStorage.setItem("reporterLocation", trimmedLocation);
+      localStorage.setItem("reporterAccountStatus", tempAccountStatus);
 
-    setName(trimmedName);
-    setGender(tempGender);
-    setLocation(trimmedLocation);
-    setAccountStatus(tempAccountStatus);
+      setName(trimmedName);
+      setGender(tempGender);
+      setLocation(trimmedLocation);
+      setAccountStatus(tempAccountStatus);
 
-    setIsEditingProfile(false);
-    alert("Profile changes saved successfully.");
+      setIsEditingProfile(false);
+
+      toast.success("Profile changes saved successfully.");
+    } catch (error) {
+      console.error("Profile save error:", error);
+      toast.error("Unable to save profile changes in this browser.");
+    }
   };
 
   // CHANGE PROFILE PHOTO
@@ -166,13 +176,13 @@ function Profile() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Please select a valid image file.");
+      toast.warning("Please select a valid image file.");
       event.target.value = "";
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert("Please select an image smaller than 5 MB.");
+      toast.warning("Please select an image smaller than 5 MB.");
       event.target.value = "";
       return;
     }
@@ -180,15 +190,29 @@ function Profile() {
     const reader = new FileReader();
 
     reader.onload = () => {
-      const imageData = reader.result;
+      try {
+        const imageData = reader.result;
 
-      setProfileImage(imageData);
-      localStorage.setItem("reporterProfileImage", imageData);
-      setShowPhotoMenu(false);
+        if (typeof imageData !== "string") {
+          toast.error("Unable to process this image.");
+          return;
+        }
+
+        localStorage.setItem("reporterProfileImage", imageData);
+        setProfileImage(imageData);
+        setShowPhotoMenu(false);
+
+        toast.success("Profile photo updated successfully.");
+      } catch (error) {
+        console.error("Profile photo save error:", error);
+        toast.error(
+          "Unable to save this photo. Try a smaller image."
+        );
+      }
     };
 
     reader.onerror = () => {
-      alert("Unable to read this image. Please try another one.");
+      toast.error("Unable to read this image. Please try another one.");
     };
 
     reader.readAsDataURL(file);
@@ -197,9 +221,16 @@ function Profile() {
 
   // REMOVE PROFILE PHOTO
   const handleRemovePhoto = () => {
-    setProfileImage("");
-    localStorage.removeItem("reporterProfileImage");
-    setShowPhotoMenu(false);
+    try {
+      localStorage.removeItem("reporterProfileImage");
+      setProfileImage("");
+      setShowPhotoMenu(false);
+
+      toast.success("Profile photo removed successfully.");
+    } catch (error) {
+      console.error("Profile photo removal error:", error);
+      toast.error("Unable to remove the profile photo.");
+    }
   };
 
   // LOGOUT

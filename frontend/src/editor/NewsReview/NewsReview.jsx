@@ -1,58 +1,228 @@
-import { useNavigate } from "react-router-dom";
-import React, { useEffect, useState } from "react";
+ 
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./NewsReview.css";
+
+const API_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000"
+).replace(/\/+$/, "") + "/api/news";
+
+const formatDate = (value) => {
+  if (!value) return "—";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const getFileUrl = (file) =>
+  typeof file === "string" ? file : file?.url || file?.path || "";
+
+const getFileName = (file, fallback) => {
+  if (typeof file === "object" && file?.name) return file.name;
+
+  const url = getFileUrl(file);
+
+  if (url) {
+    try {
+      return decodeURIComponent(url.split("/").pop().split("?")[0]);
+    } catch {
+      return fallback;
+    }
+  }
+
+  return fallback;
+};
+
+const getResponseData = async (response) => {
+  try {
+    return await response.json();
+  } catch {
+    throw new Error("Invalid server response. Please try again.");
+  }
+};
 
 export default function NewsReview() {
   const navigate = useNavigate();
-  const [status, setStatus] = useState("Pending Review");
-  const [activeMedia, setActiveMedia] = useState("Image");
-  const [selectedImage, setSelectedImage] = useState(0);
+  const location = useLocation();
+
+  const selectedNews = location.state?.news || null;
+
+  const [news, setNews] = useState(selectedNews);
+  const [status, setStatus] = useState(selectedNews?.status || "Pending");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [activeMedia, setActiveMedia] = useState("images");
+  const [selectedFile, setSelectedFile] = useState(0);
   const [showDialog, setShowDialog] = useState("");
   const [reason, setReason] = useState("");
-  const [message, setMessage] = useState("");
-
-  const [news, setNews] = useState({
-    title: "local-road-update",
-    content:
-      "A major road repair project has been initiated on the main highway connecting Kudal and Sawantwadi. The work is expected to improve traffic flow and reduce travel time for local commuters.",
-    format: "AV",
-  });
-
-  const images = [
-    {
-      src: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=700&q=80",
-      name: "road-image.jpg",
-      size: "2.4 MB",
-    },
-    {
-      src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=700&q=80",
-      name: "road-report.mp4",
-      size: "12.8 MB",
-    },
-    {
-      src: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=700&q=80",
-      name: "site-photo.jpg",
-      size: "3.1 MB",
-    },
-  ];
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!message) return;
+    let cancelled = false;
 
-    const timer = window.setTimeout(() => setMessage(""), 3000);
-    return () => window.clearTimeout(timer);
-  }, [message]);
+    const loadNews = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-  const notify = (text) => setMessage(text);
+        const response = await fetch(API_URL);
+        const result = await getResponseData(response);
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || "Unable to load news.");
+        }
+
+        const allNews = Array.isArray(result.news) ? result.news : [];
+
+        const currentNews =
+          selectedNews?.id != null
+            ? allNews.find(
+                (item) => String(item.id) === String(selectedNews.id)
+              )
+            : null;
+
+        if (!currentNews) {
+          throw new Error(
+            "News record not found. Please return to All News and select a news item."
+          );
+        }
+
+        if (!cancelled) {
+          setNews(currentNews);
+          setStatus(currentNews.status || "Pending");
+        }
+      } catch (err) {
+        if (!cancelled) {
+          const errorMessage =
+            err.message || "Unable to load news from the server.";
+
+          setError(errorMessage);
+          toast.error(errorMessage);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadNews();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedNews?.id]);
+
+  const mediaFiles = useMemo(() => {
+    const files = news?.media_files || {};
+
+    const normalize = (items, type) =>
+      (Array.isArray(items) ? items : []).map((file, index) => ({
+        original: file,
+        url: getFileUrl(file),
+        name: getFileName(file, `${type} ${index + 1}`),
+        type,
+      }));
+
+    return {
+      images: normalize(files.images, "Image"),
+      video: normalize(files.video, "Video"),
+      audio: normalize(files.audio, "Audio"),
+      documents: normalize(files.documents, "Document"),
+    };
+  }, [news]);
+
+  const currentFiles = mediaFiles[activeMedia] || [];
+  const currentFile = currentFiles[selectedFile] || null;
 
   const closeDialog = () => {
     setShowDialog("");
     setReason("");
   };
 
-  const handleAction = () => {
+  const updateStatus = async (nextStatus, feedback = "") => {
+    if (!news?.id) {
+      toast.error("News ID is missing. Please reopen the news from All News.");
+      return false;
+    }
+
+    try {
+      setSaving(true);
+      setError("");
+
+      const response = await fetch(`${API_URL}/${news.id}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: nextStatus,
+          editor_feedback: feedback,
+        }),
+      });
+
+      const result = await getResponseData(response);
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Unable to update news status.");
+      }
+
+      setStatus(nextStatus);
+
+      setNews((previous) => ({
+        ...previous,
+        ...(result.news || {}),
+        status: nextStatus,
+        editor_feedback: feedback || null,
+        updated_at: new Date().toISOString(),
+      }));
+
+      return true;
+    } catch (err) {
+      const errorMessage =
+        err.message || "Server error. Please try again.";
+
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleApprove = async () => {
+    const success = await updateStatus("Approved");
+
+    if (success) {
+      toast.success("News approved successfully.");
+    }
+  };
+
+  const handlePublish = async () => {
+    if (status !== "Approved") {
+      toast.warning("Approve the news before publishing it.");
+      return;
+    }
+
+    const success = await updateStatus("Published");
+
+    if (success) {
+      toast.success("News published successfully.");
+    }
+  };
+
+  const handleAction = async () => {
     if (!reason.trim()) {
-      notify(
+      toast.warning(
         showDialog === "reject"
           ? "Please enter a rejection reason."
           : "Please enter correction remarks."
@@ -60,46 +230,89 @@ export default function NewsReview() {
       return;
     }
 
-    if (showDialog === "reject") {
-      setStatus("Rejected");
-      notify("News rejected successfully.");
-    } else {
-      setStatus("Requires Correction");
-      notify("News sent for correction.");
+    const nextStatus =
+      showDialog === "reject" ? "Rejected" : "Correction Required";
+
+    const success = await updateStatus(nextStatus, reason.trim());
+
+    if (success) {
+      toast.success(
+        nextStatus === "Rejected"
+          ? "News rejected successfully."
+          : "Correction request saved successfully."
+      );
+
+      closeDialog();
     }
-
-    closeDialog();
   };
 
-  const handleApprove = () => {
-    setStatus("Approved");
-    notify("News approved successfully.");
+  const changeMediaType = (type) => {
+    setActiveMedia(type);
+    setSelectedFile(0);
   };
 
-  const handleOutput = () => {
-    if (status !== "Approved") {
-      notify("Approve the news before sending it to the output team.");
-      return;
-    }
+  if (loading) {
+    return (
+      <div className="ndr-page">
+        <div className="ndr-card">
+          <p>Loading news details from the database...</p>
+        </div>
+      </div>
+    );
+  }
 
-    setStatus("Sent to Output Team");
-    notify("News sent to the output team.");
-  };
+  if (error && !news) {
+    return (
+      <div className="ndr-page">
+        <div className="ndr-card">
+          <h2>Unable to Open News</h2>
+          <p>{error}</p>
 
-  const handleUpdate = () => {
-    const title = window.prompt("Enter News Slug:", news.title);
-    if (title === null) return;
+          <button
+            type="button"
+            className="ndr-back"
+            onClick={() => navigate("/editor/all-news")}
+          >
+            ← Back to All News
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-    const content = window.prompt("Enter News Content:", news.content);
-    if (content === null) return;
+  if (!news) {
+    return (
+      <div className="ndr-page">
+        <div className="ndr-card">
+          <h2>No News Selected</h2>
+          <p>Please select a news item from All News to review it.</p>
 
-    setNews((previous) => ({ ...previous, title, content }));
-    notify("News updated successfully.");
-  };
+          <button
+            type="button"
+            className="ndr-back"
+            onClick={() => navigate("/editor/all-news")}
+          >
+            ← Back to All News
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const reporterName = news.reporter_name || "Unknown Reporter";
+
+  const reporterId =
+    news.reporter_id != null
+      ? `REP-${String(news.reporter_id).padStart(3, "0")}`
+      : "—";
+
+  const title = news.news_slug || news.title || "Untitled News";
+  const submissionDate = formatDate(news.created_at);
+  const updatedDate = formatDate(news.updated_at);
+  const isFinal = ["Rejected", "Published"].includes(status);
 
   return (
     <div className="ndr-page">
-      {/* Polished Banner */}
       <header className="ndr-header">
         <div className="ndr-banner">
           <div className="ndr-banner-icon" aria-hidden="true">
@@ -110,7 +323,9 @@ export default function NewsReview() {
             <span className="ndr-eyebrow">
               EDITOR WORKSPACE / NEWS MANAGEMENT
             </span>
+
             <h1>News Details &amp; Review</h1>
+
             <p>
               Review submitted news, verify attachments and manage editorial
               decisions.
@@ -118,17 +333,17 @@ export default function NewsReview() {
           </div>
 
           <button
-  type="button"
-  className="ndr-back"
-  onClick={() => navigate("/editor/all-news")}
->
-  ← Back to All News
-</button>
+            type="button"
+            className="ndr-back"
+            onClick={() => navigate("/editor/all-news")}
+          >
+            ← Back to All News
+          </button>
         </div>
 
         <div className="ndr-meta">
           <span className="ndr-meta-id">
-            ▤ News ID: <b>YBIT-NEWS-001</b>
+            ▤ News ID: <b>{news.id}</b>
           </span>
 
           <span
@@ -140,223 +355,265 @@ export default function NewsReview() {
           </span>
 
           <span className="ndr-meta-date">
-            ▦ Submission Date: <b>15 Oct 2026</b>
+            ▦ Submission Date: <b>{submissionDate}</b>
           </span>
         </div>
       </header>
 
-      {/* Main Layout */}
       <div className="ndr-layout">
         <main className="ndr-main">
-          {/* Reporter Details */}
           <section className="ndr-card ndr-reporter">
             <div className="ndr-avatar">👤</div>
 
             <div className="ndr-reporter-info">
               <h3>
-                Tanavi Vanjare
+                {reporterName}
                 <span className="ndr-badge">Reporter</span>
               </h3>
-              <p>REP-001</p>
-              <p>✉ tanavi@example.com</p>
+
+              <p>{reporterId}</p>
+              <p>News ID: {news.id}</p>
             </div>
 
             <div className="ndr-date">
               <span>▦ Submitted On</span>
-              <b>15 Oct 2026, 10:24 AM</b>
+              <b>{submissionDate}</b>
             </div>
 
             <div className="ndr-date">
               <span>▦ Last Updated</span>
-              <b>15 Oct 2026, 10:24 AM</b>
+              <b>{updatedDate}</b>
             </div>
           </section>
 
-          {/* News Information */}
           <section className="ndr-card ndr-information">
             <div className="ndr-section-heading">
               <div>
                 <span className="ndr-section-kicker">SUBMISSION DETAILS</span>
                 <h2>▤ News Information</h2>
               </div>
-              <span className="ndr-id">YBIT-NEWS-001</span>
+
+              <span className="ndr-id">ID: {news.id}</span>
             </div>
 
             <div className="ndr-news-row">
               <div className="ndr-slug">
-                <label>News Slug</label>
-                <h3>{news.title}</h3>
+                <label>News Slug / Title</label>
+                <h3>{title}</h3>
               </div>
 
               <div className="ndr-formats">
                 <label>News Format</label>
+
                 <div className="ndr-format-list">
-                  {["AV", "AVB", "TikTak", "WKT", "PKG", "One-to-One"].map(
-                    (format) => (
-                      <button
-                        type="button"
-                        key={format}
-                        className={news.format === format ? "selected" : ""}
-                        aria-pressed={news.format === format}
-                        onClick={() =>
-                          setNews((previous) => ({ ...previous, format }))
-                        }
-                      >
-                        {format}
-                      </button>
-                    )
-                  )}
+                  <button type="button" className="selected">
+                    {news.format || "—"}
+                  </button>
                 </div>
               </div>
             </div>
 
             <div className="ndr-content">
-              <h3>Full News Content</h3>
-              <p>{news.content}</p>
+              <h3>Full News Script</h3>
+
+              <p style={{ whiteSpace: "pre-wrap" }}>
+                {news.script || "No news script was provided."}
+              </p>
+
+              {news.location && (
+                <p>
+                  <strong>Location:</strong> {news.location}
+                </p>
+              )}
+
+              {news.event_date && (
+                <p>
+                  <strong>Event Date:</strong> {formatDate(news.event_date)}
+                </p>
+              )}
+
+              <p>
+                <strong>Breaking News:</strong>{" "}
+                {news.breaking_news ? "Yes" : "No"}
+              </p>
+
+              {news.editor_feedback && (
+                <p>
+                  <strong>Previous Editor Feedback:</strong>{" "}
+                  {news.editor_feedback}
+                </p>
+              )}
             </div>
 
-            {/* Media Attachments */}
             <div className="ndr-media">
               <div className="ndr-media-heading">
                 <div>
                   <span className="ndr-section-kicker">ATTACHED FILES</span>
                   <h3>📎 Media Attachments</h3>
                 </div>
+
                 <span className="ndr-attachment-count">
-                  {images.length} Attachments
+                  {Object.values(mediaFiles).reduce(
+                    (total, files) => total + files.length,
+                    0
+                  )}{" "}
+                  Attachments
                 </span>
               </div>
 
-              <div className="ndr-media-layout">
-                <div className="ndr-media-list">
-                  {images.map((item, index) => (
-                    <button
-                      type="button"
-                      className={`ndr-media-item ${
-                        selectedImage === index ? "active" : ""
-                      }`}
-                      key={item.name}
-                      onClick={() => {
-                        setSelectedImage(index);
-                        setActiveMedia("Image");
-                      }}
-                      aria-pressed={selectedImage === index}
-                    >
-                      <img src={item.src} alt={item.name} loading="lazy" />
-                      <span>{item.name}</span>
-                      <small>{item.size}</small>
-                    </button>
-                  ))}
-                </div>
+              <div className="ndr-preview-tabs">
+                {[
+                  ["images", "Images"],
+                  ["video", "Video"],
+                  ["audio", "Audio"],
+                  ["documents", "Documents"],
+                ].map(([type, label]) => (
+                  <button
+                    type="button"
+                    key={type}
+                    className={activeMedia === type ? "active" : ""}
+                    onClick={() => changeMediaType(type)}
+                  >
+                    {label} ({mediaFiles[type].length})
+                  </button>
+                ))}
+              </div>
 
-                <div className="ndr-preview">
-                  <div className="ndr-preview-header">
-                    <b>Attachment Preview</b>
-                    <span>{activeMedia}</span>
-                  </div>
-
-                  <div className="ndr-preview-tabs">
-                    <button
-                      type="button"
-                      className={activeMedia === "Image" ? "active" : ""}
-                      onClick={() => setActiveMedia("Image")}
-                    >
-                      Image Preview
-                    </button>
-
-                    <button
-                      type="button"
-                      className={activeMedia === "Video" ? "active" : ""}
-                      onClick={() => setActiveMedia("Video")}
-                    >
-                      Video Preview
-                    </button>
-                  </div>
-
-                  {activeMedia === "Image" ? (
-                    <img
-                      className="ndr-preview-image"
-                      src={images[selectedImage].src}
-                      alt="Selected news attachment"
-                    />
-                  ) : (
-                    <div className="ndr-video-message">
-                      <span>▶</span>
-                      <p>Video attachment preview</p>
-                      <small>Connect a video file to play it.</small>
-                    </div>
-                  )}
-
-                  <div className="ndr-dots">
-                    {images.map((item, index) => (
+              {currentFiles.length > 0 ? (
+                <div className="ndr-media-layout">
+                  <div className="ndr-media-list">
+                    {currentFiles.map((file, index) => (
                       <button
                         type="button"
-                        key={item.name}
-                        className={selectedImage === index ? "active" : ""}
-                        onClick={() => {
-                          setSelectedImage(index);
-                          setActiveMedia("Image");
-                        }}
-                        aria-label={`Show image ${index + 1}`}
-                      />
+                        className={`ndr-media-item ${
+                          selectedFile === index ? "active" : ""
+                        }`}
+                        key={`${file.name}-${index}`}
+                        onClick={() => setSelectedFile(index)}
+                        aria-pressed={selectedFile === index}
+                      >
+                        <span aria-hidden="true">
+                          {activeMedia === "images"
+                            ? "🖼"
+                            : activeMedia === "video"
+                              ? "🎬"
+                              : activeMedia === "audio"
+                                ? "🎧"
+                                : "📄"}
+                        </span>
+
+                        <span>{file.name}</span>
+                      </button>
                     ))}
                   </div>
+
+                  <div className="ndr-preview">
+                    <div className="ndr-preview-header">
+                      <b>{currentFile?.name || "Attachment Preview"}</b>
+                      <span>{activeMedia}</span>
+                    </div>
+
+                    {currentFile?.url ? (
+                      <>
+                        {activeMedia === "images" && (
+                          <img
+                            className="ndr-preview-image"
+                            src={currentFile.url}
+                            alt={currentFile.name}
+                          />
+                        )}
+
+                        {activeMedia === "video" && (
+                          <video
+                            className="ndr-preview-image"
+                            src={currentFile.url}
+                            controls
+                            preload="metadata"
+                          >
+                            Your browser does not support video playback.
+                          </video>
+                        )}
+
+                        {activeMedia === "audio" && (
+                          <div className="ndr-video-message">
+                            <p>{currentFile.name}</p>
+                            <audio src={currentFile.url} controls>
+                              Your browser does not support audio playback.
+                            </audio>
+                          </div>
+                        )}
+
+                        {activeMedia === "documents" && (
+                          <div className="ndr-video-message">
+                            <p>{currentFile.name}</p>
+
+                            <a
+                              href={currentFile.url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open Document
+                            </a>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="ndr-video-message">
+                        <p>File URL is not available.</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="ndr-video-message">
+                  <p>No {activeMedia} attachments submitted.</p>
+                </div>
+              )}
             </div>
           </section>
         </main>
 
-        {/* Right Sidebar Cards */}
         <aside className="ndr-right">
           <section className="ndr-card ndr-lock">
             <div className="ndr-lock-heading">
-              <span className="ndr-lock-icon">🔒</span>
+              <span className="ndr-lock-icon">🔎</span>
+
               <div>
-                <span className="ndr-section-kicker">REVIEW ASSIGNMENT</span>
-                <h3>Currently being reviewed by</h3>
+                <span className="ndr-section-kicker">REVIEW DETAILS</span>
+                <h3>News Review</h3>
               </div>
             </div>
 
-            <h4>Editor Name</h4>
-            <p>Review lock will expire in</p>
-            <b className="ndr-lock-time">◷ 09:42</b>
+            <h4>{reporterName}</h4>
+            <p>Submitted by reporter</p>
+            <b className="ndr-lock-time">{status}</b>
           </section>
 
-          {/* Timeline */}
           <section className="ndr-card ndr-timeline">
             <span className="ndr-section-kicker">ACTIVITY LOG</span>
             <h2>◷ Review Activity Timeline</h2>
 
             <div className="ndr-timeline-item">
               <span className="ndr-timeline-icon">▤</span>
+
               <div>
                 <h4>News Submitted</h4>
-                <p>Tanavi Vanjare submitted the news.</p>
-                <small>15 Oct 2026, 10:24 AM</small>
-              </div>
-            </div>
-
-            <div className="ndr-timeline-item">
-              <span className="ndr-timeline-icon">♙</span>
-              <div>
-                <h4>Review Started</h4>
-                <p>Editor Name started reviewing the news.</p>
-                <small>15 Oct 2026, 11:02 AM</small>
+                <p>{reporterName} submitted the news.</p>
+                <small>{submissionDate}</small>
               </div>
             </div>
 
             <div className="ndr-timeline-item">
               <span className="ndr-timeline-icon">↻</span>
+
               <div>
-                <h4>Status Updated</h4>
+                <h4>Current Status</h4>
                 <p>Status: {status}</p>
-                <small>Current review session</small>
+                <small>Last updated: {updatedDate}</small>
               </div>
             </div>
           </section>
 
-          {/* Review Actions */}
           <section className="ndr-card ndr-actions">
             <span className="ndr-section-kicker">EDITORIAL CONTROLS</span>
             <h2>🛡 Review Actions</h2>
@@ -365,8 +622,10 @@ export default function NewsReview() {
               type="button"
               className="ndr-action approve"
               onClick={handleApprove}
+              disabled={saving || isFinal || status === "Approved"}
             >
-              <span>✓</span> Approve News
+              <span>✓</span>
+              {status === "Approved" ? "News Approved" : "Approve News"}
             </button>
 
             <button
@@ -376,6 +635,7 @@ export default function NewsReview() {
                 setReason("");
                 setShowDialog("reject");
               }}
+              disabled={saving || isFinal}
             >
               <span>✕</span> Reject News
             </button>
@@ -387,6 +647,7 @@ export default function NewsReview() {
                 setReason("");
                 setShowDialog("correction");
               }}
+              disabled={saving || isFinal}
             >
               <span>↻</span> Send for Correction
             </button>
@@ -394,31 +655,31 @@ export default function NewsReview() {
             <button
               type="button"
               className="ndr-action output"
-              onClick={handleOutput}
+              onClick={handlePublish}
+              disabled={saving || status !== "Approved"}
             >
-              <span>↑</span> Send to Output Team
+              <span>↑</span> Publish News
               <small>Available after approval</small>
             </button>
 
-            <button
-              type="button"
-              className="ndr-action update"
-              onClick={handleUpdate}
-            >
-              <span>✎</span> Update News
-            </button>
-          </section>
+            {saving && <p>Saving changes to database...</p>}
 
-          
+            {error && news && (
+              <p role="alert" className="ndr-error">
+                {error}
+              </p>
+            )}
+          </section>
         </aside>
       </div>
 
-      {/* Reject / Correction Modal */}
       {showDialog && (
         <div
           className="ndr-modal-overlay"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) closeDialog();
+            if (event.target === event.currentTarget && !saving) {
+              closeDialog();
+            }
           }}
         >
           <div
@@ -432,6 +693,7 @@ export default function NewsReview() {
               className="ndr-modal-close"
               onClick={closeDialog}
               aria-label="Close dialog"
+              disabled={saving}
             >
               ×
             </button>
@@ -441,7 +703,9 @@ export default function NewsReview() {
             </div>
 
             <h2 id="ndr-dialog-title">
-              {showDialog === "reject" ? "Reject News" : "Send for Correction"}
+              {showDialog === "reject"
+                ? "Reject News"
+                : "Send for Correction"}
             </h2>
 
             <p>
@@ -459,24 +723,27 @@ export default function NewsReview() {
                   : "Enter correction remarks..."
               }
               autoFocus
+              disabled={saving}
             />
 
             <div className="ndr-modal-actions">
-              <button type="button" onClick={closeDialog}>
+              <button
+                type="button"
+                onClick={closeDialog}
+                disabled={saving}
+              >
                 Cancel
               </button>
-              <button type="button" onClick={handleAction}>
-                Submit
+
+              <button
+                type="button"
+                onClick={handleAction}
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Submit"}
               </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Toast Message */}
-      {message && (
-        <div className="ndr-toast" role="status" aria-live="polite">
-          {message}
         </div>
       )}
     </div>

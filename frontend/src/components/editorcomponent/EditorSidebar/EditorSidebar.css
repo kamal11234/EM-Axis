@@ -11,6 +11,7 @@
   background: #2052ad;
   overflow-y: auto;
   box-sizing: border-box;
+   font-family: "Segoe UI", Arial, sans-serif;  
 }
 
 .editor-sidebar-menu {
@@ -29,7 +30,7 @@
   border-radius: 11px;
   color: #ffffff;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
 
   transition: background 0.2s ease;

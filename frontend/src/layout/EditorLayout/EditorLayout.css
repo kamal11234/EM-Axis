@@ -1,33 +1,133 @@
 
 /* ==========================================
    EDITOR LAYOUT
-   ========================================== */
+========================================== */
 
 .editor-layout {
   min-height: 100vh;
+  height: auto !important;
   background: var(--app-bg, #f3f7fc);
+  overflow: visible !important;
 }
 
-/* Main content area */
+/* ==========================================
+   MAIN CONTENT + SCROLLING
+========================================== */
+
 .editor-main-content {
-  margin-left: 250px;
-  min-height: 100vh;
-  padding: 0 26px 28px;
+  margin-left: 240px !important;
+  width: calc(100% - 240px);
+  min-height: 0 !important;
+  height: calc(100vh - 76px) !important;
+
+  padding: 0 12px 28px;
   box-sizing: border-box;
+
   background: var(--app-bg, #f3f7fc);
   color: var(--app-text, #173766);
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Back button hover support */
+/* ==========================================
+   GENERAL BUTTON FONT
+========================================== */
+
 .editor-main-content button {
   font-family: inherit;
 }
 
-/* Responsive layout */
+/* ==========================================
+   EDITOR BACK ARROW
+========================================== */
+
+.editor-back-arrow-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 12px;
+  box-sizing: border-box;
+}
+
+.editor-back-arrow {
+  width: 40px;
+  height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  border: 1px solid #d5e3fa;
+  border-radius: 50%;
+
+  background: #ffffff;
+  color: #2455ad;
+
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1;
+
+  cursor: pointer;
+
+  box-shadow: 0 3px 10px rgba(36, 85, 173, 0.10);
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.editor-back-arrow:hover {
+  background: #2455ad;
+  color: #ffffff;
+  transform: translateX(-3px);
+  box-shadow: 0 5px 14px rgba(36, 85, 173, 0.22);
+}
+
+.editor-back-arrow:focus-visible {
+  outline: 2px solid #397fe5;
+  outline-offset: 3px;
+}
+
+/* ==========================================
+   DARK MODE
+========================================== */
+
+:root[data-theme="dark"] .editor-back-arrow {
+  background: #1e293b;
+  color: #93c5fd;
+  border-color: #334155;
+}
+
+:root[data-theme="dark"] .editor-back-arrow:hover {
+  background: #2455ad;
+  color: #ffffff;
+}
+
+/* ==========================================
+   RESPONSIVE LAYOUT
+========================================== */
+
 @media (max-width: 768px) {
   .editor-main-content {
-    margin-left: 0;
-    padding-left: 15px;
-    padding-right: 15px;
+    margin-left: 0 !important;
+    width: 100%;
+    height: calc(100vh - 76px) !important;
+    padding: 0 10px 22px;
+  }
+
+  .editor-back-arrow-wrapper {
+    padding: 10px 0;
+  }
+
+  .editor-back-arrow {
+    width: 36px;
+    height: 36px;
+    font-size: 25px;
   }
 }

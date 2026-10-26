@@ -1,34 +1,160 @@
 
-/* ===== GLOBAL RESET ===== */
+/* ==========================================
+   EM-AXIS | GLOBAL CSS
+   Global Reset + Reporter & Editor Scrolling
+========================================== */
 
-* {
-  margin: 0;
-  padding: 0;
+/* ===== GLOBAL RESET ===== */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-/* ===== GLOBAL PAGE SETTINGS ===== */
-
+/* ===== HTML SETTINGS ===== */
 html {
+  width: 100%;
   min-height: 100%;
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
   overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
+/* ===== BODY SETTINGS ===== */
 body {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100vh;
+  height: auto;
+  margin: 0;
+  padding: 0;
+
   font-family: system-ui, sans-serif;
   background: #f5f5f5;
 
-  min-height: 100vh;
-  height: auto;
-
   overflow-x: hidden;
   overflow-y: auto;
 }
 
+/* ===== REACT ROOT ===== */
 #root {
+  width: 100%;
   min-height: 100vh;
   height: auto;
-  width: 100%;
+  margin: 0;
+  padding: 0;
   overflow: visible;
+}
+
+/* ==========================================
+   REPORTER MODULE
+========================================== */
+
+.dashboard-layout {
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+  overflow: visible;
+}
+
+.dashboard-main {
+  min-width: 0;
+  min-height: calc(100vh - 76px);
+  height: auto;
+  overflow: visible;
+}
+
+/* ==========================================
+   EDITOR MODULE
+========================================== */
+
+.editor-layout {
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+  overflow: visible;
+}
+
+.editor-main-content {
+  min-width: 0;
+  min-height: calc(100vh - 76px);
+  height: auto;
+  overflow: visible;
+}
+
+/* ==========================================
+   BACK ARROW
+========================================== */
+
+.page-back-arrow-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 26px;
+}
+
+.page-back-arrow {
+  width: 40px;
+  height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #e7efff;
+  color: #2455ad;
+
+  font-family: inherit;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.page-back-arrow:hover {
+  background: #cbdcff;
+  transform: translateX(-3px);
+}
+
+.page-back-arrow:focus-visible {
+  outline: 2px solid #2455ad;
+  outline-offset: 3px;
+}
+
+/* ==========================================
+   MOBILE RESPONSIVE
+========================================== */
+
+@media (max-width: 768px) {
+  html,
+  body {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .dashboard-layout,
+  .editor-layout {
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .dashboard-main,
+  .editor-main-content {
+    min-height: calc(100vh - 76px);
+    height: auto;
+  }
+
+  .page-back-arrow-wrapper {
+    padding: 10px 15px;
+  }
 }

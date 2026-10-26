@@ -1,6 +1,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./draft.css";
 
 const API_BASE = (
@@ -71,12 +72,15 @@ function Draft() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
-  const user = getStoredUser();
-  const reporterId = user?.id;
+  const user = useMemo(() => getStoredUser(), []);
+  const currentUser = user?.user || user;
+  const reporterId = currentUser?.id;
+  const userRole = currentUser?.role;
 
   const fetchDrafts = useCallback(async () => {
-    if (!reporterId || user?.role !== "reporter") {
+    if (!reporterId || userRole !== "reporter") {
       setDrafts([]);
       setError("Please log in with your Reporter account to view drafts.");
       setLoading(false);
@@ -93,24 +97,26 @@ function Draft() {
 
       const result = await response.json().catch(() => ({}));
 
-      if (!response.ok || !result.success) {
+      if (!response.ok || result.success !== true) {
         throw new Error(result.message || "Unable to load drafts.");
       }
 
-      setDrafts(
-        Array.isArray(result.drafts)
-          ? result.drafts.map(mapDraft)
-          : []
-      );
+      const loadedDrafts = Array.isArray(result.drafts)
+        ? result.drafts.map(mapDraft)
+        : [];
+
+      setDrafts(loadedDrafts);
     } catch (err) {
-      setError(
+      const message =
         err.message ||
-          "Unable to connect to the server. Check whether the backend is running."
-      );
+        "Unable to connect to the server. Check whether the backend is running.";
+
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
-  }, [reporterId, user?.role]);
+  }, [reporterId, userRole]);
 
   useEffect(() => {
     fetchDrafts();
@@ -146,6 +152,8 @@ function Draft() {
   );
 
   const handleContinueEdit = (draft) => {
+    toast.info(`Opening ${draft.displayId} for editing.`);
+
     navigate("/reporter/news-workspace", {
       state: {
         isEditingDraft: true,
@@ -164,39 +172,44 @@ function Draft() {
   };
 
   const handleView = (draft) => {
-    window.alert(
+    const details =
       `Draft ID: ${draft.displayId}\n` +
-        `News Title: ${draft.title}\n` +
-        `Format: ${draft.format}\n` +
-        `Location: ${draft.location || "Not added"}\n` +
-        `Event Date: ${formatDate(draft.eventDate)}\n` +
-        `Created: ${formatDate(draft.createdAt)}, ${formatTime(draft.createdAt)}\n` +
-        `Last Updated: ${formatDate(draft.updatedAt)}, ${formatTime(draft.updatedAt)}\n` +
-        `Status: ${draft.status}\n\n` +
-        `Script:\n${draft.script || "No script saved yet."}`
-    );
+      `News Title: ${draft.title || "Untitled"}\n` +
+      `Format: ${draft.format || "Not specified"}\n` +
+      `Location: ${draft.location || "Not added"}\n` +
+      `Event Date: ${formatDate(draft.eventDate)}\n` +
+      `Created: ${formatDate(draft.createdAt)}, ${formatTime(draft.createdAt)}\n` +
+      `Last Updated: ${formatDate(draft.updatedAt)}, ${formatTime(draft.updatedAt)}\n` +
+      `Status: ${draft.status}\n\n` +
+      `Script:\n${draft.script || "No script saved yet."}`;
+
+    toast.info(details, {
+      autoClose: 8000,
+      closeOnClick: false,
+      style: {
+        whiteSpace: "pre-line",
+        width: "100%",
+      },
+    });
   };
 
   const handleDelete = async (draft) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${draft.title}"?`
-    );
-
-    if (!confirmed) return;
-
+    setConfirmDelete(null);
     setDeletingId(draft.id);
     setNotice("");
     setError("");
 
     try {
       const response = await fetch(
-        `${API_BASE}/api/news/drafts/${draft.id}?reporterId=${encodeURIComponent(reporterId)}`,
+        `${API_BASE}/api/news/drafts/${draft.id}?reporterId=${encodeURIComponent(
+          reporterId
+        )}`,
         { method: "DELETE" }
       );
 
       const result = await response.json().catch(() => ({}));
 
-      if (!response.ok || !result.success) {
+      if (!response.ok || result.success !== true) {
         throw new Error(result.message || "Unable to delete draft.");
       }
 
@@ -206,11 +219,18 @@ function Draft() {
 
       setCurrentPage(1);
       setNotice(`${draft.displayId} has been deleted.`);
+      toast.success(`${draft.displayId} deleted successfully.`);
     } catch (err) {
-      setError(err.message || "Unable to delete draft.");
+      const message = err.message || "Unable to delete draft.";
+      setError(message);
+      toast.error(message);
     } finally {
       setDeletingId(null);
     }
+  };
+
+  const askDeleteConfirmation = (draft) => {
+    setConfirmDelete(draft);
   };
 
   const clearFilters = () => {
@@ -218,6 +238,7 @@ function Draft() {
     setFormatFilter("All Formats");
     setCurrentPage(1);
     setNotice("");
+    toast.info("Search and filters cleared.");
   };
 
   const inProgressCount = drafts.filter(
@@ -256,7 +277,10 @@ function Draft() {
               <button
                 type="button"
                 className="draft-clear-search"
-                onClick={() => setSearch("")}
+                onClick={() => {
+                  setSearch("");
+                  setCurrentPage(1);
+                }}
                 aria-label="Clear search"
               >
                 ×
@@ -310,6 +334,33 @@ function Draft() {
             disabled={loading}
           >
             Retry
+          </button>
+        </div>
+      )}
+
+      {confirmDelete && (
+        <div
+          className="draft-notice"
+          role="alertdialog"
+          aria-label="Confirm draft deletion"
+        >
+          <p>
+            Delete {confirmDelete.displayId}
+            {confirmDelete.title ? ` — "${confirmDelete.title}"` : ""}?
+          </p>
+          <button
+            type="button"
+            onClick={() => handleDelete(confirmDelete)}
+            disabled={deletingId !== null}
+          >
+            {deletingId === confirmDelete.id ? "Deleting..." : "Confirm Delete"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirmDelete(null)}
+            disabled={deletingId !== null}
+          >
+            Cancel
           </button>
         </div>
       )}
@@ -454,7 +505,7 @@ function Draft() {
                         <button
                           type="button"
                           className="draft-action-button draft-delete-button"
-                          onClick={() => handleDelete(draft)}
+                          onClick={() => askDeleteConfirmation(draft)}
                           disabled={deletingId === draft.id}
                           title="Delete draft"
                           aria-label={`Delete ${draft.displayId}`}

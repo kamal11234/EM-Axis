@@ -1,3 +1,4 @@
+
 const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
@@ -93,6 +94,7 @@ app.get("/api/health/db", async (req, res) => {
     });
   } catch (error) {
     console.error("DATABASE ERROR:", error.message);
+
     res.status(500).json({
       success: false,
       message: "Database connection failed.",
@@ -267,7 +269,7 @@ app.post("/api/auth/login", async (req, res) => {
     const cleanRole = normalizeRole(role);
 
     const result = await pool.query(
-      `SELECT id, full_name, email, mobile, password_hash, role, joining_date
+      `SELECT id, full_name, email, mobile, password_hash, role, joining_date, account_status
        FROM public.users
        WHERE LOWER(email) = $1`,
       [cleanEmail]
@@ -600,8 +602,17 @@ app.post("/api/news", async (req, res) => {
     );
 
     const news = result.rows[0];
+    
+await createEditorNotificationsForNews({
+  newsId: news.id,
+  title: "New News Submitted",
+  message: `A new news report "${news.news_slug}" has been submitted for editorial review.`,
+  category: "New Submission",
+  type: "info",
+  details: `News: ${news.news_slug}\nStatus: ${news.status}`,
+});
 
-    // Create notification for reporter
+
     await createReporterNotification({
       reporterId: reporterID,
       newsId: news.id,
@@ -627,6 +638,42 @@ app.post("/api/news", async (req, res) => {
     });
   }
 });
+
+
+
+async function createEditorNotificationsForNews({
+  newsId,
+  title,
+  message,
+  category = "News Update",
+  type = "info",
+  details = message,
+}) {
+  const editors = await pool.query(
+    `SELECT id
+     FROM public.users
+     WHERE LOWER(role) = 'editor'
+       AND COALESCE(account_status, 'Active') = 'Active'`
+  );
+
+  for (const editor of editors.rows) {
+    await pool.query(
+      `INSERT INTO public.editor_notifications
+        (editor_id, news_id, title, message, category, type, details)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        editor.id,
+        newsId,
+        title,
+        message,
+        category,
+        type,
+        details,
+      ]
+    );
+  }
+}
+
 
 // =====================================
 // FETCH REPORTER NEWS
@@ -677,6 +724,7 @@ app.get("/api/news/reporter/:reporterId", async (req, res) => {
     });
   }
 });
+
 // =====================================
 // FETCH ALL NEWS FOR EDITOR
 // =====================================
@@ -717,13 +765,19 @@ app.get("/api/news", async (req, res) => {
     });
   }
 });
+
 // =====================================
 // UPDATE NEWS STATUS / EDITOR FEEDBACK
+// FIX: Accept editor_feedback AND editorFeedback
 // =====================================
 app.patch("/api/news/:id/status", async (req, res) => {
   try {
     const newsID = validId(req.params.id);
-    const { status, editorFeedback } = req.body;
+    const { status } = req.body;
+
+    // The frontend may send either naming convention.
+    const editorFeedback =
+      req.body.editor_feedback ?? req.body.editorFeedback ?? "";
 
     const allowedStatuses = [
       "Pending",
@@ -747,13 +801,25 @@ app.patch("/api/news/:id/status", async (req, res) => {
       });
     }
 
-    if (
-      editorFeedback != null &&
-      typeof editorFeedback !== "string"
-    ) {
+    if (typeof editorFeedback !== "string") {
       return res.status(400).json({
         success: false,
         message: "Invalid editor feedback.",
+      });
+    }
+
+    const cleanFeedback = editorFeedback.trim();
+
+    if (
+      ["Rejected", "Correction Required"].includes(status) &&
+      !cleanFeedback
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          status === "Rejected"
+            ? "Please provide the rejection reason."
+            : "Please provide the correction remarks.",
       });
     }
 
@@ -763,13 +829,16 @@ app.patch("/api/news/:id/status", async (req, res) => {
            editor_feedback = $2,
            updated_at = CURRENT_TIMESTAMP
        WHERE id = $3
-       RETURNING id, reporter_id, news_slug, status,
-                 editor_feedback, updated_at`,
+       RETURNING
+         id,
+         reporter_id,
+         news_slug,
+         status,
+         editor_feedback,
+         updated_at`,
       [
         status,
-        typeof editorFeedback === "string"
-          ? editorFeedback.trim() || null
-          : null,
+        cleanFeedback || null,
         newsID,
       ]
     );
@@ -782,49 +851,55 @@ app.patch("/api/news/:id/status", async (req, res) => {
     }
 
     const updatedNews = result.rows[0];
+    const reason = updatedNews.editor_feedback;
 
-    const statusNotification = {
-      Pending: {
-        title: "News Under Review",
-        message: `Your news "${updatedNews.news_slug}" is pending editorial review.`,
-        category: "Under Review",
-        type: "warning",
-      },
-      Approved: {
-        title: "News Approved",
-        message: `Your news "${updatedNews.news_slug}" has been approved by the editor.`,
-        category: "Approved",
-        type: "success",
-      },
-      Published: {
-        title: "News Published",
-        message: `Your news "${updatedNews.news_slug}" has been published successfully.`,
-        category: "Published",
-        type: "success",
-      },
-      "Correction Required": {
-        title: "Correction Required",
-        message: `Your news "${updatedNews.news_slug}" needs corrections.`,
-        category: "Correction Required",
-        type: "warning",
-      },
-      Rejected: {
-        title: "News Rejected",
-        message: `Your news "${updatedNews.news_slug}" has been rejected.`,
-        category: "Rejected",
-        type: "error",
-      },
-    };
+    let notification;
 
-    const notification = statusNotification[status];
+    switch (status) {
+      case "Pending":
+        notification = {
+          title: "News Under Review",
+          message: `Your news "${updatedNews.news_slug}" is pending editorial review.`,
+          category: "Under Review",
+          type: "warning",
+        };
+        break;
 
-    let details = notification.message;
+      case "Approved":
+        notification = {
+          title: "News Approved",
+          message: `Your news "${updatedNews.news_slug}" has been approved by the editor.`,
+          category: "Approved",
+          type: "success",
+        };
+        break;
 
-    if (
-      status === "Correction Required" &&
-      updatedNews.editor_feedback
-    ) {
-      details += ` Editor feedback: ${updatedNews.editor_feedback}`;
+      case "Published":
+        notification = {
+          title: "News Published",
+          message: `Your news "${updatedNews.news_slug}" has been published successfully.`,
+          category: "Published",
+          type: "success",
+        };
+        break;
+
+      case "Correction Required":
+        notification = {
+          title: "Correction Required",
+          message: `Your news "${updatedNews.news_slug}" requires corrections. Editor's remarks: ${reason}`,
+          category: "Correction Required",
+          type: "warning",
+        };
+        break;
+
+      case "Rejected":
+        notification = {
+          title: "News Rejected",
+          message: `Your news "${updatedNews.news_slug}" was rejected. Reason: ${reason}`,
+          category: "Rejected",
+          type: "error",
+        };
+        break;
     }
 
     await createReporterNotification({
@@ -834,12 +909,12 @@ app.patch("/api/news/:id/status", async (req, res) => {
       message: notification.message,
       category: notification.category,
       type: notification.type,
-      details,
+      details: notification.message,
     });
 
     return res.status(200).json({
       success: true,
-      message: "News status updated successfully.",
+      message: "News status and editor feedback updated successfully.",
       news: updatedNews,
     });
   } catch (error) {
@@ -851,6 +926,7 @@ app.patch("/api/news/:id/status", async (req, res) => {
     });
   }
 });
+
 // =====================================
 // DRAFTS - FETCH REPORTER DRAFTS
 // =====================================
@@ -1112,32 +1188,195 @@ app.delete("/api/news/drafts/:id", async (req, res) => {
     });
   }
 });
-// =====================================================
-// REPORTER NOTIFICATIONS APIs
-// =====================================================
 
-// GET ALL NOTIFICATIONS FOR REPORTER
-app.get("/api/notifications/reporter/:reporterId", async (req, res) => {
+/* =====================================
+   EDITOR NOTIFICATIONS - FETCH ALL
+===================================== */
+app.get("/api/notifications/editor/:editorId", async (req, res) => {
   try {
-    const { reporterId } = req.params;
+    const editorId = validId(req.params.editorId);
 
-    if (!validId(reporterId)) {
+    if (!editorId) {
       return res.status(400).json({
         success: false,
-        message: "Invalid reporter ID",
+        message: "Invalid editor ID.",
+      });
+    }
+
+    const editor = await pool.query(
+      `SELECT id
+       FROM public.users
+       WHERE id = $1 AND LOWER(role) = 'editor'`,
+      [editorId]
+    );
+
+    if (editor.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Editor not found.",
+      });
+    }
+
+    const result = await pool.query(
+      `SELECT
+         id,
+         editor_id,
+         news_id,
+         title,
+         message,
+         category,
+         type,
+         details,
+         is_read AS "read",
+         created_at
+       FROM public.editor_notifications
+       WHERE editor_id = $1
+       ORDER BY created_at DESC`,
+      [editorId]
+    );
+
+    return res.status(200).json({
+      success: true,
+      notifications: result.rows,
+    });
+  } catch (error) {
+    console.error("FETCH EDITOR NOTIFICATIONS ERROR:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch editor notifications.",
+    });
+  }
+});
+
+
+/* =====================================
+   EDITOR - MARK ONE NOTIFICATION READ
+===================================== */
+app.patch(
+  "/api/notifications/editor/:editorId/:notificationId/read",
+  async (req, res) => {
+    try {
+      const editorId = validId(req.params.editorId);
+      const notificationId = validId(req.params.notificationId);
+
+      if (!editorId || !notificationId) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid editor or notification ID.",
+        });
+      }
+
+      const result = await pool.query(
+        `UPDATE public.editor_notifications
+         SET is_read = TRUE
+         WHERE id = $1 AND editor_id = $2
+         RETURNING id, is_read AS "read"`,
+        [notificationId, editorId]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Notification not found.",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Notification marked as read.",
+        notification: result.rows[0],
+      });
+    } catch (error) {
+      console.error("MARK EDITOR NOTIFICATION READ ERROR:", error.message);
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update notification.",
+      });
+    }
+  }
+);
+
+
+/* =====================================
+   EDITOR - MARK ALL NOTIFICATIONS READ
+===================================== */
+app.patch(
+  "/api/notifications/editor/:editorId/read-all",
+  async (req, res) => {
+    try {
+      const editorId = validId(req.params.editorId);
+
+      if (!editorId) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid editor ID.",
+        });
+      }
+
+      const editor = await pool.query(
+        `SELECT id
+         FROM public.users
+         WHERE id = $1 AND LOWER(role) = 'editor'`,
+        [editorId]
+      );
+
+      if (editor.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Editor not found.",
+        });
+      }
+
+      const result = await pool.query(
+        `UPDATE public.editor_notifications
+         SET is_read = TRUE
+         WHERE editor_id = $1 AND is_read = FALSE`,
+        [editorId]
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "All notifications marked as read.",
+        updatedCount: result.rowCount,
+      });
+    } catch (error) {
+      console.error("MARK ALL EDITOR NOTIFICATIONS ERROR:", error.message);
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update notifications.",
+      });
+    }
+  }
+);
+
+
+// =====================================
+// REPORTER NOTIFICATIONS - GET ALL
+// =====================================
+app.get("/api/notifications/reporter/:reporterId", async (req, res) => {
+  try {
+    const reporterID = validId(req.params.reporterId);
+
+    if (!reporterID) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid reporter ID.",
       });
     }
 
     const reporter = await pool.query(
       `SELECT id FROM public.users
        WHERE id = $1 AND role = 'reporter'`,
-      [reporterId]
+      [reporterID]
     );
 
     if (reporter.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "Reporter not found",
+        message: "Reporter not found.",
       });
     }
 
@@ -1156,7 +1395,7 @@ app.get("/api/notifications/reporter/:reporterId", async (req, res) => {
        FROM public.notifications
        WHERE reporter_id = $1
        ORDER BY created_at DESC`,
-      [reporterId]
+      [reporterID]
     );
 
     return res.status(200).json({
@@ -1164,26 +1403,27 @@ app.get("/api/notifications/reporter/:reporterId", async (req, res) => {
       notifications: result.rows,
     });
   } catch (error) {
-    console.error("Fetch notifications error:", error);
+    console.error("FETCH NOTIFICATIONS ERROR:", error.message);
 
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch notifications",
+      message: "Failed to fetch notifications.",
     });
   }
 });
 
-
+// =====================================
 // MARK SINGLE NOTIFICATION AS READ
+// =====================================
 app.patch("/api/notifications/:id/read", async (req, res) => {
   try {
-    const { id } = req.params;
-    const { reporterId } = req.body;
+    const notificationID = validId(req.params.id);
+    const reporterID = validId(req.body.reporterId);
 
-    if (!validId(id) || !validId(reporterId)) {
+    if (!notificationID || !reporterID) {
       return res.status(400).json({
         success: false,
-        message: "Invalid notification or reporter ID",
+        message: "Invalid notification or reporter ID.",
       });
     }
 
@@ -1192,43 +1432,44 @@ app.patch("/api/notifications/:id/read", async (req, res) => {
        SET is_read = TRUE
        WHERE id = $1 AND reporter_id = $2
        RETURNING id, is_read AS "read"`,
-      [id, reporterId]
+      [notificationID, reporterID]
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "Notification not found",
+        message: "Notification not found.",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Notification marked as read",
+      message: "Notification marked as read.",
       notification: result.rows[0],
     });
   } catch (error) {
-    console.error("Mark notification read error:", error);
+    console.error("MARK NOTIFICATION READ ERROR:", error.message);
 
     return res.status(500).json({
       success: false,
-      message: "Failed to update notification",
+      message: "Failed to update notification.",
     });
   }
 });
 
-
-// MARK ALL REPORTER NOTIFICATIONS AS READ
+// =====================================
+// MARK ALL REPORTER NOTIFICATIONS READ
+// =====================================
 app.patch(
   "/api/notifications/reporter/:reporterId/read-all",
   async (req, res) => {
     try {
-      const { reporterId } = req.params;
+      const reporterID = validId(req.params.reporterId);
 
-      if (!validId(reporterId)) {
+      if (!reporterID) {
         return res.status(400).json({
           success: false,
-          message: "Invalid reporter ID",
+          message: "Invalid reporter ID.",
         });
       }
 
@@ -1237,36 +1478,37 @@ app.patch(
          SET is_read = TRUE
          WHERE reporter_id = $1 AND is_read = FALSE
          RETURNING id`,
-        [reporterId]
+        [reporterID]
       );
 
       return res.status(200).json({
         success: true,
-        message: "All notifications marked as read",
+        message: "All notifications marked as read.",
         updatedCount: result.rowCount,
       });
     } catch (error) {
-      console.error("Mark all notifications read error:", error);
+      console.error("MARK ALL NOTIFICATIONS READ ERROR:", error.message);
 
       return res.status(500).json({
         success: false,
-        message: "Failed to update notifications",
+        message: "Failed to update notifications.",
       });
     }
   }
 );
 
-
+// =====================================
 // DELETE SINGLE REPORTER NOTIFICATION
+// =====================================
 app.delete("/api/notifications/:id", async (req, res) => {
   try {
-    const { id } = req.params;
-    const { reporterId } = req.query;
+    const notificationID = validId(req.params.id);
+    const reporterID = validId(req.query.reporterId);
 
-    if (!validId(id) || !validId(reporterId)) {
+    if (!notificationID || !reporterID) {
       return res.status(400).json({
         success: false,
-        message: "Invalid notification or reporter ID",
+        message: "Invalid notification or reporter ID.",
       });
     }
 
@@ -1274,42 +1516,43 @@ app.delete("/api/notifications/:id", async (req, res) => {
       `DELETE FROM public.notifications
        WHERE id = $1 AND reporter_id = $2
        RETURNING id`,
-      [id, reporterId]
+      [notificationID, reporterID]
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "Notification not found",
+        message: "Notification not found.",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Notification deleted successfully",
+      message: "Notification deleted successfully.",
     });
   } catch (error) {
-    console.error("Delete notification error:", error);
+    console.error("DELETE NOTIFICATION ERROR:", error.message);
 
     return res.status(500).json({
       success: false,
-      message: "Failed to delete notification",
+      message: "Failed to delete notification.",
     });
   }
 });
 
-
-// DELETE ALL READ NOTIFICATIONS FOR REPORTER
+// =====================================
+// DELETE ALL READ NOTIFICATIONS
+// =====================================
 app.delete(
   "/api/notifications/reporter/:reporterId/read",
   async (req, res) => {
     try {
-      const { reporterId } = req.params;
+      const reporterID = validId(req.params.reporterId);
 
-      if (!validId(reporterId)) {
+      if (!reporterID) {
         return res.status(400).json({
           success: false,
-          message: "Invalid reporter ID",
+          message: "Invalid reporter ID.",
         });
       }
 
@@ -1317,28 +1560,105 @@ app.delete(
         `DELETE FROM public.notifications
          WHERE reporter_id = $1 AND is_read = TRUE
          RETURNING id`,
-        [reporterId]
+        [reporterID]
       );
 
       return res.status(200).json({
         success: true,
-        message: "Read notifications deleted successfully",
+        message: "Read notifications deleted successfully.",
         deletedCount: result.rowCount,
       });
     } catch (error) {
-      console.error("Delete read notifications error:", error);
+      console.error("DELETE READ NOTIFICATIONS ERROR:", error.message);
 
       return res.status(500).json({
         success: false,
-        message: "Failed to delete read notifications",
+        message: "Failed to delete read notifications.",
       });
     }
   }
 );
-// =====================================================
-// START EM-AXIS SERVER
-// =====================================================
 
+/* =====================================
+   GET ALL REPORTERS FROM DATABASE
+===================================== */
+app.get("/api/reporters", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        u.id,
+        u.full_name AS name,
+        u.email,
+        u.mobile,
+        u.joining_date,
+        COALESCE(u.account_status, 'Active') AS status,
+
+        COUNT(n.id)::int AS total,
+
+        COUNT(n.id) FILTER (
+          WHERE LOWER(COALESCE(n.status, '')) = 'pending'
+        )::int AS pending,
+
+        COUNT(n.id) FILTER (
+          WHERE LOWER(COALESCE(n.status, '')) = 'approved'
+        )::int AS approved,
+
+        COUNT(n.id) FILTER (
+          WHERE LOWER(COALESCE(n.status, '')) = 'rejected'
+        )::int AS rejected,
+
+        COUNT(n.id) FILTER (
+          WHERE LOWER(COALESCE(n.status, '')) = 'published'
+        )::int AS published
+
+      FROM public.users u
+
+      LEFT JOIN public.news n
+        ON n.reporter_id = u.id
+
+      WHERE LOWER(u.role) = 'reporter'
+
+      GROUP BY
+        u.id,
+        u.full_name,
+        u.email,
+        u.mobile,
+        u.joining_date,
+        u.account_status
+
+      ORDER BY u.id ASC
+    `);
+
+    const reporters = result.rows.map((reporter) => ({
+      ...reporter,
+      id: Number(reporter.id),
+      reporterCode: `REP-${String(reporter.id).padStart(3, "0")}`,
+      total: Number(reporter.total),
+      pending: Number(reporter.pending),
+      approved: Number(reporter.approved),
+      rejected: Number(reporter.rejected),
+      published: Number(reporter.published),
+    }));
+
+    return res.status(200).json({
+      success: true,
+      count: reporters.length,
+      reporters,
+    });
+  } catch (error) {
+    console.error("FETCH ALL REPORTERS ERROR:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch reporters from the database.",
+    });
+  }
+});
+
+
+// =====================================
+// START EM-AXIS SERVER
+// =====================================
 app.listen(PORT, () => {
   console.log(`EM-AXIS server running on port ${PORT}`);
 });

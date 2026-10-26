@@ -1,6 +1,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./totalNews.css";
 
 const API_BASE = (
@@ -78,11 +79,15 @@ function mapNewsRecord(item) {
     id: String(item.id),
     databaseId: item.id,
     title: item.news_slug || item.title || "Untitled News",
-    format: normalizeFormat(item.news_format || item.newsFormat || item.format),
-    date: createdAt ? new Date(createdAt).toISOString().slice(0, 10) : "",
+    format: normalizeFormat(
+      item.news_format || item.newsFormat || item.format
+    ),
+    date: createdAt
+      ? new Date(createdAt).toISOString().slice(0, 10)
+      : "",
     displayDate: formatDate(createdAt),
     time: formatTime(createdAt),
-    eventDate: eventDate,
+    eventDate,
     location: item.location || "—",
     status: item.status || "Pending",
     script: item.script || "",
@@ -104,6 +109,7 @@ function TotalNews() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // FETCH REPORTER NEWS
   const fetchNews = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -155,11 +161,13 @@ function TotalNews() {
     } catch (err) {
       console.error("TOTAL NEWS FETCH ERROR:", err);
 
-      setError(
+      const errorMessage =
         err instanceof TypeError
           ? "Cannot connect to the backend. Check that the server is running."
-          : err.message || "Unable to load news records."
-      );
+          : err.message || "Unable to load news records.";
+
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -169,6 +177,7 @@ function TotalNews() {
     fetchNews();
   }, [fetchNews, location.key, location.state?.refresh]);
 
+  // FILTER NEWS
   const filteredNews = useMemo(() => {
     const searchText = search.trim().toLowerCase();
 
@@ -179,19 +188,17 @@ function TotalNews() {
         item.id.toLowerCase().includes(searchText) ||
         item.location.toLowerCase().includes(searchText);
 
-      const formatMatch =
-        format === "All" || item.format === format;
+      const formatMatch = format === "All" || item.format === format;
 
-      const statusMatch =
-        status === "All" || item.status === status;
+      const statusMatch = status === "All" || item.status === status;
 
-      const dateMatch =
-        !selectedDate || item.date === selectedDate;
+      const dateMatch = !selectedDate || item.date === selectedDate;
 
       return searchMatch && formatMatch && statusMatch && dateMatch;
     });
   }, [news, search, format, status, selectedDate]);
 
+  // SUMMARY COUNTS
   const counts = useMemo(
     () => ({
       total: news.length,
@@ -203,16 +210,19 @@ function TotalNews() {
     [news]
   );
 
+  // RESET FILTERS
   const resetFilters = () => {
     setSearch("");
     setFormat("All");
     setStatus("All");
     setSelectedDate("");
+    toast.info("Filters have been reset.");
   };
 
   return (
     <div className="total-news-page">
       <main className="total-news-main">
+        {/* PAGE HEADER */}
         <section className="total-news-heading">
           <div className="total-heading-left">
             <div className="total-heading-icon">📰</div>
@@ -228,6 +238,7 @@ function TotalNews() {
           </div>
         </section>
 
+        {/* SUMMARY CARDS */}
         <section className="total-summary-grid">
           <div className="total-summary-card summary-blue">
             <div className="summary-card-top">
@@ -275,6 +286,7 @@ function TotalNews() {
           </div>
         </section>
 
+        {/* FILTER PANEL */}
         <section className="total-filter-panel">
           <div className="total-filter-heading">
             <div>
@@ -349,12 +361,16 @@ function TotalNews() {
               <strong>{news.length}</strong> news records
             </span>
 
-            {(search || format !== "All" || status !== "All" || selectedDate) && (
+            {(search ||
+              format !== "All" ||
+              status !== "All" ||
+              selectedDate) && (
               <span className="total-filter-active">Filters applied</span>
             )}
           </div>
         </section>
 
+        {/* FETCH ERROR */}
         {error && (
           <section className="total-filter-panel" role="alert">
             <p>{error}</p>
@@ -368,6 +384,7 @@ function TotalNews() {
           </section>
         )}
 
+        {/* NEWS TABLE */}
         <section className="total-table-card">
           <div className="total-table-scroll">
             <table className="total-news-table">
@@ -394,9 +411,13 @@ function TotalNews() {
                   <tr>
                     <td colSpan={7} className="total-empty-state">
                       <div className="total-empty-icon">📰</div>
+
                       <strong>
-                        {error ? "News could not be loaded" : "No news records found"}
+                        {error
+                          ? "News could not be loaded"
+                          : "No news records found"}
                       </strong>
+
                       <p>
                         {error
                           ? "Check your backend connection and try again."
@@ -404,6 +425,7 @@ function TotalNews() {
                             ? "Your submitted news will appear here."
                             : "Try changing your search or filter options."}
                       </p>
+
                       {news.length > 0 && (
                         <button type="button" onClick={resetFilters}>
                           Clear Filters
@@ -489,6 +511,7 @@ function TotalNews() {
         </section>
       </main>
 
+      {/* NEWS DETAILS MODAL */}
       {selectedNews && (
         <div
           className="total-modal-overlay"
@@ -533,22 +556,27 @@ function TotalNews() {
                   <span>News ID</span>
                   <strong>{selectedNews.id}</strong>
                 </div>
+
                 <div className="total-detail-item">
                   <span>Format</span>
                   <strong>{selectedNews.format}</strong>
                 </div>
+
                 <div className="total-detail-item">
                   <span>Created Date</span>
                   <strong>{selectedNews.displayDate}</strong>
                 </div>
+
                 <div className="total-detail-item">
                   <span>Time</span>
                   <strong>{selectedNews.time}</strong>
                 </div>
+
                 <div className="total-detail-item">
                   <span>Location</span>
                   <strong>{selectedNews.location}</strong>
                 </div>
+
                 <div className="total-detail-item">
                   <span>Status</span>
                   <strong>{selectedNews.status}</strong>

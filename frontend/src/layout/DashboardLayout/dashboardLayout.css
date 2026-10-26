@@ -1,6 +1,7 @@
+
 /* ==========================================
    REPORTER DASHBOARD LAYOUT
-   ========================================== */
+========================================== */
 
 .dashboard-layout {
   min-height: 100vh;
@@ -8,20 +9,20 @@
 }
 
 .dashboard-main {
-  margin-left: 250px;
+  margin-left: 240px;
   min-height: calc(100vh - 76px);
-  padding: 0 26px 28px;
+  padding: 0 8px 28px;
   box-sizing: border-box;
 }
 
 /* ==========================================
    BACK BUTTON AREA
-   ========================================== */
+========================================== */
 
 .reporter-back-wrapper {
   display: flex;
   align-items: center;
-  padding: 18px 0 20px;
+  padding: 8px 0 10px;
 }
 
 /* Stylish blue back button */
@@ -113,11 +114,11 @@
 @media (max-width: 768px) {
   .dashboard-main {
     margin-left: 0;
-    padding: 0 15px 22px;
+    padding: 0 8px 22px;
   }
 
   .reporter-back-wrapper {
-    padding: 14px 0 16px;
+    padding: 8px 0 10px;
   }
 
   .reporter-back-button {
@@ -130,6 +131,11 @@
     height: 27px;
   }
 }
+
+/* ==========================================
+   BACK BUTTON VISIBILITY
+========================================== */
+
 .dashboard-layout .dashboard-main .reporter-back-wrapper {
   display: flex !important;
   visibility: visible !important;
@@ -137,9 +143,9 @@
   position: relative !important;
   z-index: 999 !important;
   width: 100%;
-  min-height: 55px;
+  min-height: 45px;
   align-items: center;
-  padding: 12px 0;
+  padding: 8px 0;
   box-sizing: border-box;
 }
 
@@ -173,4 +179,88 @@
   background: #17488f !important;
   box-shadow: 0 6px 16px rgba(36, 95, 190, 0.3);
   transform: translateY(-2px);
+}
+
+/* ==========================================
+   ALTERNATIVE PAGE BACK ARROW
+========================================== */
+
+.page-back-arrow-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 8px 8px;
+}
+
+.page-back-arrow {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: #e7efff;
+  color: #2455ad;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.page-back-arrow:hover {
+  background: #cbdcff;
+  transform: translateX(-3px);
+}
+
+.page-back-arrow:focus-visible {
+  outline: 2px solid #2455ad;
+  outline-offset: 3px;
+}
+
+@media (max-width: 768px) {
+  .page-back-arrow-wrapper {
+    padding: 8px;
+  }
+}
+
+/* ==========================================
+   REPORTER PAGE SCROLLING — KEEP
+========================================== */
+
+.dashboard-layout {
+  height: auto !important;
+  min-height: 100vh;
+  overflow: visible !important;
+}
+
+.dashboard-layout .dashboard-main {
+  margin-left: 240px;
+  height: calc(100vh - 76px) !important;
+  min-height: 0 !important;
+  padding: 0 8px 28px;
+  box-sizing: border-box;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+
+  overscroll-behavior-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  .dashboard-layout .dashboard-main {
+    margin-left: 0;
+    width: 100%;
+    height: calc(100vh - 76px) !important;
+    min-height: 0 !important;
+    padding: 0 8px 22px;
+    box-sizing: border-box;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    overscroll-behavior-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }

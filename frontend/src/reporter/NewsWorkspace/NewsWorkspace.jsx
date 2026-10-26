@@ -1,6 +1,6 @@
-
 import React, { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./newsworkspace.css";
 
 const API_BASE = (
@@ -56,10 +56,10 @@ function NewsWorkspace() {
   );
 
   const [mediaFiles, setMediaFiles] = useState(() => ({
-    audio: restoreMedia(initialMedia.audio),
-    video: restoreMedia(initialMedia.video),
-    documents: restoreMedia(initialMedia.documents),
-    images: restoreMedia(initialMedia.images),
+    audio: restoreMedia(initialMedia.audio || []),
+    video: restoreMedia(initialMedia.video || []),
+    documents: restoreMedia(initialMedia.documents || []),
+    images: restoreMedia(initialMedia.images || []),
   }));
 
   const [showMedia, setShowMedia] = useState(false);
@@ -78,6 +78,12 @@ function NewsWorkspace() {
   const videoRef = useRef(null);
   const documentRef = useRef(null);
   const imageRef = useRef(null);
+
+  // SHOW VALIDATION ERROR
+  const showValidationError = (text) => {
+    setMessage(text);
+    toast.warning(text);
+  };
 
   // UPDATE NEWS DETAILS
   const handleDetailChange = (event) => {
@@ -105,16 +111,26 @@ function NewsWorkspace() {
     event.target.value = "";
     setMessage("");
     setShowMedia(false);
+
+    toast.success(
+      `${selectedFiles.length} ${type} file${
+        selectedFiles.length > 1 ? "s" : ""
+      } added to the workspace.`
+    );
   };
 
   // REMOVE MEDIA FILE
   const removeMediaFile = (type, index) => {
+    const file = mediaFiles[type][index];
+
     setMediaFiles((previous) => ({
       ...previous,
       [type]: previous[type].filter(
         (_, fileIndex) => fileIndex !== index
       ),
     }));
+
+    toast.info(`${file?.name || "Media file"} removed from the workspace.`);
   };
 
   // ALL MEDIA FILES
@@ -138,32 +154,32 @@ function NewsWorkspace() {
   // VALIDATE NEWS
   const validateNews = () => {
     if (!details.newsFormat.trim()) {
-      setMessage("Please select a news format.");
+      showValidationError("Please select a news format.");
       return false;
     }
 
     if (!details.newsSlug.trim()) {
-      setMessage("Please enter the news slug.");
+      showValidationError("Please enter the news slug.");
       return false;
     }
 
     if (!details.location.trim()) {
-      setMessage("Please enter the reporting location.");
+      showValidationError("Please enter the reporting location.");
       return false;
     }
 
     if (!details.eventDate) {
-      setMessage("Please select the event date and time.");
+      showValidationError("Please select the event date and time.");
       return false;
     }
 
     if (Number.isNaN(new Date(details.eventDate).getTime())) {
-      setMessage("Please enter a valid event date.");
+      showValidationError("Please enter a valid event date.");
       return false;
     }
 
     if (!script.trim()) {
-      setMessage("Please write the news script first.");
+      showValidationError("Please write the news script first.");
       return false;
     }
 
@@ -177,6 +193,8 @@ function NewsWorkspace() {
     setMessage("");
     setEditingDetails(false);
     setShowPreview(true);
+
+    toast.info("News preview is ready.");
   };
 
   // GET REPORTER ID
@@ -187,15 +205,17 @@ function NewsWorkspace() {
       throw new Error("Your session has expired. Please log in again.");
     }
 
-    let user;
+    let parsedUser;
 
     try {
-      user = JSON.parse(storedUser);
+      parsedUser = JSON.parse(storedUser);
     } catch {
       throw new Error("Invalid login session. Please log in again.");
     }
 
+    const user = parsedUser?.user || parsedUser;
     const reporterId = Number(user?.id);
+
     const userRole = String(user?.role || "")
       .trim()
       .toLowerCase()
@@ -235,12 +255,12 @@ function NewsWorkspace() {
     mediaFiles: getMediaMetadata(),
   });
 
-  // SAVE OR UPDATE DRAFT, THEN OPEN DRAFT PAGE
+  // SAVE OR UPDATE DRAFT
   const saveDraft = async () => {
     if (submitting) return;
 
     if (!script.trim()) {
-      setMessage("Please write the news script before saving.");
+      showValidationError("Please write the news script before saving.");
       return;
     }
 
@@ -280,7 +300,12 @@ function NewsWorkspace() {
         setDraftId(savedId);
       }
 
-      // Redirect only after the database confirms the save.
+      toast.success(
+        isUpdating
+          ? "Draft updated successfully!"
+          : "News draft saved successfully!"
+      );
+
       navigate("/reporter/draft", {
         replace: true,
         state: {
@@ -291,11 +316,13 @@ function NewsWorkspace() {
     } catch (error) {
       console.error("DRAFT SAVE ERROR:", error);
 
-      setMessage(
+      const errorMessage =
         error instanceof TypeError
           ? "Cannot connect to the backend. Check that the server is running."
-          : error.message || "Unable to save draft. Please try again."
-      );
+          : error.message || "Unable to save draft. Please try again.";
+
+      setMessage(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -327,7 +354,7 @@ function NewsWorkspace() {
         throw new Error(result.message || "Unable to submit news.");
       }
 
-      // Delete draft after news is successfully submitted.
+      // Delete the draft after news submission succeeds.
       if (Number.isInteger(draftId) && draftId > 0) {
         try {
           const deleteResponse = await fetch(
@@ -335,13 +362,23 @@ function NewsWorkspace() {
             { method: "DELETE" }
           );
 
-          if (!deleteResponse.ok) {
-            console.warn("News submitted, but draft deletion failed.");
+          const deleteResult = await deleteResponse.json().catch(() => ({}));
+
+          if (!deleteResponse.ok || deleteResult.success === false) {
+            toast.warning(
+              "News was submitted, but the saved draft could not be deleted."
+            );
           }
         } catch (deleteError) {
           console.warn("Draft deletion failed:", deleteError);
+
+          toast.warning(
+            "News was submitted, but the saved draft could not be deleted."
+          );
         }
       }
+
+      toast.success("News submitted successfully!");
 
       navigate("/reporter/total-news", {
         state: {
@@ -352,11 +389,13 @@ function NewsWorkspace() {
     } catch (error) {
       console.error("NEWS SUBMISSION ERROR:", error);
 
-      setMessage(
+      const errorMessage =
         error instanceof TypeError
           ? "Cannot connect to the backend. Check that the server is running."
-          : error.message || "Unable to submit news."
-      );
+          : error.message || "Unable to submit news.";
+
+      setMessage(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -427,9 +466,7 @@ function NewsWorkspace() {
             <button
               type="button"
               className="secondary-button"
-              onClick={() =>
-                setEditingDetails((previous) => !previous)
-              }
+              onClick={() => setEditingDetails((previous) => !previous)}
             >
               {editingDetails ? "Cancel Edit" : "Edit News Details"}
             </button>
@@ -509,7 +546,8 @@ function NewsWorkspace() {
                   className="preview-button"
                   onClick={() => {
                     setEditingDetails(false);
-                    setMessage("News details updated.");
+                    setMessage("");
+                    toast.success("News details updated in the preview.");
                   }}
                 >
                   Save Details
@@ -670,9 +708,7 @@ function NewsWorkspace() {
               type="button"
               className="media-action-button"
               aria-expanded={showMedia}
-              onClick={() =>
-                setShowMedia((previous) => !previous)
-              }
+              onClick={() => setShowMedia((previous) => !previous)}
             >
               <span className="media-action-icon">📎</span>
               Media File
@@ -718,9 +754,15 @@ function NewsWorkspace() {
             type="button"
             className={`breaking-button ${breakingNews ? "active" : ""}`}
             aria-pressed={breakingNews}
-            onClick={() =>
-              setBreakingNews((previous) => !previous)
-            }
+            onClick={() => {
+              const nextValue = !breakingNews;
+              setBreakingNews(nextValue);
+              toast.info(
+                nextValue
+                  ? "Breaking News enabled."
+                  : "Breaking News disabled."
+              );
+            }}
           >
             <span className="breaking-dot" />
             {breakingNews ? "Breaking News: ON" : "Breaking News"}
