@@ -9,40 +9,33 @@ function Profile() {
 
   const [userDetails, setUserDetails] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [showPhotoMenu, setShowPhotoMenu] = useState(false);
 
   const [profileImage, setProfileImage] = useState(
     localStorage.getItem("reporterProfileImage") || ""
   );
 
-  const [showPhotoMenu, setShowPhotoMenu] = useState(false);
+  const [name, setName] = useState("");
+  const [tempName, setTempName] = useState("");
 
   const [gender, setGender] = useState(
     localStorage.getItem("reporterGender") || "Male"
   );
+  const [tempGender, setTempGender] = useState(gender);
+
+  const [location, setLocation] = useState(
+    localStorage.getItem("reporterLocation") || ""
+  );
+  const [tempLocation, setTempLocation] = useState(location);
 
   const [accountStatus, setAccountStatus] = useState(
     localStorage.getItem("reporterAccountStatus") || "Active"
   );
+  const [tempAccountStatus, setTempAccountStatus] =
+    useState(accountStatus);
 
-  const [name, setName] = useState(
-    localStorage.getItem("reporterName") || ""
-  );
-
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [tempName, setTempName] = useState(name);
-
-  // LOCATION
-  const [location, setLocation] = useState(
-    localStorage.getItem("reporterLocation") || ""
-  );
-
-  const [tempLocation, setTempLocation] = useState(
-    localStorage.getItem("reporterLocation") || ""
-  );
-
-  const [isEditingLocation, setIsEditingLocation] = useState(false);
-
-  // Fetch registered user details from backend
+  // LOAD USER DETAILS
   useEffect(() => {
     const loadProfile = async () => {
       try {
@@ -69,17 +62,14 @@ function Profile() {
 
         const user = data.user;
 
+        const savedName =
+          localStorage.getItem("reporterName") ||
+          user.full_name ||
+          "";
+
         setUserDetails(user);
-        setName(
-          localStorage.getItem("reporterName") ||
-            user.full_name ||
-            ""
-        );
-        setTempName(
-          localStorage.getItem("reporterName") ||
-            user.full_name ||
-            ""
-        );
+        setName(savedName);
+        setTempName(savedName);
       } catch (error) {
         console.error("Profile loading error:", error);
         alert(error.message || "Unable to load profile.");
@@ -91,23 +81,12 @@ function Profile() {
     loadProfile();
   }, [navigate]);
 
-  // Reporter ID
+  // AUTOMATIC ID
   const reporterId = userDetails?.id
     ? `REP${String(userDetails.id).padStart(3, "0")}`
     : "—";
 
-  // Format joining date as DD-MM-YYYY
-  const formatJoiningDate = (date) => {
-    if (!date) return "—";
-
-    const datePart = String(date).slice(0, 10);
-    const parts = datePart.split("-");
-
-    if (parts.length !== 3) return "—";
-
-    return `${parts[2]}-${parts[1]}-${parts[0]}`;
-  };
-
+  // DESIGNATION
   const roleLabels = {
     reporter: "Reporter",
     editor: "Editor",
@@ -115,17 +94,72 @@ function Profile() {
   };
 
   const designation = roleLabels[userDetails?.role] || "—";
+  const displayName = name || userDetails?.full_name || "—";
 
-  // PROFILE PHOTO
-  const handleCameraClick = () => {
-    setShowPhotoMenu((prev) => !prev);
+  // DATE FORMAT: DD-MM-YYYY
+  const formatJoiningDate = (date) => {
+    if (!date) return "—";
+
+    const parts = String(date).slice(0, 10).split("-");
+
+    if (parts.length !== 3) return "—";
+
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
   };
 
-  const handleChangePhoto = () => {
-    setShowPhotoMenu(false);
-    fileInputRef.current?.click();
+  // EDIT PROFILE
+  const handleEditProfile = () => {
+    setTempName(displayName === "—" ? "" : displayName);
+    setTempGender(gender);
+    setTempLocation(location);
+    setTempAccountStatus(accountStatus);
+    setIsEditingProfile(true);
   };
 
+  // CANCEL EDIT
+  const handleCancelEdit = () => {
+    setTempName(name || userDetails?.full_name || "");
+    setTempGender(gender);
+    setTempLocation(location);
+    setTempAccountStatus(accountStatus);
+    setIsEditingProfile(false);
+  };
+
+  // SAVE EDITABLE FIELDS
+  const handleSaveChanges = () => {
+    const trimmedName = tempName.trim();
+    const trimmedLocation = tempLocation.trim();
+
+    if (!trimmedName) {
+      alert("Please enter your name.");
+      return;
+    }
+
+    if (!/^[A-Za-z ]+$/.test(trimmedName)) {
+      alert("Name should contain only English letters and spaces.");
+      return;
+    }
+
+    if (trimmedLocation.length > 150) {
+      alert("Location must be 150 characters or fewer.");
+      return;
+    }
+
+    localStorage.setItem("reporterName", trimmedName);
+    localStorage.setItem("reporterGender", tempGender);
+    localStorage.setItem("reporterLocation", trimmedLocation);
+    localStorage.setItem("reporterAccountStatus", tempAccountStatus);
+
+    setName(trimmedName);
+    setGender(tempGender);
+    setLocation(trimmedLocation);
+    setAccountStatus(tempAccountStatus);
+
+    setIsEditingProfile(false);
+    alert("Profile changes saved successfully.");
+  };
+
+  // CHANGE PROFILE PHOTO
   const handleImageChange = (event) => {
     const file = event.target.files?.[0];
 
@@ -150,6 +184,7 @@ function Profile() {
 
       setProfileImage(imageData);
       localStorage.setItem("reporterProfileImage", imageData);
+      setShowPhotoMenu(false);
     };
 
     reader.onerror = () => {
@@ -160,84 +195,11 @@ function Profile() {
     event.target.value = "";
   };
 
+  // REMOVE PROFILE PHOTO
   const handleRemovePhoto = () => {
     setProfileImage("");
     localStorage.removeItem("reporterProfileImage");
     setShowPhotoMenu(false);
-  };
-
-  // EDIT NAME
-  const handleEditName = () => {
-    setTempName(name || userDetails?.full_name || "");
-    setIsEditingName(true);
-  };
-
-  const handleSaveName = () => {
-    const trimmedName = tempName.trim();
-
-    if (!trimmedName) {
-      alert("Please enter your name.");
-      return;
-    }
-
-    if (!/^[A-Za-z ]+$/.test(trimmedName)) {
-      alert("Name should contain only English letters and spaces.");
-      return;
-    }
-
-    setName(trimmedName);
-    localStorage.setItem("reporterName", trimmedName);
-    setIsEditingName(false);
-  };
-
-  const handleCancelName = () => {
-    setTempName(name || userDetails?.full_name || "");
-    setIsEditingName(false);
-  };
-
-  // EDIT LOCATION
-  const handleEditLocation = () => {
-    setTempLocation(location);
-    setIsEditingLocation(true);
-  };
-
-  const handleSaveLocation = () => {
-    const trimmedLocation = tempLocation.trim();
-
-    if (!trimmedLocation) {
-      alert("Please enter your location.");
-      return;
-    }
-
-    if (trimmedLocation.length > 150) {
-      alert("Location must be 150 characters or fewer.");
-      return;
-    }
-
-    setLocation(trimmedLocation);
-    localStorage.setItem("reporterLocation", trimmedLocation);
-    setIsEditingLocation(false);
-  };
-
-  const handleCancelLocation = () => {
-    setTempLocation(location);
-    setIsEditingLocation(false);
-  };
-
-  // GENDER
-  const handleGenderChange = (event) => {
-    const value = event.target.value;
-
-    setGender(value);
-    localStorage.setItem("reporterGender", value);
-  };
-
-  // ACCOUNT STATUS
-  const handleStatusChange = (event) => {
-    const value = event.target.value;
-
-    setAccountStatus(value);
-    localStorage.setItem("reporterAccountStatus", value);
   };
 
   // LOGOUT
@@ -248,7 +210,8 @@ function Profile() {
 
   if (profileLoading) {
     return (
-      <div className="profile-page">
+      <div className="profile-page profile-loading">
+        <div className="profile-loader"></div>
         <h2>Loading profile...</h2>
       </div>
     );
@@ -256,26 +219,59 @@ function Profile() {
 
   return (
     <div className="profile-page">
-      {/* PROFILE HEADER */}
+      {/* PAGE HEADER */}
       <div className="profile-page-header">
         <div className="profile-heading">
           <div className="profile-user-icon">
             <span>♙</span>
           </div>
 
-          <h1>Reporter Profile</h1>
+          <div>
+            <h1>Reporter Profile</h1>
+            <p>View and manage your profile information</p>
+          </div>
+        </div>
+
+        <div className="profile-header-actions">
+          {!isEditingProfile ? (
+            <button
+              type="button"
+              className="profile-edit-btn"
+              onClick={handleEditProfile}
+            >
+              <span>✎</span> Edit Profile
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="profile-cancel-btn"
+                onClick={handleCancelEdit}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="profile-save-btn"
+                onClick={handleSaveChanges}
+              >
+                <span>✓</span> Save Changes
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* PROFILE MAIN */}
+      {/* PROFILE CONTENT */}
       <div className="profile-main">
         {/* LEFT PROFILE CARD */}
-        <div className="profile-left-card">
+        <section className="profile-left-card">
           <div className="profile-image-wrapper">
             {profileImage ? (
               <img
                 src={profileImage}
-                alt="Reporter Profile"
+                alt="Reporter profile"
                 className="profile-image"
               />
             ) : (
@@ -287,8 +283,9 @@ function Profile() {
             <button
               type="button"
               className="camera-btn"
-              onClick={handleCameraClick}
+              onClick={() => setShowPhotoMenu((prev) => !prev)}
               title="Profile photo options"
+              aria-label="Profile photo options"
             >
               📷
             </button>
@@ -297,11 +294,13 @@ function Profile() {
               <div className="photo-menu">
                 <button
                   type="button"
-                  className="photo-menu-item change-photo"
-                  onClick={handleChangePhoto}
+                  className="photo-menu-item"
+                  onClick={() => {
+                    setShowPhotoMenu(false);
+                    fileInputRef.current?.click();
+                  }}
                 >
-                  <span>📷</span>
-                  Change Photo
+                  <span>📷</span> Change Photo
                 </button>
 
                 {profileImage && (
@@ -310,8 +309,7 @@ function Profile() {
                     className="photo-menu-item remove-photo"
                     onClick={handleRemovePhoto}
                   >
-                    <span>🗑️</span>
-                    Remove Photo
+                    <span>🗑</span> Remove Photo
                   </button>
                 )}
               </div>
@@ -326,109 +324,107 @@ function Profile() {
             />
           </div>
 
-          {/* PROFILE NAME */}
-          {!isEditingName ? (
-            <div className="profile-name">
-              {name || userDetails?.full_name || "—"}
-
-              <button
-                type="button"
-                className="edit-icon"
-                onClick={handleEditName}
-                title="Edit Name"
-              >
-                ✎
-              </button>
-            </div>
-          ) : (
-            <div className="name-edit-box">
-              <input
-                type="text"
-                value={tempName}
-                onChange={(e) => setTempName(e.target.value)}
-                className="name-input"
-                autoFocus
-              />
-
-              <div className="name-edit-buttons">
-                <button
-                  type="button"
-                  className="name-save-btn"
-                  onClick={handleSaveName}
-                  title="Save Name"
-                >
-                  ✓
-                </button>
-
-                <button
-                  type="button"
-                  className="name-cancel-btn"
-                  onClick={handleCancelName}
-                  title="Cancel"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          )}
+          <div className="profile-name">{displayName}</div>
 
           <div className="profile-id">{reporterId}</div>
 
           <div
             className={`profile-active-badge ${
-              accountStatus === "Inactive" ? "inactive-badge" : ""
+              (isEditingProfile ? tempAccountStatus : accountStatus) ===
+              "Inactive"
+                ? "inactive-badge"
+                : ""
             }`}
           >
             <span></span>
-            {accountStatus}
+            {isEditingProfile ? tempAccountStatus : accountStatus}
           </div>
-        </div>
+
+          <div className="profile-role-chip">{designation}</div>
+        </section>
 
         {/* RIGHT DETAILS CARD */}
-        <div className="profile-details-card">
-          {/* REPORTER NAME */}
+        <section className="profile-details-card">
+          <div className="profile-card-heading">
+            <div>
+              <h2>Personal Information</h2>
+              <p>Your registered account details</p>
+            </div>
+
+            <span className="profile-card-heading-icon">▤</span>
+          </div>
+
+          {/* NAME - EDITABLE */}
           <div className="profile-detail-row">
-            <div className="detail-icon">●</div>
+            <div className="detail-icon">♙</div>
             <div className="detail-label">Reporter Name</div>
+
             <div className="detail-value">
-              {name || userDetails?.full_name || "—"}
+              {isEditingProfile ? (
+                <input
+                  className="profile-text-input"
+                  type="text"
+                  value={tempName}
+                  onChange={(event) => setTempName(event.target.value)}
+                  placeholder="Enter reporter name"
+                  maxLength={100}
+                />
+              ) : (
+                <>
+                  <span>{displayName}</span>
+
+                  <button
+                    type="button"
+                    className="edit-icon"
+                    onClick={handleEditProfile}
+                    title="Edit reporter name"
+                    aria-label="Edit reporter name"
+                  >
+                    ✎
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
-          {/* REPORTER ID */}
+          {/* REPORTER ID - NON-EDITABLE */}
           <div className="profile-detail-row">
             <div className="detail-icon">▣</div>
             <div className="detail-label">Reporter ID</div>
-            <div className="detail-value">{reporterId}</div>
+            <div className="detail-value readonly-value">{reporterId}</div>
           </div>
 
-          {/* EMAIL */}
+          {/* EMAIL - NON-EDITABLE */}
           <div className="profile-detail-row">
             <div className="detail-icon">✉</div>
             <div className="detail-label">Email ID</div>
-            <div className="detail-value">
+            <div className="detail-value readonly-value">
               {userDetails?.email || "—"}
             </div>
           </div>
 
-          {/* MOBILE */}
+          {/* MOBILE - NON-EDITABLE */}
           <div className="profile-detail-row">
-            <div className="detail-icon">●</div>
+            <div className="detail-icon">☎</div>
             <div className="detail-label">Mobile Number</div>
-            <div className="detail-value">
+            <div className="detail-value readonly-value">
               {userDetails?.mobile || "—"}
             </div>
           </div>
 
-          {/* GENDER */}
+          {/* GENDER - EDITABLE */}
           <div className="profile-detail-row">
             <div className="detail-icon">⚥</div>
             <div className="detail-label">Gender</div>
+
             <div className="detail-value">
               <select
-                className="profile-select"
-                value={gender}
-                onChange={handleGenderChange}
+                className={`profile-select ${
+                  !isEditingProfile ? "readonly-select" : ""
+                }`}
+                value={isEditingProfile ? tempGender : gender}
+                onChange={(event) => setTempGender(event.target.value)}
+                disabled={!isEditingProfile}
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -437,147 +433,63 @@ function Profile() {
             </div>
           </div>
 
-          {/* DESIGNATION */}
+          {/* DESIGNATION - NON-EDITABLE */}
           <div className="profile-detail-row">
             <div className="detail-icon">▣</div>
             <div className="detail-label">Designation</div>
-            <div className="detail-value">{designation}</div>
+            <div className="detail-value readonly-value">
+              {designation}
+            </div>
           </div>
 
-          {/* LOCATION */}
+          {/* LOCATION - EDITABLE */}
           <div className="profile-detail-row">
-            <div className="detail-icon">📍</div>
+            <div className="detail-icon">⌖</div>
             <div className="detail-label">Location</div>
 
             <div className="detail-value">
-              {!isEditingLocation ? (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <span>{location || "Not added"}</span>
-
-                  <button
-                    type="button"
-                    onClick={handleEditLocation}
-                    title="Add or edit location"
-                    aria-label="Add or edit location"
-                    style={{
-                      border: "none",
-                      background: "transparent",
-                      color: "#1769d2",
-                      cursor: "pointer",
-                      fontSize: "18px",
-                      padding: "2px 5px",
-                    }}
-                  >
-                    ✎
-                  </button>
-                </div>
+              {isEditingProfile ? (
+                <input
+                  className="profile-text-input"
+                  type="text"
+                  value={tempLocation}
+                  onChange={(event) => setTempLocation(event.target.value)}
+                  placeholder="Enter city or reporting area"
+                  maxLength={150}
+                />
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    gap: "8px",
-                    width: "100%",
-                    maxWidth: "300px",
-                  }}
-                >
-                  <input
-                    type="text"
-                    value={tempLocation}
-                    onChange={(e) => setTempLocation(e.target.value)}
-                    placeholder="Enter city or reporting area"
-                    maxLength={150}
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleSaveLocation();
-                      }
-                      if (e.key === "Escape") {
-                        handleCancelLocation();
-                      }
-                    }}
-                    style={{
-                      width: "100%",
-                      boxSizing: "border-box",
-                      padding: "9px 11px",
-                      border: "1px solid #b8c7d9",
-                      borderRadius: "6px",
-                      fontSize: "14px",
-                      outlineColor: "#1769d2",
-                    }}
-                  />
-
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "8px",
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={handleSaveLocation}
-                      style={{
-                        padding: "7px 14px",
-                        border: "none",
-                        borderRadius: "5px",
-                        background: "#1769d2",
-                        color: "#fff",
-                        cursor: "pointer",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Save
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleCancelLocation}
-                      style={{
-                        padding: "7px 14px",
-                        border: "1px solid #bbb",
-                        borderRadius: "5px",
-                        background: "#fff",
-                        color: "#333",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
+                <span>{location || "Not added"}</span>
               )}
             </div>
           </div>
 
-          {/* JOINING DATE */}
+          {/* JOINING DATE - NON-EDITABLE */}
           <div className="profile-detail-row">
             <div className="detail-icon">▦</div>
             <div className="detail-label">Joining Date</div>
-            <div className="detail-value">
+            <div className="detail-value readonly-value">
               {formatJoiningDate(userDetails?.joining_date)}
             </div>
           </div>
 
-          {/* ACCOUNT STATUS */}
+          {/* ACCOUNT STATUS - EDITABLE */}
           <div className="profile-detail-row">
             <div className="detail-icon">◉</div>
             <div className="detail-label">Account Status</div>
+
             <div className="detail-value">
               <select
                 className={`profile-select status-select ${
-                  accountStatus === "Inactive" ? "inactive-select" : ""
-                }`}
-                value={accountStatus}
-                onChange={handleStatusChange}
+                  (isEditingProfile ? tempAccountStatus : accountStatus) ===
+                  "Inactive"
+                    ? "inactive-select"
+                    : ""
+                } ${!isEditingProfile ? "readonly-select" : ""}`}
+                value={isEditingProfile ? tempAccountStatus : accountStatus}
+                onChange={(event) =>
+                  setTempAccountStatus(event.target.value)
+                }
+                disabled={!isEditingProfile}
               >
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
@@ -592,10 +504,10 @@ function Profile() {
               className="logout-btn"
               onClick={handleLogout}
             >
-              ⇥ LOG OUT
+              <span>⇥</span> LOG OUT
             </button>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );

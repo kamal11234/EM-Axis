@@ -1,84 +1,102 @@
-import { useMemo, useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 import "./Notifications.css";
 
-const initialNotifications = [
-  {
-    id: 1,
-    title: "News Approved",
-    message:
-      "Your news report has been approved by the editor and is ready for the next stage.",
-    time: "Today · 10:30 AM",
-    newsId: "N001",
-    category: "Approved",
-    type: "success",
-    read: false,
-    details:
-      "Your submitted news report has been approved by the editor. It is ready for the next stage of the news publishing process.",
-  },
-  {
-    id: 2,
-    title: "News Under Review",
-    message:
-      "Your submitted news is currently being reviewed by the editorial team.",
-    time: "Today · 09:15 AM",
-    newsId: "N002",
-    category: "Under Review",
-    type: "warning",
-    read: false,
-    details:
-      "Your news report has been submitted successfully and is currently under review. Please wait for the editor's decision.",
-  },
-  {
-    id: 3,
-    title: "Revision Required",
-    message:
-      "The editor has requested some changes to your news. Please review and update it.",
-    time: "Yesterday · 04:45 PM",
-    newsId: "N003",
-    category: "Revision",
-    type: "danger",
-    read: false,
-    details:
-      "The editor has requested revisions to your news report. Open your submitted news, review the editor's feedback, make the necessary changes, and resubmit it.",
-  },
-  {
-    id: 4,
-    title: "News Published",
-    message: "Your news report has been published successfully.",
-    time: "Yesterday · 02:20 PM",
-    newsId: "N004",
-    category: "Published",
-    type: "info",
-    read: true,
-    details:
-      "Your news report has been published successfully. You can check its status in your news workspace.",
-  },
-  {
-    id: 5,
-    title: "Welcome to EM-AXIS",
-    message:
-      "Welcome to the Reporter workspace. You can check your news updates and notifications here.",
-    time: "18 Oct 2026 · 11:00 AM",
-    newsId: "",
-    category: "System",
-    type: "system",
-    read: true,
-    details:
-      "Welcome to EM-AXIS News Management System. Use your Reporter workspace to create news, submit reports, check their status, and receive updates.",
-  },
-];
+const API_URL = "http://localhost:5000";
+
+function getReporterId() {
+  try {
+    const user = JSON.parse(sessionStorage.getItem("emAxisUser") || "{}");
+    return user.id || user.userId || user.user_id || null;
+  } catch {
+    return null;
+  }
+}
+
+function formatDate(dateValue) {
+  if (!dateValue) return "Date unavailable";
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) return "Date unavailable";
+
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function normalizeNotification(item) {
+  return {
+    ...item,
+    id: item.id,
+    newsId: item.news_id ?? item.newsId ?? null,
+    read: item.read === true || item.is_read === true,
+    time: formatDate(item.created_at || item.time),
+    type: item.type || "info",
+    category: item.category || "System",
+    details: item.details || item.message || "",
+  };
+}
 
 function Notifications() {
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const reporterId = getReporterId();
+
+  const [notifications, setNotifications] = useState([]);
   const [activeFilter, setActiveFilter] = useState("All");
   const [search, setSearch] = useState("");
   const [notice, setNotice] = useState("");
   const [selectedNotification, setSelectedNotification] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // FETCH NOTIFICATIONS FROM BACKEND
+  const fetchNotifications = async () => {
+    if (!reporterId) {
+      setNotice("Reporter login details not found. Please log in again.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await fetch(
+        `${API_URL}/api/notifications/reporter/${reporterId}`
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to load notifications.");
+      }
+
+      setNotifications(
+        (data.notifications || []).map(normalizeNotification)
+      );
+    } catch (error) {
+      setNotice(error.message || "Unable to load notifications.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    // Load notifications when this page mounts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const totalCount = notifications.length;
+
   const unreadCount = notifications.filter(
     (notification) => !notification.read
   ).length;
+
   const readCount = notifications.filter(
     (notification) => notification.read
   ).length;
@@ -88,10 +106,10 @@ function Notifications() {
 
     return notifications.filter((notification) => {
       const matchesSearch = [
-        notification.title,
-        notification.message,
-        notification.category,
-        notification.newsId,
+        notification.title || "",
+        notification.message || "",
+        notification.category || "",
+        String(notification.newsId || ""),
       ].some((value) => value.toLowerCase().includes(query));
 
       const matchesFilter =
@@ -103,52 +121,165 @@ function Notifications() {
     });
   }, [notifications, activeFilter, search]);
 
-  const openDetails = (notification) => {
-    const updatedNotification = { ...notification, read: true };
+  // MARK ONE NOTIFICATION AS READ
+  const markAsRead = async (notification) => {
+    if (notification.read) return true;
 
-    setNotifications((previous) =>
-      previous.map((item) =>
-        item.id === notification.id ? updatedNotification : item
-      )
-    );
+    try {
+      const response = await fetch(
+        `${API_URL}/api/notifications/${notification.id}/read`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reporterId }),
+        }
+      );
 
-    setSelectedNotification(updatedNotification);
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Could not mark as read.");
+      }
+
+      setNotifications((previous) =>
+        previous.map((item) =>
+          item.id === notification.id ? { ...item, read: true } : item
+        )
+      );
+
+      return true;
+    } catch (error) {
+      setNotice(error.message || "Failed to update notification.");
+      return false;
+    }
+  };
+
+  const openDetails = async (notification) => {
     setNotice("");
+
+    const success = await markAsRead(notification);
+
+    if (success) {
+      setSelectedNotification({ ...notification, read: true });
+    }
   };
 
   const closeDetails = () => {
     setSelectedNotification(null);
   };
 
-  const markAllAsRead = () => {
-    setNotifications((previous) =>
-      previous.map((notification) => ({ ...notification, read: true }))
-    );
+  // MARK ALL AS READ
+  const markAllAsRead = async () => {
+    if (!reporterId || unreadCount === 0 || actionLoading) return;
 
-    setSelectedNotification((previous) =>
-      previous ? { ...previous, read: true } : null
-    );
-    setNotice("All notifications marked as read.");
-  };
+    try {
+      setActionLoading(true);
+      setNotice("");
 
-  const deleteNotification = (id) => {
-    setNotifications((previous) =>
-      previous.filter((notification) => notification.id !== id)
-    );
+      const response = await fetch(
+        `${API_URL}/api/notifications/reporter/${reporterId}/read-all`,
+        { method: "PATCH" }
+      );
 
-    if (selectedNotification?.id === id) {
-      setSelectedNotification(null);
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to update notifications.");
+      }
+
+      setNotifications((previous) =>
+        previous.map((item) => ({ ...item, read: true }))
+      );
+
+      setSelectedNotification((previous) =>
+        previous ? { ...previous, read: true } : null
+      );
+
+      setNotice("All notifications marked as read.");
+    } catch (error) {
+      setNotice(error.message || "Failed to mark notifications as read.");
+    } finally {
+      setActionLoading(false);
     }
-
-    setNotice("Notification deleted.");
   };
 
-  const clearReadNotifications = () => {
-    setNotifications((previous) =>
-      previous.filter((notification) => !notification.read)
-    );
-    setSelectedNotification(null);
-    setNotice("Read notifications cleared.");
+  const askDeleteConfirmation = (notification) => {
+    setPendingDelete(notification);
+    setNotice("");
+  };
+
+  // DELETE ONE NOTIFICATION
+  const confirmDelete = async () => {
+    if (!pendingDelete || actionLoading) return;
+
+    const notificationToDelete = pendingDelete;
+
+    try {
+      setActionLoading(true);
+      setNotice("");
+
+      const response = await fetch(
+        `${API_URL}/api/notifications/${notificationToDelete.id}?reporterId=${reporterId}`,
+        { method: "DELETE" }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to delete notification.");
+      }
+
+      setNotifications((previous) =>
+        previous.filter((item) => item.id !== notificationToDelete.id)
+      );
+
+      if (selectedNotification?.id === notificationToDelete.id) {
+        setSelectedNotification(null);
+      }
+
+      setPendingDelete(null);
+      setNotice(`"${notificationToDelete.title}" deleted successfully.`);
+    } catch (error) {
+      setNotice(error.message || "Failed to delete notification.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setPendingDelete(null);
+  };
+
+  // DELETE ALL READ NOTIFICATIONS
+  const clearReadNotifications = async () => {
+    if (!reporterId || readCount === 0 || actionLoading) return;
+
+    try {
+      setActionLoading(true);
+      setNotice("");
+
+      const response = await fetch(
+        `${API_URL}/api/notifications/reporter/${reporterId}/read`,
+        { method: "DELETE" }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to clear read notifications.");
+      }
+
+      setNotifications((previous) =>
+        previous.filter((item) => !item.read)
+      );
+
+      setSelectedNotification(null);
+      setNotice("Read notifications cleared.");
+    } catch (error) {
+      setNotice(error.message || "Failed to clear read notifications.");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleFilterChange = (filter) => {
@@ -174,7 +305,7 @@ function Notifications() {
           type="button"
           className="notifications-primary-btn"
           onClick={markAllAsRead}
-          disabled={unreadCount === 0}
+          disabled={unreadCount === 0 || actionLoading}
         >
           ✓ Mark All as Read
         </button>
@@ -229,7 +360,7 @@ function Notifications() {
             type="button"
             className="notifications-clear-btn"
             onClick={clearReadNotifications}
-            disabled={readCount === 0}
+            disabled={readCount === 0 || actionLoading}
           >
             ▤ Clear Read
           </button>
@@ -296,7 +427,12 @@ function Notifications() {
         )}
 
         <div className="notifications-list">
-          {filteredNotifications.length > 0 ? (
+          {loading ? (
+            <div className="notifications-empty">
+              <h3>Loading notifications...</h3>
+              <p>Please wait while we fetch your notifications.</p>
+            </div>
+          ) : filteredNotifications.length > 0 ? (
             filteredNotifications.map((notification) => (
               <article
                 key={notification.id}
@@ -367,7 +503,7 @@ function Notifications() {
                   <button
                     type="button"
                     className="notification-delete-btn"
-                    onClick={() => deleteNotification(notification.id)}
+                    onClick={() => askDeleteConfirmation(notification)}
                     aria-label={`Delete ${notification.title}`}
                     title="Delete notification"
                   >
@@ -381,15 +517,12 @@ function Notifications() {
               <div className="notifications-empty-icon" aria-hidden="true">
                 ♧
               </div>
-              <h3>No notifications found</h3>
+
+              <h3>No notifications yet</h3>
               <p>
-                {search
-                  ? "Try another search term."
-                  : activeFilter === "Unread"
-                  ? "You have no unread notifications."
-                  : activeFilter === "Read"
-                  ? "You have no read notifications."
-                  : "Your notifications will appear here."}
+                {search || activeFilter !== "All"
+                  ? "No notifications match your search or selected filter."
+                  : "Updates about your news submissions will appear here when notifications are created."}
               </p>
 
               {(search || activeFilter !== "All") && (
@@ -414,7 +547,7 @@ function Notifications() {
 
           <span className="notifications-live-status">
             <span className="notifications-live-dot" />
-            Updates appear here
+            Connected to notifications API
           </span>
         </div>
       </section>
@@ -459,7 +592,7 @@ function Notifications() {
               </span>
 
               <p className="notification-details-message">
-                {selectedNotification.details}
+                {selectedNotification.details || selectedNotification.message}
               </p>
 
               <div className="notification-details-info">
@@ -492,6 +625,54 @@ function Notifications() {
                 onClick={closeDetails}
               >
                 Close
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {pendingDelete && (
+        <div
+          className="notification-modal-overlay notification-delete-overlay"
+          onClick={cancelDelete}
+        >
+          <section
+            className="notification-confirm-modal"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="notification-confirm-title"
+            aria-describedby="notification-confirm-message"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="notification-confirm-icon" aria-hidden="true">
+              !
+            </div>
+
+            <h2 id="notification-confirm-title">Delete Notification?</h2>
+
+            <p id="notification-confirm-message">
+              Are you sure you want to delete{" "}
+              <strong>"{pendingDelete.title}"</strong>? This action cannot be
+              undone.
+            </p>
+
+            <div className="notification-confirm-actions">
+              <button
+                type="button"
+                className="notification-cancel-delete-btn"
+                onClick={cancelDelete}
+                disabled={actionLoading}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="notification-confirm-delete-btn"
+                onClick={confirmDelete}
+                disabled={actionLoading}
+              >
+                {actionLoading ? "Processing..." : "Yes, Delete"}
               </button>
             </div>
           </section>

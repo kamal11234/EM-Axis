@@ -3,6 +3,10 @@ import React, { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./newsworkspace.css";
 
+const API_BASE = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000"
+).replace(/\/+$/, "");
+
 const emptyMedia = () => ({
   audio: [],
   video: [],
@@ -14,29 +18,68 @@ function NewsWorkspace() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const incoming = location.state?.newsDetails || {};
+  const incomingState = location.state || {};
+  const incoming = incomingState.newsDetails || {};
+
+  const toDateTimeLocal = (value) => {
+    if (!value) return "";
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset)
+      .toISOString()
+      .slice(0, 16);
+  };
+
+  const restoreMedia = (files = []) =>
+    files.map((file) =>
+      typeof file === "string" ? { name: file } : file
+    );
+
+  const initialMedia = incomingState.mediaFiles || {};
 
   const [details, setDetails] = useState({
     newsId: incoming.newsId || incoming.id || "Auto Generated",
     newsFormat: incoming.newsFormat || incoming.format || "",
     newsSlug: incoming.newsSlug || incoming.slug || "",
     location: incoming.location || "",
-    eventDate: incoming.eventDate || incoming.dateTime || "",
+    eventDate: toDateTimeLocal(
+      incoming.eventDate || incoming.dateTime || ""
+    ),
   });
 
-  const [script, setScript] = useState("");
-  const [breakingNews, setBreakingNews] = useState(false);
-  const [mediaFiles, setMediaFiles] = useState(emptyMedia);
+  const [script, setScript] = useState(incomingState.script || "");
+  const [breakingNews, setBreakingNews] = useState(
+    Boolean(incomingState.breakingNews)
+  );
+
+  const [mediaFiles, setMediaFiles] = useState(() => ({
+    audio: restoreMedia(initialMedia.audio),
+    video: restoreMedia(initialMedia.video),
+    documents: restoreMedia(initialMedia.documents),
+    images: restoreMedia(initialMedia.images),
+  }));
+
   const [showMedia, setShowMedia] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [editingDetails, setEditingDetails] = useState(false);
   const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const [draftId, setDraftId] = useState(
+    Number(incomingState.draftId) > 0
+      ? Number(incomingState.draftId)
+      : null
+  );
 
   const audioRef = useRef(null);
   const videoRef = useRef(null);
   const documentRef = useRef(null);
   const imageRef = useRef(null);
 
+  // UPDATE NEWS DETAILS
   const handleDetailChange = (event) => {
     const { name, value } = event.target;
 
@@ -44,8 +87,11 @@ function NewsWorkspace() {
       ...previous,
       [name]: value,
     }));
+
+    setMessage("");
   };
 
+  // SELECT MEDIA FILES
   const handleMediaChange = (event, type) => {
     const selectedFiles = Array.from(event.target.files || []);
 
@@ -61,6 +107,7 @@ function NewsWorkspace() {
     setShowMedia(false);
   };
 
+  // REMOVE MEDIA FILE
   const removeMediaFile = (type, index) => {
     setMediaFiles((previous) => ({
       ...previous,
@@ -70,6 +117,7 @@ function NewsWorkspace() {
     }));
   };
 
+  // ALL MEDIA FILES
   const allMedia = Object.entries(mediaFiles).flatMap(
     ([type, files]) =>
       files.map((file, index) => ({
@@ -79,6 +127,7 @@ function NewsWorkspace() {
       }))
   );
 
+  // MEDIA ICON
   const mediaIcon = (type) => {
     if (type === "audio") return "🎵";
     if (type === "video") return "🎥";
@@ -86,7 +135,33 @@ function NewsWorkspace() {
     return "📄";
   };
 
+  // VALIDATE NEWS
   const validateNews = () => {
+    if (!details.newsFormat.trim()) {
+      setMessage("Please select a news format.");
+      return false;
+    }
+
+    if (!details.newsSlug.trim()) {
+      setMessage("Please enter the news slug.");
+      return false;
+    }
+
+    if (!details.location.trim()) {
+      setMessage("Please enter the reporting location.");
+      return false;
+    }
+
+    if (!details.eventDate) {
+      setMessage("Please select the event date and time.");
+      return false;
+    }
+
+    if (Number.isNaN(new Date(details.eventDate).getTime())) {
+      setMessage("Please enter a valid event date.");
+      return false;
+    }
+
     if (!script.trim()) {
       setMessage("Please write the news script first.");
       return false;
@@ -95,13 +170,7 @@ function NewsWorkspace() {
     return true;
   };
 
-  const getNewsData = () => ({
-    ...details,
-    script,
-    breakingNews,
-    mediaFiles,
-  });
-
+  // OPEN PREVIEW
   const openPreview = () => {
     if (!validateNews()) return;
 
@@ -110,101 +179,196 @@ function NewsWorkspace() {
     setShowPreview(true);
   };
 
-  const saveDraft = () => {
+  // GET REPORTER ID
+  const getReporter = () => {
+    const storedUser = sessionStorage.getItem("emAxisUser");
+
+    if (!storedUser) {
+      throw new Error("Your session has expired. Please log in again.");
+    }
+
+    let user;
+
+    try {
+      user = JSON.parse(storedUser);
+    } catch {
+      throw new Error("Invalid login session. Please log in again.");
+    }
+
+    const reporterId = Number(user?.id);
+    const userRole = String(user?.role || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, "_");
+
+    if (!Number.isInteger(reporterId) || reporterId < 1) {
+      throw new Error("Reporter ID is missing. Please log in again.");
+    }
+
+    if (userRole !== "reporter") {
+      throw new Error("Only a reporter account can perform this action.");
+    }
+
+    return { reporterId };
+  };
+
+  // MEDIA FILE NAMES FOR DATABASE
+  const getMediaMetadata = () =>
+    Object.fromEntries(
+      Object.entries(mediaFiles).map(([type, files]) => [
+        type,
+        files.map((file) => file?.name || String(file)),
+      ])
+    );
+
+  // COMMON DATABASE PAYLOAD
+  const getPayload = (reporterId) => ({
+    reporterId,
+    newsFormat: details.newsFormat.trim(),
+    newsSlug: details.newsSlug.trim(),
+    location: details.location.trim(),
+    eventDate: details.eventDate
+      ? new Date(details.eventDate).toISOString()
+      : null,
+    script: script.trim(),
+    breakingNews,
+    mediaFiles: getMediaMetadata(),
+  });
+
+  // SAVE OR UPDATE DRAFT, THEN OPEN DRAFT PAGE
+  const saveDraft = async () => {
+    if (submitting) return;
+
     if (!script.trim()) {
       setMessage("Please write the news script before saving.");
       return;
     }
 
-    console.log("News draft:", getNewsData());
-
-    setMessage(
-      "Draft data is ready. Backend saving is not connected yet."
-    );
-  };
-
-  // SEND NEWS TO TOTAL NEWS PAGE
-  const sendToEditor = () => {
-    if (!validateNews()) return;
-
-    const newsData = getNewsData();
-
-    // Create a valid date for the news row
-    const parsedDate = newsData.eventDate
-      ? new Date(newsData.eventDate)
-      : new Date();
-
-    const validDate = Number.isNaN(parsedDate.getTime())
-      ? new Date()
-      : parsedDate;
-
-    const formatMap = {
-      "One-to-One": "One to One",
-      "One-to-One ": "One to One",
-      TikTak: "WKT Tiktak",
-    };
-
-    const newNews = {
-      id: `N${Date.now()}`,
-      title: newsData.newsSlug?.trim() || "Untitled News",
-      format:
-        formatMap[newsData.newsFormat] || newsData.newsFormat || "—",
-      date: validDate.toISOString().slice(0, 10),
-      displayDate: validDate.toLocaleDateString("en-GB"),
-      time: validDate.toLocaleTimeString("en-IN", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      }),
-      location: newsData.location?.trim() || "—",
-      status: "Pending",
-      script: newsData.script,
-      breakingNews: newsData.breakingNews,
-
-      // Save file names as metadata; File objects themselves
-      // cannot be persisted in localStorage.
-      mediaFiles: Object.fromEntries(
-        Object.entries(newsData.mediaFiles).map(
-          ([type, files]) => [
-            type,
-            files.map((file) => file.name),
-          ]
-        )
-      ),
-    };
+    setSubmitting(true);
+    setMessage("");
 
     try {
-      const existingNews = JSON.parse(
-        localStorage.getItem("emAxisPendingNews") || "[]"
+      const { reporterId } = getReporter();
+      const payload = getPayload(reporterId);
+
+      const isUpdating = Number.isInteger(draftId) && draftId > 0;
+
+      const response = await fetch(
+        isUpdating
+          ? `${API_BASE}/api/news/drafts/${draftId}`
+          : `${API_BASE}/api/news/drafts`,
+        {
+          method: isUpdating ? "PATCH" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
       );
 
-      if (!Array.isArray(existingNews)) {
-        throw new Error("Invalid saved news data");
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Unable to save draft.");
       }
 
-      existingNews.push(newNews);
-
-      localStorage.setItem(
-        "emAxisPendingNews",
-        JSON.stringify(existingNews)
+      const savedId = Number(
+        result.draft?.id || result.id || draftId
       );
 
-      // Navigate to Total News after saving
-      navigate("/reporter/total-news");
+      if (Number.isInteger(savedId) && savedId > 0) {
+        setDraftId(savedId);
+      }
+
+      // Redirect only after the database confirms the save.
+      navigate("/reporter/draft", {
+        replace: true,
+        state: {
+          refresh: true,
+          savedDraftId: savedId || null,
+        },
+      });
     } catch (error) {
-      console.error("Unable to save news:", error);
-      setMessage("Unable to save news in this browser. Please try again.");
+      console.error("DRAFT SAVE ERROR:", error);
+
+      setMessage(
+        error instanceof TypeError
+          ? "Cannot connect to the backend. Check that the server is running."
+          : error.message || "Unable to save draft. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  // SEND NEWS TO EDITOR
+  const sendToEditor = async () => {
+    if (submitting) return;
+    if (!validateNews()) return;
+
+    setSubmitting(true);
+    setMessage("");
+
+    try {
+      const { reporterId } = getReporter();
+      const payload = getPayload(reporterId);
+
+      const response = await fetch(`${API_BASE}/api/news`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Unable to submit news.");
+      }
+
+      // Delete draft after news is successfully submitted.
+      if (Number.isInteger(draftId) && draftId > 0) {
+        try {
+          const deleteResponse = await fetch(
+            `${API_BASE}/api/news/drafts/${draftId}?reporterId=${reporterId}`,
+            { method: "DELETE" }
+          );
+
+          if (!deleteResponse.ok) {
+            console.warn("News submitted, but draft deletion failed.");
+          }
+        } catch (deleteError) {
+          console.warn("Draft deletion failed:", deleteError);
+        }
+      }
+
+      navigate("/reporter/total-news", {
+        state: {
+          refresh: true,
+          submittedNews: result.news,
+        },
+      });
+    } catch (error) {
+      console.error("NEWS SUBMISSION ERROR:", error);
+
+      setMessage(
+        error instanceof TypeError
+          ? "Cannot connect to the backend. Check that the server is running."
+          : error.message || "Unable to submit news."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // FORMAT DATE
   const formatDate = (value) => {
     if (!value) return "—";
 
     const parsedDate = new Date(value);
 
-    if (Number.isNaN(parsedDate.getTime())) {
-      return value;
-    }
+    if (Number.isNaN(parsedDate.getTime())) return value;
 
     return parsedDate.toLocaleString("en-IN", {
       dateStyle: "medium",
@@ -212,7 +376,7 @@ function NewsWorkspace() {
     });
   };
 
-  /* ======================== PREVIEW ======================== */
+  // ======================== NEWS PREVIEW ========================
 
   if (showPreview) {
     return (
@@ -226,7 +390,6 @@ function NewsWorkspace() {
         <section className="preview-card">
           <div className="section-heading">
             <div className="section-icon">📰</div>
-
             <div>
               <h2>News Details</h2>
               <p>Review or edit the information below.</p>
@@ -236,7 +399,7 @@ function NewsWorkspace() {
           <div className="preview-details">
             <div>
               <span>NEWS ID</span>
-              <strong>{details.newsId || "—"}</strong>
+              <strong>{details.newsId || "Auto Generated"}</strong>
             </div>
 
             <div>
@@ -382,9 +545,7 @@ function NewsWorkspace() {
           </div>
 
           <div
-            className={`preview-breaking ${
-              breakingNews ? "active" : ""
-            }`}
+            className={`preview-breaking ${breakingNews ? "active" : ""}`}
           >
             <span className="breaking-dot" />
             Breaking News: {breakingNews ? "Yes" : "No"}
@@ -407,16 +568,18 @@ function NewsWorkspace() {
               type="button"
               className="draft-button"
               onClick={saveDraft}
+              disabled={submitting}
             >
-              Save as Draft
+              {submitting ? "Saving..." : "Save as Draft"}
             </button>
 
             <button
               type="button"
               className="editor-button"
               onClick={sendToEditor}
+              disabled={submitting}
             >
-              Send to Editor →
+              {submitting ? "Submitting..." : "Send to Editor →"}
             </button>
           </div>
 
@@ -430,7 +593,7 @@ function NewsWorkspace() {
     );
   }
 
-  /* ======================== NEWS WORKSPACE ======================== */
+  // ======================== NEWS WORKSPACE ========================
 
   return (
     <main className="news-workspace-page">
@@ -444,7 +607,6 @@ function NewsWorkspace() {
         <div className="workspace-section">
           <div className="section-heading">
             <div className="section-icon">📝</div>
-
             <div>
               <h2>News Script</h2>
               <p>Write the complete news script.</p>
@@ -465,8 +627,6 @@ function NewsWorkspace() {
             {script.length} characters
           </div>
         </div>
-
-        {/* HIDDEN FILE INPUTS */}
 
         <input
           ref={audioRef}
@@ -492,9 +652,7 @@ function NewsWorkspace() {
           accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
           multiple
           hidden
-          onChange={(event) =>
-            handleMediaChange(event, "documents")
-          }
+          onChange={(event) => handleMediaChange(event, "documents")}
         />
 
         <input
@@ -505,8 +663,6 @@ function NewsWorkspace() {
           hidden
           onChange={(event) => handleMediaChange(event, "images")}
         />
-
-        {/* MEDIA FILE + BREAKING NEWS */}
 
         <div className="workspace-tools-row">
           <div className="media-action-wrapper">
@@ -560,9 +716,7 @@ function NewsWorkspace() {
 
           <button
             type="button"
-            className={`breaking-button ${
-              breakingNews ? "active" : ""
-            }`}
+            className={`breaking-button ${breakingNews ? "active" : ""}`}
             aria-pressed={breakingNews}
             onClick={() =>
               setBreakingNews((previous) => !previous)
@@ -572,8 +726,6 @@ function NewsWorkspace() {
             {breakingNews ? "Breaking News: ON" : "Breaking News"}
           </button>
         </div>
-
-        {/* ATTACHED FILES */}
 
         {allMedia.length > 0 && (
           <div className="uploaded-files">
@@ -598,8 +750,6 @@ function NewsWorkspace() {
           </div>
         )}
 
-        {/* MAIN ACTIONS */}
-
         <div className="workspace-actions">
           <button
             type="button"
@@ -613,16 +763,18 @@ function NewsWorkspace() {
             type="button"
             className="draft-button"
             onClick={saveDraft}
+            disabled={submitting}
           >
-            Save as Draft
+            {submitting ? "Saving..." : "Save as Draft"}
           </button>
 
           <button
             type="button"
             className="editor-button"
             onClick={sendToEditor}
+            disabled={submitting}
           >
-            Send to Editor →
+            {submitting ? "Submitting..." : "Send to Editor →"}
           </button>
         </div>
 
@@ -637,4 +789,3 @@ function NewsWorkspace() {
 }
 
 export default NewsWorkspace;
-

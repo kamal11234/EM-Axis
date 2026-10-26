@@ -108,9 +108,46 @@
   background: #f3f5f8;
 }
 
+.navbar-notification:active {
+  transform: scale(0.96);
+}
+
 .notification-icon {
   font-size: 21px;
   line-height: 1;
+}
+
+/* =========================================
+   NOTIFICATION COUNT BADGE
+========================================= */
+
+.notification-badge {
+  position: absolute;
+  top: 0;
+  right: -2px;
+
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ef4444;
+  color: #ffffff;
+
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+
+  border: 2px solid #ffffff;
+  border-radius: 20px;
+
+  box-shadow: 0 2px 5px rgba(239, 68, 68, 0.2);
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 /* =========================================
@@ -126,7 +163,6 @@
 
 /* =========================================
    PROFILE DROPDOWN WRAPPER
-   Added for My Profile and Logout
 ========================================= */
 
 .navbar-profile-wrapper {
@@ -162,7 +198,9 @@
   background: #f3f5f8;
 }
 
-/* Keyboard focus */
+/* =========================================
+   KEYBOARD FOCUS
+========================================= */
 
 .navbar-profile:focus-visible,
 .navbar-notification:focus-visible,
@@ -263,7 +301,6 @@
 
 /* =========================================
    PROFILE DROPDOWN MENU
-   Added
 ========================================= */
 
 .profile-dropdown {
@@ -286,7 +323,6 @@
 
 /* =========================================
    DROPDOWN ITEMS
-   My Profile and Logout
 ========================================= */
 
 .profile-dropdown-item {
@@ -317,7 +353,9 @@
   color: #144db1;
 }
 
-/* Dropdown icons */
+/* =========================================
+   DROPDOWN ICONS
+========================================= */
 
 .dropdown-item-icon {
   width: 22px;
@@ -451,6 +489,14 @@
 
   .notification-icon {
     font-size: 18px;
+  }
+
+  .notification-badge {
+    top: -2px;
+    right: -3px;
+    min-width: 17px;
+    height: 17px;
+    font-size: 9px;
   }
 
   .navbar-profile {

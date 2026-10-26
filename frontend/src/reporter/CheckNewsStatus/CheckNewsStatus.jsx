@@ -1,130 +1,237 @@
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./CheckNewsStatus.css";
 
+const API_BASE = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000"
+).replace(/\/$/, "");
+
+const rowsPerPage = 5;
+
+const normalizeStatus = (status) => {
+  const value = String(status || "Pending")
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ");
+
+  const statusMap = {
+    draft: "Draft",
+    pending: "Pending",
+    submitted: "Pending",
+    "under review": "Pending",
+    "in review": "Pending",
+    approved: "Approved",
+    published: "Published",
+    rejected: "Rejected",
+    "correction required": "Correction Required",
+    "needs changes": "Correction Required",
+    "changes required": "Correction Required",
+  };
+
+  return statusMap[value] || "Pending";
+};
+
+const formatDate = (value) => {
+  if (!value) return "—";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`;
+};
+
+const getLoggedInUser = () => {
+  try {
+    return JSON.parse(sessionStorage.getItem("emAxisUser")) || {};
+  } catch {
+    return {};
+  }
+};
+
+const getNewsId = (news) =>
+  news.id ?? news.news_id ?? news.newsId ?? "";
+
+const getNewsTitle = (news) =>
+  news.title ?? news.news_title ?? news.newsTitle ?? "Untitled News";
+
+const mapNews = (news) => {
+  const status = normalizeStatus(
+    news.status ?? news.news_status ?? news.newsStatus
+  );
+
+  return {
+    id: getNewsId(news),
+    title: getNewsTitle(news),
+    date: formatDate(
+      news.created_at ??
+        news.submitted_at ??
+        news.submission_date ??
+        news.createdAt
+    ),
+    editor:
+      news.editor_name ??
+      news.editorName ??
+      news.editor?.full_name ??
+      news.editor?.name ??
+      "Not assigned",
+    updated: formatDate(
+      news.updated_at ??
+        news.updatedAt ??
+        news.status_updated_at ??
+        news.published_at
+    ),
+    statusText: status,
+    status: `status-${status
+      .toLowerCase()
+      .replace(/\s+/g, "-")}`,
+    correction:
+      news.correction_message ??
+      news.correction_reason ??
+      news.feedback ??
+      news.editor_feedback ??
+      (status === "Correction Required"
+        ? "Please check the editor's feedback."
+        : status === "Rejected"
+        ? "Please contact the editor for details."
+        : status === "Published"
+        ? "No correction required"
+        : status === "Approved"
+        ? "Ready for publishing"
+        : status === "Draft"
+        ? "Not submitted for review"
+        : "Waiting for editor review"),
+    raw: news,
+  };
+};
+
 const CheckNewsStatus = () => {
+  const navigate = useNavigate();
+
+  const [user] = useState(getLoggedInUser);
+  const [newsRows, setNewsRows] = useState([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const rowsPerPage = 5;
+  const reporterId = user.id ?? user.user_id ?? user.userId;
 
-  const dummyRows = [
-    {
-      id: "N001",
-      title: "Heavy rainfall alert issued across coastal districts",
-      date: "02-10-2026",
-      editor: "Rahul Patil",
-      updated: "02-10-2026",
-      status: "status-0",
-      statusText: "Published",
-      correction: "No correction required",
-      action: "View",
-    },
-    {
-      id: "N002",
-      title: "New highway project to improve regional connectivity",
-      date: "01-10-2026",
-      editor: "Sneha Joshi",
-      updated: "02-10-2026",
-      status: "status-1",
-      statusText: "Approved",
-      correction: "Ready for publishing",
-      action: "View",
-    },
-    {
-      id: "N003",
-      title: "Local school announces new education initiative",
-      date: "30-09-2026",
-      editor: "Amit Sawant",
-      updated: "01-10-2026",
-      status: "status-2",
-      statusText: "Pending",
-      correction: "Waiting for editor review",
-      action: "View",
-    },
-    {
-      id: "N004",
-      title: "Major changes announced in city transport services",
-      date: "29-09-2026",
-      editor: "Priya Naik",
-      updated: "30-09-2026",
-      status: "status-3",
-      statusText: "Rejected",
-      correction: "Verify facts and update the headline",
-      action: "View",
-    },
-    {
-      id: "N005",
-      title: "New healthcare facilities planned for rural areas",
-      date: "28-09-2026",
-      editor: "Rahul Patil",
-      updated: "29-09-2026",
-      status: "status-4",
-      statusText: "Draft",
-      correction: "Not submitted for review",
-      action: "Edit",
-    },
-    {
-      id: "N006",
-      title: "State government announces a new youth programme",
-      date: "27-09-2026",
-      editor: "Sneha Joshi",
-      updated: "28-09-2026",
-      status: "status-5",
-      statusText: "Correction Required",
-      correction: "Add a source and verify statistics",
-      action: "View",
-    },
-    {
-      id: "N007",
-      title: "Local sports team wins the district championship",
-      date: "26-09-2026",
-      editor: "Amit Sawant",
-      updated: "27-09-2026",
-      status: "status-6",
-      statusText: "Published",
-      correction: "No correction required",
-      action: "View",
-    },
-    {
-      id: "N008",
-      title: "Community development project enters its next phase",
-      date: "25-09-2026",
-      editor: "Priya Naik",
-      updated: "26-09-2026",
-      status: "status-7",
-      statusText: "Pending",
-      correction: "Waiting for editor review",
-      action: "View",
-    },
-  ];
+  useEffect(() => {
+    const controller = new AbortController();
 
-  // Summary card counts
-  const summary = useMemo(() => {
-    return {
-      total: dummyRows.length,
-      published: dummyRows.filter(
+    const fetchNews = async () => {
+      if (!reporterId) {
+        setNewsRows([]);
+        setError(
+          "Your reporter account could not be identified. Please log in again."
+        );
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError("");
+
+        // This endpoint must return news belonging to this reporter.
+        const response = await fetch(
+          `${API_BASE}/api/news/reporter/${encodeURIComponent(
+            reporterId
+          )}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+              ...(sessionStorage.getItem("token")
+                ? {
+                    Authorization: `Bearer ${sessionStorage.getItem(
+                      "token"
+                    )}`,
+                  }
+                : {}),
+            },
+            signal: controller.signal,
+          }
+        );
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            result.message ||
+              result.error ||
+              `Unable to load news (HTTP ${response.status}).`
+          );
+        }
+
+        const records = Array.isArray(result)
+          ? result
+          : result.news ??
+            result.data?.news ??
+            result.data ??
+            [];
+
+        if (!Array.isArray(records)) {
+          throw new Error(
+            "The server returned an unexpected news data format."
+          );
+        }
+
+        setNewsRows(records.map(mapNews));
+      } catch (err) {
+        if (err.name === "AbortError") return;
+
+        setNewsRows([]);
+        setError(
+          err.message ||
+            "Unable to load news. Please try again."
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchNews();
+
+    return () => controller.abort();
+  }, [reporterId]);
+
+  const summary = useMemo(
+    () => ({
+      total: newsRows.length,
+      published: newsRows.filter(
         (row) => row.statusText === "Published"
       ).length,
-      inReview: dummyRows.filter(
+      inReview: newsRows.filter(
         (row) => row.statusText === "Pending"
       ).length,
-      needsChanges: dummyRows.filter(
+      needsChanges: newsRows.filter(
         (row) =>
           row.statusText === "Rejected" ||
           row.statusText === "Correction Required"
       ).length,
-    };
-  }, []);
+    }),
+    [newsRows]
+  );
 
-  // Search and status filter
   const filteredRows = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    return dummyRows.filter((row) => {
+    return newsRows.filter((row) => {
       const matchesSearch =
-        row.id.toLowerCase().includes(query) ||
+        String(row.id).toLowerCase().includes(query) ||
         row.title.toLowerCase().includes(query) ||
         row.editor.toLowerCase().includes(query);
 
@@ -134,7 +241,7 @@ const CheckNewsStatus = () => {
 
       return matchesSearch && matchesStatus;
     });
-  }, [search, statusFilter]);
+  }, [newsRows, search, statusFilter]);
 
   const totalPages = Math.max(
     1,
@@ -142,7 +249,6 @@ const CheckNewsStatus = () => {
   );
 
   const safePage = Math.min(currentPage, totalPages);
-
   const startIndex = (safePage - 1) * rowsPerPage;
 
   const currentRows = filteredRows.slice(
@@ -161,19 +267,32 @@ const CheckNewsStatus = () => {
   };
 
   const handleView = (row) => {
-    window.alert(
-      `News ID: ${row.id}\n` +
-        `News Slug: ${row.title}\n` +
-        `Submission Date: ${row.date}\n` +
-        `Editor Name: ${row.editor}\n` +
-        `Last updated: ${row.updated}\n` +
-        `News Status: ${row.statusText}\n` +
-        `Correction Required (if any): ${row.correction}`
-    );
+    const details = [
+      `News ID: ${row.id || "—"}`,
+      `News Title: ${row.title}`,
+      `Submission Date: ${row.date}`,
+      `Editor Name: ${row.editor}`,
+      `Last Updated: ${row.updated}`,
+      `News Status: ${row.statusText}`,
+      `Editor Feedback: ${row.correction}`,
+    ].join("\n");
+
+    window.alert(details);
   };
 
   const handleEdit = (row) => {
-    window.alert(`Edit draft: ${row.title}`);
+    navigate("/reporter/create-news", {
+      state: {
+        news: row.raw,
+        editMode: true,
+      },
+    });
+  };
+
+  const clearFilters = () => {
+    setSearch("");
+    setStatusFilter("All");
+    setCurrentPage(1);
   };
 
   return (
@@ -184,7 +303,7 @@ const CheckNewsStatus = () => {
           <div className="check-heading-icon">▤</div>
 
           <div>
-            <h2>Check News Status</h2>
+            <h1>Check News Status</h1>
             <p>
               Track your news submissions and editor feedback
               in one place.
@@ -248,49 +367,41 @@ const CheckNewsStatus = () => {
       <div className="status-summary-grid">
         <div className="status-summary-card summary-total">
           <div className="summary-icon">▤</div>
-
           <div className="summary-details">
             <span className="summary-label">Total News</span>
-            <h3>{summary.total}</h3>
+            <h3>{loading ? "—" : summary.total}</h3>
             <p>All your submissions</p>
           </div>
-
           <span className="summary-arrow">›</span>
         </div>
 
         <div className="status-summary-card summary-published">
           <div className="summary-icon">✓</div>
-
           <div className="summary-details">
             <span className="summary-label">Published</span>
-            <h3>{summary.published}</h3>
+            <h3>{loading ? "—" : summary.published}</h3>
             <p>Successfully published</p>
           </div>
-
           <span className="summary-arrow">›</span>
         </div>
 
         <div className="status-summary-card summary-review">
           <div className="summary-icon">◷</div>
-
           <div className="summary-details">
             <span className="summary-label">In Review</span>
-            <h3>{summary.inReview}</h3>
+            <h3>{loading ? "—" : summary.inReview}</h3>
             <p>Waiting for editor review</p>
           </div>
-
           <span className="summary-arrow">›</span>
         </div>
 
         <div className="status-summary-card summary-changes">
           <div className="summary-icon">!</div>
-
           <div className="summary-details">
             <span className="summary-label">Needs Changes</span>
-            <h3>{summary.needsChanges}</h3>
+            <h3>{loading ? "—" : summary.needsChanges}</h3>
             <p>Requires your attention</p>
           </div>
-
           <span className="summary-arrow">›</span>
         </div>
       </div>
@@ -306,33 +417,66 @@ const CheckNewsStatus = () => {
           </div>
 
           <span className="total-news-badge">
-            {filteredRows.length}{" "}
-            {filteredRows.length === 1 ? "News" : "News Items"}
+            {loading
+              ? "Loading..."
+              : `${filteredRows.length} ${
+                  filteredRows.length === 1
+                    ? "News Item"
+                    : "News Items"
+                }`}
           </span>
         </div>
+
+        {error && (
+          <div
+            className="news-load-error"
+            role="alert"
+          >
+            <strong>Could not load news</strong>
+            <p>{error}</p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </button>
+          </div>
+        )}
 
         <div className="status-table-scroll">
           <table className="status-table">
             <thead>
               <tr>
                 <th>News ID</th>
-                <th>News Slug</th>
+                <th>News Title</th>
                 <th>Submission Date</th>
                 <th>Editor Name</th>
-                <th>Last updated</th>
+                <th>Last Updated</th>
                 <th>News Status</th>
-                <th>Correction Required(if any)</th>
+                <th>Correction Required (if any)</th>
                 <th>Action</th>
               </tr>
             </thead>
 
             <tbody>
-              {currentRows.length > 0 ? (
-                currentRows.map((row) => (
-                  <tr key={row.id}>
+              {loading ? (
+                <tr>
+                  <td colSpan="8" className="empty-table-message">
+                    Loading your news submissions...
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan="8" className="empty-table-message">
+                    News data is unavailable.
+                  </td>
+                </tr>
+              ) : currentRows.length > 0 ? (
+                currentRows.map((row, index) => (
+                  <tr key={row.id || `${row.title}-${index}`}>
                     <td>
                       <span className="news-id-badge">
-                        {row.id}
+                        {row.id || "—"}
                       </span>
                     </td>
 
@@ -375,8 +519,7 @@ const CheckNewsStatus = () => {
                       <span
                         className={`correction-text ${
                           row.statusText === "Rejected" ||
-                          row.statusText ===
-                            "Correction Required"
+                          row.statusText === "Correction Required"
                             ? "correction-warning"
                             : ""
                         }`}
@@ -392,17 +535,17 @@ const CheckNewsStatus = () => {
                           className="pill big action-blue"
                           onClick={() => handleView(row)}
                         >
-                          <span className="action-eye">◉</span>
+                          <span className="action-eye">👀</span>
                           View
                         </button>
 
-                        {row.status === "status-4" && (
+                        {row.statusText === "Draft" && (
                           <button
                             type="button"
                             className="pill big action-green"
                             onClick={() => handleEdit(row)}
                           >
-                            Edit
+                            ✎ Edit
                           </button>
                         )}
                       </div>
@@ -416,21 +559,26 @@ const CheckNewsStatus = () => {
                     className="empty-table-message"
                   >
                     <div className="empty-state-icon">⌕</div>
-                    <strong>No news found</strong>
+                    <strong>
+                      {newsRows.length === 0
+                        ? "No news submissions yet"
+                        : "No news found"}
+                    </strong>
                     <p>
-                      Try changing your search or status filter.
+                      {newsRows.length === 0
+                        ? "Your submitted news will appear here."
+                        : "Try changing your search or status filter."}
                     </p>
-                    <button
-                      type="button"
-                      className="reset-filter-button"
-                      onClick={() => {
-                        setSearch("");
-                        setStatusFilter("All");
-                        setCurrentPage(1);
-                      }}
-                    >
-                      Clear filters
-                    </button>
+
+                    {(search || statusFilter !== "All") && (
+                      <button
+                        type="button"
+                        className="reset-filter-button"
+                        onClick={clearFilters}
+                      >
+                        Clear filters
+                      </button>
+                    )}
                   </td>
                 </tr>
               )}
@@ -441,25 +589,23 @@ const CheckNewsStatus = () => {
         {/* TABLE FOOTER / PAGINATION */}
         <div className="status-table-footer">
           <span className="table-results-text">
-            {filteredRows.length === 0
+            {loading
+              ? "Loading results..."
+              : filteredRows.length === 0
               ? "Showing 0 news"
-              : `Showing ${startIndex + 1} to ${
-                  Math.min(
-                    startIndex + rowsPerPage,
-                    filteredRows.length
-                  )
-                } of ${filteredRows.length} news`}
+              : `Showing ${startIndex + 1} to ${Math.min(
+                  startIndex + rowsPerPage,
+                  filteredRows.length
+                )} of ${filteredRows.length} news`}
           </span>
 
           <div className="pagination-controls">
             <button
               type="button"
               className="pagination-button"
-              disabled={safePage === 1}
+              disabled={loading || safePage === 1}
               onClick={() =>
-                setCurrentPage((page) =>
-                  Math.max(1, page - 1)
-                )
+                setCurrentPage((page) => Math.max(1, page - 1))
               }
               aria-label="Previous page"
             >
@@ -473,7 +619,7 @@ const CheckNewsStatus = () => {
             <button
               type="button"
               className="pagination-button"
-              disabled={safePage >= totalPages}
+              disabled={loading || safePage >= totalPages}
               onClick={() =>
                 setCurrentPage((page) =>
                   Math.min(totalPages, page + 1)

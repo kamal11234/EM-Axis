@@ -1,16 +1,17 @@
 
-/* ==============================
-   DASHBOARD BASE
-============================== */
+/* ==========================================
+   EM-AXIS | REPORTER DASHBOARD
+========================================== */
 
 .dashboard-content {
   width: 100%;
   min-height: 100vh;
-  padding: 20px;
+  padding: 24px;
   box-sizing: border-box;
-  background: #ffffff;
-  color: #222222;
   overflow-x: hidden;
+  background: #f5f7fc;
+  color: #24334b;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
 .dashboard-content * {
@@ -20,24 +21,55 @@
 .dashboard-content button,
 .dashboard-content input,
 .dashboard-content select {
-  font-family: inherit;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
-/* ==============================
+/* ==========================================
    WELCOME SECTION
-============================== */
+========================================== */
 
 .welcome-section {
+  position: relative;
   width: 100%;
-  min-height: 200px;
-  height: 200px;
+  min-height: 205px;
+  height: 205px;
   display: flex;
-  background: #d5f8fc;
-  border-radius: 12px;
+  align-items: center;
+  justify-content: space-between;
   overflow: hidden;
+  border: 1px solid #d7e6ff;
+  border-radius: 16px;
+  background: linear-gradient(110deg, #e6f1ff 0%, #d9ebff 58%, #c8e4ff 100%);
+  box-shadow: 0 5px 18px rgba(34, 75, 140, 0.06);
+}
+
+.welcome-section::before {
+  content: "";
+  position: absolute;
+  width: 230px;
+  height: 230px;
+  right: 24%;
+  top: -155px;
+  border: 35px solid rgba(255, 255, 255, 0.42);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.welcome-section::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  right: 36%;
+  bottom: -115px;
+  border: 24px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .welcome-text {
+  position: relative;
+  z-index: 1;
   flex: 1;
   min-width: 0;
   padding: 25px 32px;
@@ -48,32 +80,34 @@
 
 .welcome-text h1 {
   margin: 0;
-  font-size: clamp(25px, 2.4vw, 36px);
+  font-size: clamp(25px, 2.4vw, 34px);
   line-height: 1.25;
-  color: #111827;
-  font-weight: 700;
+  color: #172d50;
+  font-weight: 800;
+  letter-spacing: -0.6px;
 }
 
 .welcome-text h3 {
-  margin: 8px 0 0;
-  font-size: 22px;
-  color: #1641d8;
-  font-weight: 600;
+  margin: 9px 0 0;
+  font-size: 20px;
+  color: #1758b5;
+  font-weight: 700;
 }
 
 .welcome-text p {
   margin: 10px 0 0;
-  font-size: 15px;
-  line-height: 1.6;
-  color: #374151;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #50627d;
 }
 
-/* REPORTER IMAGE */
-
 .welcome-image {
-  width: 38%;
+  position: relative;
+  z-index: 1;
+  width: 48%;
   min-width: 0;
-  height: 100%;
+  height: 232px ;
+  padding: 12px 0px 12px 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -83,22 +117,26 @@
 .welcome-image img {
   width: 100%;
   height: 100%;
+  object-position: center;
+  display: block;
+  border-radius: 12px;
   object-fit: cover;
   object-position: center 58%;
-  display: block;
+ 
 }
 
-/* ==============================
+
+/* ==========================================
    MAIN DASHBOARD GRID
-============================== */
+========================================== */
 
 .dashboard-main-layout {
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-columns: minmax(0, 1fr) 285px;
   gap: 22px;
   align-items: start;
-  margin-top: 22px;
+  margin-top: 24px;
 }
 
 .dashboard-left,
@@ -114,67 +152,72 @@
 .dashboard-right {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
-/* ==============================
+/* ==========================================
    ACTION SECTION
-============================== */
+========================================== */
 
 .action-section {
   width: 100%;
-  min-height: 58px;
+  min-height: 48px;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   padding: 0;
-  background: #ffffff;
+  background: transparent;
 }
 
 .create-news-btn {
-  min-height: 46px;
-  padding: 0 20px;
+  min-height: 44px;
+  padding: 0 18px;
   flex-shrink: 0;
-  border: none;
-  border-radius: 7px;
-  background: #1641d8;
+  border: 1px solid #175ac0;
+  border-radius: 9px;
+  background: #175ac0;
   color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 650;
   white-space: nowrap;
   cursor: pointer;
-  transition: background 0.2s ease;
+  box-shadow: 0 4px 10px rgba(23, 90, 192, 0.13);
+  transition: background 0.2s ease, transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .create-news-btn:hover {
-  background: #1035b5;
+  background: #10499f;
+  box-shadow: 0 6px 14px rgba(23, 90, 192, 0.2);
+  transform: translateY(-1px);
 }
 
 .search-box {
   flex: 1 1 200px;
   min-width: 0;
   max-width: 420px;
-  height: 46px;
+  height: 44px;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 0 14px;
-  border: 1px solid #d4d8e0;
-  border-radius: 24px;
+  border: 1px solid #e0e6f0;
+  border-radius: 10px;
   background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .search-box:focus-within {
-  border-color: #1641d8;
-  box-shadow: 0 0 0 3px rgba(22, 65, 216, 0.08);
+  border-color: #6c9fe8;
+  box-shadow: 0 0 0 3px rgba(23, 90, 192, 0.08);
 }
 
 .search-box span {
   flex-shrink: 0;
   font-size: 24px;
   line-height: 1;
-  color: #666666;
+  color: #7c8da8;
 }
 
 .search-box input {
@@ -184,58 +227,64 @@
   border: none;
   outline: none;
   background: transparent;
-  color: #222222;
-  font-size: 13px;
+  color: #263752;
+  font-size: 12px;
 }
 
 .search-box input::placeholder {
-  color: #9298a3;
+  color: #98a5b8;
 }
 
 .filter-btn {
-  height: 46px;
-  min-width: 105px;
-  padding: 0 15px;
+  height: 44px;
+  min-width: 100px;
+  padding: 0 13px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   flex-shrink: 0;
-  border: 1px solid #d4d8e0;
-  border-radius: 24px;
+  border: 1px solid #dfe6f0;
+  border-radius: 9px;
   background: #ffffff;
-  color: #333333;
-  font-size: 13px;
+  color: #52627a;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
   transition: 0.2s ease;
 }
 
 .filter-btn:hover {
-  background: #f6f8fc;
+  border-color: #c4d8f7;
+  background: #f5f8ff;
 }
 
 .filter-btn.active-filter {
-  border-color: #1641d8;
-  background: #f1f4ff;
-  color: #1641d8;
+  border-color: #c5d9fb;
+  background: #edf4ff;
+  color: #175ac0;
 }
 
 .filter-arrow {
   font-size: 17px;
 }
 
-/* ==============================
+/* ==========================================
    FILTER SECTION
-============================== */
+========================================== */
 
 .filter-section {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 14px;
-  padding: 16px 0 20px;
+  gap: 13px;
+  margin-top: 15px;
+  padding: 17px;
+  border: 1px solid #e5ebf4;
+  border-radius: 12px;
   background: #ffffff;
+  box-shadow: 0 3px 12px rgba(32, 58, 95, 0.025);
   animation: filterOpen 0.2s ease;
 }
 
@@ -244,7 +293,6 @@
     opacity: 0;
     transform: translateY(-4px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -252,55 +300,56 @@
 }
 
 .filter-field {
-  flex: 1 1 130px;
+  flex: 1 1 120px;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
 }
 
 .filter-field label {
-  color: #4b5563;
-  font-size: 12px;
-  font-weight: 600;
+  color: #485b76;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .filter-field select {
   width: 100%;
-  height: 42px;
-  padding: 0 12px;
-  border: 1px solid #d4d8e0;
-  border-radius: 7px;
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid #dfe6f0;
+  border-radius: 8px;
   outline: none;
-  background: #ffffff;
-  color: #333333;
+  background: #fbfcfe;
+  color: #354760;
   font-size: 12px;
   cursor: pointer;
 }
 
 .filter-field select:focus {
-  border-color: #1641d8;
+  border-color: #6c9fe8;
+  box-shadow: 0 0 0 3px rgba(23, 90, 192, 0.07);
 }
 
 .date-field {
-  flex: 1.7 1 250px;
+  flex: 1.7 1 230px;
 }
 
 .date-range-box {
   width: 100%;
   min-width: 0;
-  height: 42px;
+  height: 40px;
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 0 9px;
-  border: 1px solid #d4d8e0;
-  border-radius: 7px;
-  background: #ffffff;
+  padding: 0 8px;
+  border: 1px solid #dfe6f0;
+  border-radius: 8px;
+  background: #fbfcfe;
 }
 
 .date-range-box:focus-within {
-  border-color: #1641d8;
+  border-color: #6c9fe8;
 }
 
 .date-part {
@@ -314,7 +363,7 @@
 .date-part span {
   flex-shrink: 0;
   font-size: 13px;
-  color: #6b7280;
+  color: #71829c;
 }
 
 .date-part input {
@@ -324,8 +373,8 @@
   border: none;
   outline: none;
   background: transparent;
-  color: #333333;
-  font-size: 11px;
+  color: #354760;
+  font-size: 10px;
 }
 
 .date-part input::-webkit-calendar-picker-indicator {
@@ -334,57 +383,64 @@
 
 .date-separator {
   flex-shrink: 0;
-  color: #9ca3af;
+  color: #9ba8ba;
   font-size: 13px;
 }
 
 .clear-filter-btn {
-  height: 42px;
-  padding: 0 16px;
+  height: 40px;
+  padding: 0 14px;
   flex-shrink: 0;
-  border: 1px solid #d4d8e0;
-  border-radius: 7px;
-  background: #ffffff;
-  color: #4b5563;
-  font-size: 12px;
+  border: 1px solid #dfe6f0;
+  border-radius: 8px;
+  background: #f8faff;
+  color: #53647c;
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
+  transition: 0.2s ease;
 }
 
 .clear-filter-btn:hover {
-  border-color: #1641d8;
-  color: #1641d8;
-  background: #f5f7ff;
+  border-color: #f0c4c4;
+  background: #fff3f3;
+  color: #c23c3c;
 }
 
-/* ==============================
+/* ==========================================
    NEWS RESULTS
-============================== */
+========================================== */
 
 .news-results-section {
   width: 100%;
   min-width: 0;
-  margin-top: 8px;
-  padding: 0 0 20px;
+  margin-top: 24px;
+  padding: 21px;
+  border: 1px solid #e5eaf2;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 4px 15px rgba(32, 58, 95, 0.035);
 }
 
 .news-results-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .news-results-header h2 {
   margin: 0;
-  color: #1f2937;
-  font-size: 20px;
-  font-weight: 700;
+  color: #1c3150;
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.3px;
 }
 
 .news-results-header p {
-  margin: 5px 0 0;
-  color: #7b8190;
-  font-size: 12px;
+  margin: 6px 0 0;
+  color: #8795aa;
+  font-size: 11px;
 }
 
 .news-list {
@@ -396,22 +452,23 @@
 
 .news-card {
   width: 100%;
-  min-height: 76px;
+  min-height: 78px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px;
-  border: 1px solid #e2e5eb;
-  border-radius: 9px;
+  padding: 15px;
+  border: 1px solid #e7ebf2;
+  border-radius: 10px;
   background: #ffffff;
-  transition: border-color 0.2s ease,
-              box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .news-card:hover {
-  border-color: #cbd5ed;
-  box-shadow: 0 3px 10px rgba(31, 41, 55, 0.04);
+  border-color: #cbdcf6;
+  background: #fcfdff;
+  box-shadow: 0 4px 12px rgba(31, 67, 120, 0.055);
 }
 
 .news-card-left {
@@ -428,10 +485,10 @@
 
 .news-title-row h3 {
   margin: 0;
-  color: #252b36;
-  font-size: 14px;
+  color: #263852;
+  font-size: 13px;
   line-height: 1.5;
-  font-weight: 600;
+  font-weight: 700;
   overflow-wrap: anywhere;
 }
 
@@ -439,36 +496,36 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 9px;
-  border-radius: 20px;
+  padding: 5px 9px;
+  border-radius: 6px;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
 }
 
 .status-badge.draft {
-  background: #eeeaff;
-  color: #6c55d9;
+  background: #f0edff;
+  color: #7056bf;
 }
 
 .status-badge.pending {
-  background: #fff3d8;
-  color: #b77900;
+  background: #fff4dc;
+  color: #a66c08;
 }
 
 .status-badge.approved {
-  background: #e6f8ed;
-  color: #15803d;
+  background: #e4f7ec;
+  color: #177b4c;
 }
 
 .status-badge.published {
-  background: #e7f1ff;
-  color: #2364c7;
+  background: #e8f1ff;
+  color: #2863b4;
 }
 
 .status-badge.rejected {
-  background: #ffe9e9;
-  color: #cf3636;
+  background: #ffeded;
+  color: #c33e45;
 }
 
 .news-details {
@@ -477,27 +534,33 @@
   flex-wrap: wrap;
   gap: 7px;
   margin-top: 7px;
-  color: #777f8e;
-  font-size: 11px;
+  color: #8190a5;
+  font-size: 10px;
   line-height: 1.5;
 }
 
+.news-details span:nth-child(even) {
+  color: #c2cbd7;
+}
+
 .view-news-btn {
-  min-height: 34px;
-  padding: 0 15px;
+  min-height: 33px;
+  padding: 0 14px;
   flex-shrink: 0;
-  border: 1px solid #d4dcf5;
-  border-radius: 6px;
-  background: #f5f7ff;
-  color: #1641d8;
-  font-size: 12px;
-  font-weight: 600;
+  border: 1px solid #d4e2f9;
+  border-radius: 8px;
+  background: #f0f6ff;
+  color: #175ac0;
+  font-size: 11px;
+  font-weight: 700;
   cursor: pointer;
+  transition: 0.2s ease;
 }
 
 .view-news-btn:hover {
-  border-color: #1641d8;
-  background: #eaf0ff;
+  border-color: #175ac0;
+  background: #175ac0;
+  color: #ffffff;
 }
 
 /* EMPTY SEARCH RESULTS */
@@ -510,41 +573,48 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  border: 1px dashed #d5d9e2;
+  border: 1px dashed #d6e0ee;
   border-radius: 10px;
-  background: #fafbfc;
+  background: #fafcff;
   text-align: center;
 }
 
 .no-news-icon {
-  font-size: 27px;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  background: #edf4ff;
+  font-size: 23px;
 }
 
 .no-news h3 {
-  margin: 10px 0 4px;
-  color: #333333;
-  font-size: 15px;
+  margin: 12px 0 5px;
+  color: #263852;
+  font-size: 14px;
 }
 
 .no-news p {
   margin: 0;
-  color: #858b98;
+  color: #8795aa;
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-/* ==============================
+/* ==========================================
    QUICK STATUS
-============================== */
+========================================== */
 
 .quick-status-section {
   width: 100%;
   min-width: 0;
-  padding: 15px;
-  border: 1px solid #e2e5eb;
-  border-radius: 10px;
+  padding: 19px;
+  border: 1px solid #e5eaf2;
+  border-radius: 14px;
   background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.035);
+  box-shadow: 0 4px 15px rgba(32, 58, 95, 0.035);
 }
 
 .quick-status-header {
@@ -552,37 +622,42 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 13px;
+  margin-bottom: 16px;
 }
 
 .quick-status-header h2 {
   margin: 0;
-  color: #222b3a;
-  font-size: 17px;
-  font-weight: 700;
+  color: #1c3150;
+  font-size: 16px;
+  font-weight: 750;
 }
 
 .quick-status-header span {
-  color: #858b98;
-  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #edf4ff;
+  color: #2863b4;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .status-card {
   width: 100%;
-  min-height: 55px;
+  min-height: 59px;
   display: flex;
   align-items: center;
   gap: 11px;
-  margin-bottom: 8px;
-  padding: 9px;
-  border: 1px solid #eceef3;
-  border-radius: 8px;
-  background: #fafbfc;
-  transition: background 0.2s ease;
+  margin-bottom: 9px;
+  padding: 10px;
+  border: 1px solid #edf0f5;
+  border-radius: 10px;
+  background: #fafbfe;
+  transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .status-card:hover {
-  background: #f4f6fa;
+  border-color: #dce6f5;
+  background: #f5f8ff;
 }
 
 .status-card:last-child {
@@ -590,89 +665,89 @@
 }
 
 .status-icon {
-  width: 34px;
-  height: 34px;
-  min-width: 34px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 15px;
 }
 
 .status-icon.draft {
-  background: #eeeaff;
-  color: #6c55d9;
+  background: #f0edff;
+  color: #7056bf;
 }
 
 .status-icon.pending {
-  background: #fff3d8;
-  color: #c68100;
+  background: #fff4dc;
+  color: #b7790c;
 }
 
 .status-icon.approved {
-  background: #e6f8ed;
-  color: #159447;
+  background: #e4f7ec;
+  color: #177b4c;
 }
 
 .status-icon.published {
-  background: #e7f1ff;
-  color: #2364c7;
+  background: #e8f1ff;
+  color: #2863b4;
 }
 
 .status-icon.rejected {
-  background: #ffe9e9;
-  color: #d64646;
+  background: #ffeded;
+  color: #c33e45;
 }
 
 .status-card h3 {
   margin: 0;
-  color: #283142;
+  color: #2d405b;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .status-card p {
   margin: 4px 0 0;
-  color: #7b8190;
+  color: #8492a7;
   font-size: 11px;
 }
 
-/* ==============================
+/* ==========================================
    RECENT NOTIFICATIONS
-============================== */
+========================================== */
 
 .notification-section {
   width: 100%;
   min-width: 0;
   margin: 0;
-  padding: 15px;
-  border: 1px solid #e2e5eb;
-  border-radius: 10px;
+  padding: 19px;
+  border: 1px solid #e5eaf2;
+  border-radius: 14px;
   background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.035);
+  box-shadow: 0 4px 15px rgba(32, 58, 95, 0.035);
 }
 
 .notification-header {
   width: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 13px;
+  margin-bottom: 15px;
 }
 
 .notification-header h2 {
   margin: 0;
-  color: #222b3a;
+  color: #1c3150;
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 750;
   line-height: 1.4;
 }
 
 .notification-header p {
-  margin: 4px 0 0;
-  color: #858b98;
+  margin: 5px 0 0;
+  color: #8795aa;
   font-size: 11px;
 }
 
@@ -681,13 +756,14 @@
   flex-shrink: 0;
   border: none;
   background: transparent;
-  color: #1641d8;
+  color: #175ac0;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
 }
 
 .view-all-btn:hover {
+  color: #10499f;
   text-decoration: underline;
 }
 
@@ -695,45 +771,46 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
 }
 
 .notification-card {
   width: 100%;
   min-width: 0;
-  min-height: 68px;
+  min-height: 69px;
   display: flex;
   align-items: flex-start;
-  gap: 9px;
-  padding: 10px;
-  border: 1px solid #e6e8ee;
-  border-radius: 8px;
+  gap: 10px;
+  padding: 11px;
+  border: 1px solid #e9edf4;
+  border-radius: 10px;
   background: #ffffff;
+  transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .notification-card.unread {
-  border-color: #dce5ff;
-  border-left: 3px solid #1641d8;
-  background: #f5f7ff;
+  border-color: #dce7fb;
+  border-left: 3px solid #3478d4;
+  background: #f7faff;
 }
 
 .notification-icon {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: #e8edff;
-  color: #1641d8;
+  border-radius: 9px;
+  background: #e4f7ec;
+  color: #177b4c;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .notification-icon.warning {
-  background: #fff3d9;
-  color: #bd8000;
+  background: #fff4dc;
+  color: #b7790c;
 }
 
 .notification-content {
@@ -742,8 +819,8 @@
 }
 
 .notification-content h3 {
-  margin: 0 0 4px;
-  color: #293142;
+  margin: 0 0 5px;
+  color: #2d405b;
   font-size: 11px;
   line-height: 1.5;
   font-weight: 700;
@@ -752,75 +829,61 @@
 
 .notification-content p {
   margin: 0;
-  color: #697386;
+  color: #75849a;
   font-size: 10px;
-  line-height: 1.5;
+  line-height: 1.6;
   overflow-wrap: anywhere;
 }
 
 .notification-content span {
   display: block;
-  margin-top: 5px;
-  color: #969baa;
-  font-size: 9px;
+  margin-top: 6px;
+  color: #98a4b5;
+  font-size: 10px;
 }
 
-/* ==============================
-   RESPONSIVE: LAPTOP
-============================== */
+/* ==========================================
+   TABLET
+========================================== */
 
-@media (max-width: 1200px) {
+@media (max-width: 1100px) {
   .dashboard-content {
-    padding: 16px;
+    padding: 18px;
   }
 
   .dashboard-main-layout {
-    grid-template-columns: minmax(0, 1fr) 250px;
-    gap: 15px;
+    grid-template-columns: minmax(0, 1fr) 255px;
+    gap: 16px;
   }
 
   .welcome-text {
     padding: 22px;
   }
 
-  .action-section {
-    gap: 9px;
-  }
-
-  .create-news-btn {
-    padding: 0 14px;
-  }
-
-  .filter-btn {
-    min-width: 90px;
-    padding: 0 11px;
-  }
-
-  .search-box {
-    flex-basis: 160px;
+  .filter-section {
+    gap: 11px;
   }
 
   .quick-status-section,
   .notification-section {
-    padding: 12px;
+    padding: 15px;
   }
 }
 
-/* ==============================
-   RESPONSIVE: TABLET
-============================== */
+/* ==========================================
+   SMALLER SCREENS
+========================================== */
 
 @media (max-width: 900px) {
   .dashboard-main-layout {
     grid-template-columns: minmax(0, 1fr);
-    gap: 20px;
   }
 
   .dashboard-right {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
-    gap: 15px;
+    gap: 16px;
   }
 
   .welcome-section {
@@ -828,79 +891,82 @@
   }
 
   .filter-field {
-    flex-basis: 140px;
+    flex-basis: 130px;
   }
 
   .date-field {
-    flex-basis: 240px;
+    flex-basis: 230px;
   }
 }
 
-/* ==============================
-   RESPONSIVE: MOBILE
-============================== */
+/* ==========================================
+   MOBILE
+========================================== */
 
 @media (max-width: 600px) {
   .dashboard-content {
-    padding: 10px;
+    padding: 12px;
   }
 
   .welcome-section {
     height: auto;
     min-height: 165px;
+    border-radius: 13px;
   }
 
   .welcome-text {
-    padding: 15px;
+    padding: 18px 15px;
   }
 
   .welcome-text h1 {
-    font-size: 23px;
+    font-size: 22px;
   }
 
   .welcome-text h3 {
-    margin-top: 7px;
-    font-size: 17px;
+    font-size: 16px;
   }
 
   .welcome-text p {
-    margin-top: 8px;
     font-size: 12px;
-    line-height: 1.5;
+    line-height: 1.6;
   }
 
   .welcome-image {
-    width: 35%;
+    width: 34%;
+    padding: 8px;
   }
 
   .dashboard-main-layout {
-    margin-top: 14px;
-    gap: 16px;
+    margin-top: 16px;
+    gap: 17px;
   }
 
   .action-section {
-    gap: 10px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 9px;
   }
 
   .create-news-btn {
     width: 100%;
-    height: 44px;
+    padding: 0 12px;
   }
 
   .search-box {
-    flex: 1 1 100%;
+    grid-column: 1 / -1;
+    grid-row: 2;
     width: 100%;
     max-width: none;
-    height: 44px;
   }
 
   .filter-btn {
-    width: 100%;
-    height: 42px;
+    min-width: 85px;
+    padding: 0 10px;
   }
 
   .filter-section {
-    padding: 13px 0 16px;
+    margin-top: 12px;
+    padding: 14px;
     gap: 12px;
   }
 
@@ -910,20 +976,29 @@
   }
 
   .date-range-box {
-    height: 42px;
+    height: 40px;
+  }
+
+  .news-results-section {
+    margin-top: 16px;
+    padding: 16px 13px;
   }
 
   .news-results-header h2 {
-    font-size: 18px;
+    font-size: 17px;
   }
 
   .news-card {
-    padding: 12px;
+    padding: 12px 10px;
     gap: 8px;
   }
 
+  .news-title-row {
+    gap: 6px;
+  }
+
   .news-title-row h3 {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .news-details {
@@ -932,61 +1007,54 @@
   }
 
   .view-news-btn {
-    min-height: 32px;
+    min-height: 31px;
     padding: 0 10px;
   }
 
   .dashboard-right {
     display: flex;
     flex-direction: column;
-    gap: 13px;
+    gap: 15px;
   }
 
   .quick-status-section,
   .notification-section {
-    padding: 13px;
-  }
-
-  .status-card {
-    min-height: 52px;
-  }
-
-  .notification-card {
-    min-height: 62px;
+    padding: 15px;
   }
 }
 
-/* ==============================
-   SMALL MOBILE
-============================== */
+/* ==========================================
+   VERY SMALL MOBILE
+========================================== */
 
 @media (max-width: 360px) {
   .welcome-text {
-    padding: 11px;
+    padding: 13px 10px;
   }
 
   .welcome-text h1 {
-    font-size: 20px;
+    font-size: 19px;
   }
 
   .welcome-text h3 {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .welcome-text p {
     font-size: 11px;
   }
 
+  .welcome-image {
+    width: 31%;
+    padding: 5px;
+  }
+
   .news-card {
     align-items: flex-start;
   }
 
-  .news-title-row {
-    gap: 6px;
-  }
-
   .status-badge {
-    padding: 3px 7px;
+    padding: 4px 7px;
     font-size: 9px;
   }
 }

@@ -1,73 +1,11 @@
-import { useMemo, useState } from "react";
 
-
-
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import "./totalNews.css";
 
-
-const initialNews = [
-  {
-    id: "N001",
-    title: "City to get New Metro Line Nesxt Year",
-    format: "AV",
-    date: "2025-08-12",
-    displayDate: "12-08-2025",
-    time: "10:30 AM",
-    location: "Pune",
-    status: "Published",
-  },
-  {
-    id: "N002",
-    title: "Traffic diversions in city due to metro work",
-    format: "AVB",
-    date: "2025-08-10",
-    displayDate: "10-08-2025",
-    time: "08:45 AM",
-    location: "Mumbai",
-    status: "Approved",
-  },
-  {
-    id: "N003",
-    title: "Local Festival Sale",
-    format: "One to One",
-    date: "2025-08-08",
-    displayDate: "08-08-2025",
-    time: "10:30 PM",
-    location: "Maharashtra",
-    status: "Pending",
-  },
-  {
-    id: "N004",
-    title: "Traffic Rules Awareness",
-    format: "PKG",
-    date: "2025-08-07",
-    displayDate: "07-08-2025",
-    time: "12:36 PM",
-    location: "Delhi",
-    status: "Rejected",
-  },
-  {
-    id: "N005",
-    title: "New Highway project to boost connectivity",
-    format: "WKT Tiktak",
-    date: "2025-08-11",
-    displayDate: "11-08-2025",
-    time: "04:15 PM",
-    location: "Lonavala",
-    status: "Approved",
-  },
-  {
-    id: "N006",
-    title: "New education policy brings major changes",
-    format: "WKT",
-    date: "2025-08-08",
-    displayDate: "08-08-2025",
-    time: "01:20 PM",
-    location: "Sawantwadi",
-    status: "Approved",
-  },
-];
-
+const API_BASE = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000"
+).replace(/\/+$/, "");
 
 const formats = [
   "All",
@@ -76,825 +14,574 @@ const formats = [
   "PKG",
   "WKT",
   "WKT Tiktak",
+  "TikTak",
+  "One-to-One",
   "One to One",
 ];
-
 
 const statuses = [
   "All",
   "Published",
   "Approved",
   "Pending",
+  "Correction Required",
   "Rejected",
 ];
 
+function formatDate(value) {
+  if (!value) return "—";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+function formatTime(value) {
+  if (!value) return "—";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+function normalizeFormat(value) {
+  if (!value) return "—";
+
+  const normalized = String(value).trim().toLowerCase();
+
+  if (normalized === "one-to-one" || normalized === "one to one") {
+    return "One to One";
+  }
+
+  if (normalized === "wkt tiktak") return "WKT Tiktak";
+
+  return value;
+}
+
+function mapNewsRecord(item) {
+  const createdAt = item.created_at || item.createdAt || null;
+  const eventDate = item.event_date || item.eventDate || createdAt;
+
+  return {
+    id: String(item.id),
+    databaseId: item.id,
+    title: item.news_slug || item.title || "Untitled News",
+    format: normalizeFormat(item.news_format || item.newsFormat || item.format),
+    date: createdAt ? new Date(createdAt).toISOString().slice(0, 10) : "",
+    displayDate: formatDate(createdAt),
+    time: formatTime(createdAt),
+    eventDate: eventDate,
+    location: item.location || "—",
+    status: item.status || "Pending",
+    script: item.script || "",
+    breakingNews: Boolean(item.breaking_news ?? item.breakingNews),
+    editorFeedback: item.editor_feedback || item.editorFeedback || "",
+  };
+}
 
 function TotalNews() {
+  const location = useLocation();
 
-  const [news, setNews] = useState(initialNews);
-
+  const [news, setNews] = useState([]);
   const [search, setSearch] = useState("");
-
   const [format, setFormat] = useState("All");
-
   const [status, setStatus] = useState("All");
-
   const [selectedDate, setSelectedDate] = useState("");
-
   const [selectedNews, setSelectedNews] = useState(null);
 
-  const [modalType, setModalType] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
+  const fetchNews = useCallback(async () => {
+    setLoading(true);
+    setError("");
 
-  /* ================================
-     FILTER
-  ================================= */
+    try {
+      const storedUser = sessionStorage.getItem("emAxisUser");
+
+      if (!storedUser) {
+        throw new Error("Login session not found. Please log in again.");
+      }
+
+      let user;
+
+      try {
+        user = JSON.parse(storedUser);
+      } catch {
+        throw new Error("Invalid login session. Please log in again.");
+      }
+
+      const reporterId = Number(user?.id);
+      const role = String(user?.role || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[\s-]+/g, "_");
+
+      if (!Number.isInteger(reporterId) || reporterId < 1) {
+        throw new Error("Reporter ID is missing. Please log in again.");
+      }
+
+      if (role !== "reporter") {
+        throw new Error("Please log in with a reporter account.");
+      }
+
+      const response = await fetch(
+        `${API_BASE}/api/news/reporter/${reporterId}`
+      );
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result.success) {
+        throw new Error(
+          result.message || "Unable to fetch your news records."
+        );
+      }
+
+      const records = Array.isArray(result.news) ? result.news : [];
+
+      setNews(records.map(mapNewsRecord));
+    } catch (err) {
+      console.error("TOTAL NEWS FETCH ERROR:", err);
+
+      setError(
+        err instanceof TypeError
+          ? "Cannot connect to the backend. Check that the server is running."
+          : err.message || "Unable to load news records."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNews();
+  }, [fetchNews, location.key, location.state?.refresh]);
 
   const filteredNews = useMemo(() => {
-
-    const searchText =
-      search.trim().toLowerCase();
+    const searchText = search.trim().toLowerCase();
 
     return news.filter((item) => {
-
       const searchMatch =
         !searchText ||
-        item.title
-          .toLowerCase()
-          .includes(searchText);
+        item.title.toLowerCase().includes(searchText) ||
+        item.id.toLowerCase().includes(searchText) ||
+        item.location.toLowerCase().includes(searchText);
 
       const formatMatch =
-        format === "All" ||
-        item.format === format;
+        format === "All" || item.format === format;
 
       const statusMatch =
-        status === "All" ||
-        item.status === status;
+        status === "All" || item.status === status;
 
       const dateMatch =
-        !selectedDate ||
-        item.date === selectedDate;
+        !selectedDate || item.date === selectedDate;
 
-      return (
-        searchMatch &&
-        formatMatch &&
-        statusMatch &&
-        dateMatch
-      );
+      return searchMatch && formatMatch && statusMatch && dateMatch;
     });
+  }, [news, search, format, status, selectedDate]);
 
-  }, [
-    news,
-    search,
-    format,
-    status,
-    selectedDate,
-  ]);
+  const counts = useMemo(
+    () => ({
+      total: news.length,
+      published: news.filter((item) => item.status === "Published").length,
+      approved: news.filter((item) => item.status === "Approved").length,
+      pending: news.filter((item) => item.status === "Pending").length,
+      rejected: news.filter((item) => item.status === "Rejected").length,
+    }),
+    [news]
+  );
 
-
-  /* ================================
-     VIEW
-  ================================= */
-
-  const handleView = (item) => {
-
-    setSelectedNews(item);
-
-    setModalType("view");
-
+  const resetFilters = () => {
+    setSearch("");
+    setFormat("All");
+    setStatus("All");
+    setSelectedDate("");
   };
-
-
-  /* ================================
-     EDIT
-  ================================= */
-
-  const handleEdit = (item) => {
-
-    setSelectedNews({
-      ...item,
-    });
-
-    setModalType("edit");
-
-  };
-
-
-  /* ================================
-     CLOSE MODAL
-  ================================= */
-
-  const closeModal = () => {
-
-    setSelectedNews(null);
-
-    setModalType("");
-
-  };
-
-
-  /* ================================
-     SAVE EDIT
-  ================================= */
-
-  const saveEdit = () => {
-
-    if (!selectedNews) {
-      return;
-    }
-
-    setNews((currentNews) =>
-
-      currentNews.map((item) =>
-
-        item.id === selectedNews.id
-          ? selectedNews
-          : item
-
-      )
-
-    );
-
-    closeModal();
-
-  };
-
-
-  /* ================================
-     DELETE
-  ================================= */
-
-  const handleDelete = (id) => {
-
-    const confirmDelete =
-      window.confirm(
-        "Are you sure you want to delete this news?"
-      );
-
-    if (!confirmDelete) {
-      return;
-    }
-
-    setNews((currentNews) =>
-
-      currentNews.filter(
-        (item) => item.id !== id
-      )
-
-    );
-
-  };
-
 
   return (
-
     <div className="total-news-page">
+      <main className="total-news-main">
+        <section className="total-news-heading">
+          <div className="total-heading-left">
+            <div className="total-heading-icon">📰</div>
+            <div>
+              <h1>Total News</h1>
+              <p>Manage and track all your submitted news stories.</p>
+            </div>
+          </div>
 
+          <div className="total-heading-count">
+            <span>Total Records</span>
+            <strong>{counts.total}</strong>
+          </div>
+        </section>
 
-      {/* =====================================
-          EXISTING NAVBAR
-      ====================================== */}
+        <section className="total-summary-grid">
+          <div className="total-summary-card summary-blue">
+            <div className="summary-card-top">
+              <span className="summary-icon">📰</span>
+              <span className="summary-caption">All Records</span>
+            </div>
+            <strong className="summary-number">{counts.total}</strong>
+            <span className="summary-description">Total news stories</span>
+          </div>
 
-     
+          <div className="total-summary-card summary-green">
+            <div className="summary-card-top">
+              <span className="summary-icon">✓</span>
+              <span className="summary-caption">Published</span>
+            </div>
+            <strong className="summary-number">{counts.published}</strong>
+            <span className="summary-description">Published stories</span>
+          </div>
 
+          <div className="total-summary-card summary-purple">
+            <div className="summary-card-top">
+              <span className="summary-icon">✓</span>
+              <span className="summary-caption">Approved</span>
+            </div>
+            <strong className="summary-number">{counts.approved}</strong>
+            <span className="summary-description">Approved stories</span>
+          </div>
 
-      {/* =====================================
-          PAGE LAYOUT
-      ====================================== */}
+          <div className="total-summary-card summary-orange">
+            <div className="summary-card-top">
+              <span className="summary-icon">◷</span>
+              <span className="summary-caption">Pending</span>
+            </div>
+            <strong className="summary-number">{counts.pending}</strong>
+            <span className="summary-description">Awaiting review</span>
+          </div>
 
-      <div className="total-news-layout">
+          <div className="total-summary-card summary-red">
+            <div className="summary-card-top">
+              <span className="summary-icon">!</span>
+              <span className="summary-caption">Rejected</span>
+            </div>
+            <strong className="summary-number">{counts.rejected}</strong>
+            <span className="summary-description">Rejected stories</span>
+          </div>
+        </section>
 
-
-        {/* =====================================
-            EXISTING SIDEBAR
-        ====================================== */}
-
-      
-
-
-        {/* =====================================
-            MAIN CONTENT
-        ====================================== */}
-
-        <main className="total-news-main">
-
-
-          {/* =====================================
-              TITLE
-          ====================================== */}
-
-          <section className="total-title-row">
-
-            <div className="total-title-left">
-
-
-              <div className="all-icon">
-                ALL
-              </div>
-
-
-              <h1>
-                Total News
-              </h1>
-
-
-              <span className="news-count">
-                102
-              </span>
-
-
+        <section className="total-filter-panel">
+          <div className="total-filter-heading">
+            <div>
+              <h2>News Records</h2>
+              <p>Search, filter and manage your news.</p>
             </div>
 
+            <button
+              type="button"
+              className="total-reset-button"
+              onClick={resetFilters}
+            >
+              ↺ Reset Filters
+            </button>
+          </div>
+
+          <div className="total-filter-grid">
+            <label className="total-filter-field total-search-field">
+              <span>Search News</span>
+              <div className="total-search-box">
+                <span className="total-search-icon">⌕</span>
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search headline, ID or location..."
+                />
+              </div>
+            </label>
+
+            <label className="total-filter-field">
+              <span>News Format</span>
+              <select
+                value={format}
+                onChange={(event) => setFormat(event.target.value)}
+              >
+                {formats.map((item) => (
+                  <option key={item} value={item}>
+                    {item === "All" ? "All Formats" : item}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="total-filter-field">
+              <span>News Status</span>
+              <select
+                value={status}
+                onChange={(event) => setStatus(event.target.value)}
+              >
+                {statuses.map((item) => (
+                  <option key={item} value={item}>
+                    {item === "All" ? "All Statuses" : item}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="total-filter-field">
+              <span>Created Date</span>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(event) => setSelectedDate(event.target.value)}
+              />
+            </label>
+          </div>
+
+          <div className="total-filter-footer">
+            <span>
+              Showing <strong>{filteredNews.length}</strong> of{" "}
+              <strong>{news.length}</strong> news records
+            </span>
+
+            {(search || format !== "All" || status !== "All" || selectedDate) && (
+              <span className="total-filter-active">Filters applied</span>
+            )}
+          </div>
+        </section>
+
+        {error && (
+          <section className="total-filter-panel" role="alert">
+            <p>{error}</p>
+            <button
+              type="button"
+              className="total-reset-button"
+              onClick={fetchNews}
+            >
+              Retry
+            </button>
           </section>
+        )}
 
-
-          {/* =====================================
-              SEARCH
-          ====================================== */}
-
-          <section className="filters">
-
-  <div className="filter-fields">
-
-    {/* SEARCH */}
-    <label className="filter-item search-field">
-      <span>Search by News Slug</span>
-
-      <div className="search-input">
-        <span>⌕</span>
-
-        <input
-          type="text"
-          value={search}
-          onChange={(event) =>
-            setSearch(event.target.value)
-          }
-          placeholder="Search by News Slug"
-        />
-      </div>
-    </label>
-
-
-    {/* NEWS FORMAT */}
-    <label className="filter-item">
-      <span>News Format</span>
-
-      <select
-        value={format}
-        onChange={(event) =>
-          setFormat(event.target.value)
-        }
-      >
-        {formats.map((item) => (
-          <option
-            key={item}
-            value={item}
-          >
-            {item}
-          </option>
-        ))}
-      </select>
-    </label>
-
-
-    {/* STATUS */}
-    <label className="filter-item">
-      <span>Status</span>
-
-      <select
-        value={status}
-        onChange={(event) =>
-          setStatus(event.target.value)
-        }
-      >
-        {statuses.map((item) => (
-          <option
-            key={item}
-            value={item}
-          >
-            {item}
-          </option>
-        ))}
-      </select>
-    </label>
-
-
-    {/* DATE */}
-    <label className="filter-item">
-      <span>Date</span>
-
-      <div className="single-date">
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={(event) =>
-            setSelectedDate(event.target.value)
-          }
-        />
-      </div>
-    </label>
-
-  </div>
-
-</section>
-
-
-          {/* =====================================
-              TABLE
-          ====================================== */}
-
-          <section className="news-table-wrapper">
-
-
-            <table className="news-table">
-
-
+        <section className="total-table-card">
+          <div className="total-table-scroll">
+            <table className="total-news-table">
               <thead>
-
                 <tr>
-
-                  <th>
-                    News ID
-                  </th>
-
-                  <th>
-                    News Slug
-                  </th>
-
-                  <th>
-                    Format
-                  </th>
-
-                  <th>
-                    Created Date
-                  </th>
-
-                  <th>
-                    Location
-                  </th>
-
-                  <th>
-                    Status
-                  </th>
-
-                  <th>
-                    Action
-                  </th>
-
+                  <th>NEWS ID</th>
+                  <th>NEWS HEADLINE</th>
+                  <th>FORMAT</th>
+                  <th>CREATED DATE</th>
+                  <th>LOCATION</th>
+                  <th>STATUS</th>
+                  <th className="total-action-heading">ACTIONS</th>
                 </tr>
-
               </thead>
 
-
               <tbody>
-
-
-                {filteredNews.length === 0 ? (
-
+                {loading ? (
                   <tr>
-
-                    <td
-                      colSpan="7"
-                      className="no-results"
-                    >
-                      No news found.
+                    <td colSpan={7} className="total-empty-state">
+                      <strong>Loading news from database...</strong>
                     </td>
-
                   </tr>
-
+                ) : filteredNews.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="total-empty-state">
+                      <div className="total-empty-icon">📰</div>
+                      <strong>
+                        {error ? "News could not be loaded" : "No news records found"}
+                      </strong>
+                      <p>
+                        {error
+                          ? "Check your backend connection and try again."
+                          : news.length === 0
+                            ? "Your submitted news will appear here."
+                            : "Try changing your search or filter options."}
+                      </p>
+                      {news.length > 0 && (
+                        <button type="button" onClick={resetFilters}>
+                          Clear Filters
+                        </button>
+                      )}
+                    </td>
+                  </tr>
                 ) : (
-
-
                   filteredNews.map((item) => (
-
-
                     <tr key={item.id}>
-
-
-                      {/* NEWS ID */}
-
                       <td>
-                        {item.id}
+                        <span className="total-news-id">
+                          N{String(item.id).padStart(3, "0")}
+                        </span>
                       </td>
 
-
-                      {/* NEWS SLUG */}
-
                       <td>
-
-                        <div className="news-slug">
-
-
-                          <div className="thumbnail">
-                            {item.title
-                              .charAt(0)
-                              .toUpperCase()}
+                        <div className="total-headline-cell">
+                          <div className="total-news-thumbnail">
+                            {item.title.charAt(0).toUpperCase()}
                           </div>
-
-
-                          <strong>
-                            {item.title}
-                          </strong>
-
-
+                          <div className="total-headline-text">
+                            <strong>{item.title}</strong>
+                            <span>News Story</span>
+                          </div>
                         </div>
-
                       </td>
 
-
-                      {/* FORMAT */}
-
                       <td>
-
-                        <strong>
-                          {item.format}
-                        </strong>
-
+                        <span className="total-format-tag">{item.format}</span>
                       </td>
 
-
-                      {/* DATE */}
-
                       <td>
-
-                        <div className="created-date">
-
-                          <strong>
-                            {item.displayDate}
-                          </strong>
-
-                          <small>
-                            {item.time}
-                          </small>
-
+                        <div className="total-date-cell">
+                          <strong>{item.displayDate}</strong>
+                          <span>{item.time}</span>
                         </div>
-
                       </td>
 
-
-                      {/* LOCATION */}
-
                       <td>
-                        {item.location}
+                        <span className="total-location">
+                          <span>📍</span> {item.location}
+                        </span>
                       </td>
 
-
-                      {/* STATUS */}
-
                       <td>
-
                         <span
-                          className={
-                            `status-badge status-${item.status.toLowerCase()}`
-                          }
+                          className={`total-status-badge status-${item.status
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")}`}
                         >
+                          <span className="total-status-dot" />
                           {item.status}
                         </span>
-
                       </td>
-
-
-                      {/* ACTION */}
 
                       <td>
-
-                        <div className="actions">
-
-
+                        <div className="total-action-buttons">
                           <button
                             type="button"
-                            className="view"
-                            title="View"
-                            onClick={() =>
-                              handleView(item)
-                            }
+                            className="total-action-btn action-view"
+                            title="View news"
+                            aria-label={`View ${item.title}`}
+                            onClick={() => setSelectedNews(item)}
                           >
-                            ◉
+                            👀
                           </button>
-
-
-                          <button
-                            type="button"
-                            className="edit"
-                            title="Edit"
-                            onClick={() =>
-                              handleEdit(item)
-                            }
-                          >
-                            ✎
-                          </button>
-
-
-                          <button
-                            type="button"
-                            className="delete"
-                            title="Delete"
-                            onClick={() =>
-                              handleDelete(item.id)
-                            }
-                          >
-                            ▥
-                          </button>
-
-
                         </div>
-
                       </td>
-
-
                     </tr>
-
                   ))
-
                 )}
-
-
               </tbody>
-
-
             </table>
+          </div>
 
+          <div className="total-table-bottom">
+            <span>
+              {filteredNews.length} record
+              {filteredNews.length === 1 ? "" : "s"} displayed
+            </span>
+          </div>
+        </section>
+      </main>
 
-          </section>
-
-
-        </main>
-
-
-      </div>
-
-
-      {/* =====================================
-          MODAL
-      ====================================== */}
-
-      {modalType && selectedNews && (
-
+      {selectedNews && (
         <div
-          className="modal-overlay"
-          onClick={closeModal}
+          className="total-modal-overlay"
+          onClick={() => setSelectedNews(null)}
         >
-
-
           <div
-            className="modal"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
+            className="total-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="total-modal-title"
+            onClick={(event) => event.stopPropagation()}
           >
-
-
-            {/* MODAL HEADER */}
-
-            <div className="modal-header">
-
-              <h2>
-
-                {modalType === "view"
-                  ? "News Details"
-                  : "Edit News"}
-
-              </h2>
-
+            <div className="total-modal-header">
+              <div>
+                <span className="total-modal-eyebrow">
+                  DATABASE ID · {selectedNews.databaseId}
+                </span>
+                <h2 id="total-modal-title">News Details</h2>
+              </div>
 
               <button
                 type="button"
-                onClick={closeModal}
+                className="total-modal-close"
+                onClick={() => setSelectedNews(null)}
+                aria-label="Close modal"
               >
                 ×
               </button>
-
-
             </div>
 
-
-            {/* =================================
-                VIEW
-            ================================== */}
-
-            {modalType === "view" && (
-
-              <div className="view-news">
-
-
-                <h3>
-                  {selectedNews.title}
-                </h3>
-
-
-                <p>
-                  <b>
-                    News ID:
-                  </b>{" "}
-                  {selectedNews.id}
-                </p>
-
-
-                <p>
-                  <b>
-                    Format:
-                  </b>{" "}
-                  {selectedNews.format}
-                </p>
-
-
-                <p>
-                  <b>
-                    Created Date:
-                  </b>{" "}
-                  {selectedNews.displayDate}
-                </p>
-
-
-                <p>
-                  <b>
-                    Time:
-                  </b>{" "}
-                  {selectedNews.time}
-                </p>
-
-
-                <p>
-                  <b>
-                    Location:
-                  </b>{" "}
-                  {selectedNews.location}
-                </p>
-
-
-                <p>
-                  <b>
-                    Status:
-                  </b>{" "}
-                  {selectedNews.status}
-                </p>
-
-
-              </div>
-
-            )}
-
-
-            {/* =================================
-                EDIT
-            ================================== */}
-
-            {modalType === "edit" && (
-
-              <div className="edit-news">
-
-
-                <label>
-
-                  Headline
-
-                  <input
-                    type="text"
-                    value={selectedNews.title}
-                    onChange={(event) =>
-                      setSelectedNews({
-                        ...selectedNews,
-                        title:
-                          event.target.value,
-                      })
-                    }
-                  />
-
-                </label>
-
-
-                <label>
-
-                  Format
-
-                  <select
-                    value={selectedNews.format}
-                    onChange={(event) =>
-                      setSelectedNews({
-                        ...selectedNews,
-                        format:
-                          event.target.value,
-                      })
-                    }
-                  >
-
-                    {formats
-                      .filter(
-                        (item) =>
-                          item !== "All"
-                      )
-                      .map((item) => (
-
-                        <option
-                          key={item}
-                          value={item}
-                        >
-                          {item}
-                        </option>
-
-                      ))}
-
-                  </select>
-
-                </label>
-
-
-                <label>
-
-                  Status
-
-                  <select
-                    value={selectedNews.status}
-                    onChange={(event) =>
-                      setSelectedNews({
-                        ...selectedNews,
-                        status:
-                          event.target.value,
-                      })
-                    }
-                  >
-
-                    {statuses
-                      .filter(
-                        (item) =>
-                          item !== "All"
-                      )
-                      .map((item) => (
-
-                        <option
-                          key={item}
-                          value={item}
-                        >
-                          {item}
-                        </option>
-
-                      ))}
-
-                  </select>
-
-                </label>
-
-
-                <label>
-
-                  Location
-
-                  <input
-                    type="text"
-                    value={
-                      selectedNews.location
-                    }
-                    onChange={(event) =>
-                      setSelectedNews({
-                        ...selectedNews,
-                        location:
-                          event.target.value,
-                      })
-                    }
-                  />
-
-                </label>
-
-
-                <div className="modal-actions">
-
-                  <button
-                    type="button"
-                    className="cancel"
-                    onClick={closeModal}
-                  >
-                    Cancel
-                  </button>
-
-
-                  <button
-                    type="button"
-                    className="save"
-                    onClick={saveEdit}
-                  >
-                    Save Changes
-                  </button>
-
+            <div className="total-view-details">
+              <div className="total-view-title">
+                <span className="total-view-title-icon">📰</span>
+                <div>
+                  <span>NEWS HEADLINE</span>
+                  <h3>{selectedNews.title}</h3>
                 </div>
-
-
               </div>
 
-            )}
+              <div className="total-detail-grid">
+                <div className="total-detail-item">
+                  <span>News ID</span>
+                  <strong>{selectedNews.id}</strong>
+                </div>
+                <div className="total-detail-item">
+                  <span>Format</span>
+                  <strong>{selectedNews.format}</strong>
+                </div>
+                <div className="total-detail-item">
+                  <span>Created Date</span>
+                  <strong>{selectedNews.displayDate}</strong>
+                </div>
+                <div className="total-detail-item">
+                  <span>Time</span>
+                  <strong>{selectedNews.time}</strong>
+                </div>
+                <div className="total-detail-item">
+                  <span>Location</span>
+                  <strong>{selectedNews.location}</strong>
+                </div>
+                <div className="total-detail-item">
+                  <span>Status</span>
+                  <strong>{selectedNews.status}</strong>
+                </div>
+              </div>
 
+              <div className="total-preview-script">
+                <strong>News Script</strong>
+                <p>{selectedNews.script || "No script available."}</p>
+              </div>
 
+              {selectedNews.editorFeedback && (
+                <div className="total-preview-script">
+                  <strong>Editor Feedback</strong>
+                  <p>{selectedNews.editorFeedback}</p>
+                </div>
+              )}
+
+              <div className="total-modal-footer">
+                <button
+                  type="button"
+                  className="total-modal-secondary"
+                  onClick={() => setSelectedNews(null)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
-
-
         </div>
-
       )}
-
-
     </div>
-
   );
 }
-
 
 export default TotalNews;

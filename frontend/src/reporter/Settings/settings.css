@@ -1,743 +1,904 @@
-/* =====================================================
-   SETTINGS PAGE
-===================================================== */
+
+/* =========================================
+   EM-AXIS REPORTER SETTINGS
+========================================= */
 
 .settings-page {
+  --settings-bg: #f5f7fb;
+  --settings-card: #ffffff;
+  --settings-text: #172033;
+  --settings-muted: #778197;
+  --settings-border: #e6eaf1;
+  --settings-blue: #2459c4;
+  --settings-blue-light: #edf3ff;
+
   width: 100%;
   min-height: 100vh;
-  padding: 32px 42px 45px;
+  padding: 28px 32px 35px;
+  background: var(--settings-bg);
+  color: var(--settings-text);
   box-sizing: border-box;
-
-  background: transparent;
-  color: #111111;
-
-  transition:
-    background 0.3s ease,
-    color 0.3s ease;
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
+.settings-page *,
+.settings-page *::before,
+.settings-page *::after {
+  box-sizing: border-box;
+}
 
-/* =====================================================
-   SETTINGS HEADER
-===================================================== */
+.settings-main {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
 
-.settings-header {
+/* =========================================
+   PAGE HEADING
+========================================= */
+
+.settings-page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 26px;
+}
+
+.settings-heading-left {
   display: flex;
   align-items: center;
   gap: 16px;
-
-  margin-bottom: 32px;
 }
 
-.settings-header-icon {
-  font-size: 43px;
-  font-weight: 900;
-
-  color: #000000;
-
-  transition: color 0.3s ease;
-}
-
-.settings-header h1 {
-  margin: 0;
-
-  font-size: 36px;
-  font-weight: 900;
-
-  color: #111111;
-
-  letter-spacing: -0.8px;
-
-  transition: color 0.3s ease;
-}
-
-
-/* =====================================================
-   SETTINGS CONTAINER
-===================================================== */
-
-.settings-container {
-  width: 100%;
-  max-width: 1000px;
-}
-
-
-/* =====================================================
-   SETTING ROW / CARD
-===================================================== */
-
-.setting-row {
-  width: 100%;
-  min-height: 82px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 30px;
-
-  padding: 12px 10px 12px 16px;
-
-  box-sizing: border-box;
-
-  /* LIGHT MODE DIVIDER */
-  border-bottom: 1px solid #d2d2d2;
-
-  transition:
-    background 0.3s ease,
-    border-color 0.3s ease;
-}
-
-
-/* =====================================================
-   LEFT SECTION
-===================================================== */
-
-.setting-left {
-  display: flex;
-  align-items: center;
-
-  gap: 18px;
-
-  min-width: 0;
-}
-
-
-/* =====================================================
-   ICON
-===================================================== */
-
-.setting-icon {
-  width: 40px;
-  height: 40px;
-
+.settings-heading-icon {
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #2459c4, #477ce5);
+  color: #ffffff;
+  font-size: 29px;
+  box-shadow: 0 7px 18px rgba(36, 89, 196, 0.18);
+}
 
+.settings-heading-left h1 {
+  margin: 0 0 7px;
+  color: var(--settings-text);
+  font-size: 29px;
+  font-weight: 750;
+  letter-spacing: -0.7px;
+}
+
+.settings-heading-left p {
+  margin: 0;
+  color: var(--settings-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.settings-heading-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px;
+  border: 1px solid var(--settings-border);
+  border-radius: 30px;
+  background: var(--settings-card);
+  color: var(--settings-text);
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.settings-live-dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
+  background: #20b875;
+  box-shadow: 0 0 0 4px rgba(32, 184, 117, 0.12);
+}
 
+/* =========================================
+   OVERVIEW BANNER
+========================================= */
+
+.settings-overview {
+  display: flex;
+  align-items: center;
+  gap: 19px;
+  padding: 23px 25px;
+  margin-bottom: 30px;
+  border: 1px solid #dce7ff;
+  border-radius: 17px;
+  background: linear-gradient(110deg, #edf3ff, #f7f9ff);
+}
+
+.settings-overview-icon {
+  width: 53px;
+  height: 53px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  background: #ffffff;
+  font-size: 26px;
+  box-shadow: 0 3px 12px rgba(36, 89, 196, 0.08);
+}
 
+.settings-overview h2 {
+  margin: 0 0 7px;
+  color: #193d83;
+  font-size: 17px;
+  font-weight: 750;
+}
+
+.settings-overview p {
+  max-width: 760px;
+  margin: 0;
+  color: #62718d;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+/* =========================================
+   SECTION HEADING
+========================================= */
+
+.settings-section {
+  width: 100%;
+}
+
+.settings-section-heading {
+  margin-bottom: 17px;
+}
+
+.settings-section-heading h2 {
+  margin: 0 0 7px;
+  color: var(--settings-text);
+  font-size: 20px;
+  font-weight: 750;
+}
+
+.settings-section-heading p {
+  margin: 0;
+  color: var(--settings-muted);
+  font-size: 13.5px;
+}
+
+/* =========================================
+   SETTINGS CONTAINER
+========================================= */
+
+.settings-container {
+  overflow: hidden;
+  border: 1px solid var(--settings-border);
+  border-radius: 17px;
+  background: var(--settings-card);
+  box-shadow: 0 5px 20px rgba(25, 42, 75, 0.035);
+}
+
+/* =========================================
+   INDIVIDUAL SETTING ROWS
+========================================= */
+
+.setting-row {
+  width: 100%;
+  min-height: 108px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+  padding: 22px 25px;
+  border: none;
+  border-bottom: 1px solid var(--settings-border);
+  background: var(--settings-card);
+  color: var(--settings-text);
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.2s ease;
+}
+
+.setting-row:last-child {
+  border-bottom: none;
+}
+
+.setting-left {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.setting-icon {
+  width: 47px;
+  height: 47px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
   font-size: 21px;
 }
 
-
-/* Individual icon backgrounds */
-
 .account-icon {
-  background: #e8f0ff;
+  background: #eaf1ff;
 }
 
 .language-icon {
-  background: #e9f8ed;
+  background: #e5f8f4;
 }
 
 .appearance-icon {
-  background: #fff3dc;
+  background: #fff3df;
+  color: #b77919;
+  font-size: 27px;
 }
 
 .notification-icon {
-  background: #ffe9ed;
+  background: #f0eaff;
 }
 
 .help-icon {
-  background: #eee8ff;
-
-  font-weight: 900;
+  background: #e8f5ff;
+  color: #1768b4;
+  font-size: 24px;
+  font-weight: 750;
 }
 
-
-/* =====================================================
-   SETTING TEXT
-===================================================== */
+.setting-info {
+  min-width: 0;
+}
 
 .setting-info h3 {
-  margin: 0 0 5px;
-
-  font-size: 17px;
-  font-weight: 800;
-
-  color: #292929;
-
-  transition: color 0.3s ease;
+  margin: 0 0 7px;
+  color: var(--settings-text);
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .setting-info p {
+  max-width: 470px;
   margin: 0;
-
-  font-size: 13px;
-
-  color: #555555;
-
-  transition: color 0.3s ease;
+  color: var(--settings-muted);
+  font-size: 12.5px;
+  line-height: 1.7;
 }
 
+/* =========================================
+   RIGHT-SIDE CONTROLS
+========================================= */
 
-/* =====================================================
-   ACCOUNT STATUS
-===================================================== */
-
-.status-control {
+.setting-control {
+  min-width: 190px;
   display: flex;
-
-  border: 1px solid #cccccc;
-
-  border-radius: 9px;
-
-  overflow: hidden;
-
-  background: #f3f3f3;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 9px;
+  flex-shrink: 0;
 }
 
-.status-control button {
-  border: none;
+.settings-segment-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--settings-border);
+  border-radius: 11px;
+  background: var(--settings-bg);
+}
 
-  padding: 9px 18px;
-
-  font-size: 13px;
-  font-weight: 700;
-
-  background: #f3f3f3;
-  color: #555555;
-
+.settings-segment-control button {
+  min-width: 76px;
+  min-height: 36px;
+  padding: 8px 13px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--settings-muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 650;
   cursor: pointer;
-
   transition:
     background 0.2s ease,
-    color 0.2s ease;
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.status-control button:hover {
-  background: #e5e5e5;
+.settings-segment-control button:hover {
+  color: var(--settings-blue);
 }
 
-/* Active selected */
-.status-control .active-btn {
-  background: #111111;
+.settings-segment-control button:focus-visible,
+.help-row:focus-visible,
+.settings-toast button:focus-visible {
+  outline: 3px solid rgba(36, 89, 196, 0.3);
+  outline-offset: 3px;
+}
+
+.settings-segment-control button.active-btn,
+.settings-segment-control button.on-active,
+.settings-segment-control button.light-active {
+  border-color: #dbe7ff;
+  background: #ffffff;
+  color: #2459c4;
+  box-shadow: 0 2px 6px rgba(25, 42, 75, 0.07);
+}
+
+.settings-segment-control button.active-btn span {
+  color: #20b875;
+  font-size: 10px;
+  margin-right: 4px;
+}
+
+.settings-segment-control button.inactive-btn,
+.settings-segment-control button.off-active {
+  border-color: #ffdede;
+  background: #fff1f1;
+  color: #cf3d48;
+}
+
+.settings-segment-control button.dark-active {
+  border-color: #343f58;
+  background: #263248;
   color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
-/* Inactive selected */
-.status-control .inactive-btn {
-  background: #555555;
-  color: #ffffff;
+.setting-current-value {
+  color: var(--settings-muted);
+  font-size: 11.5px;
+  text-align: right;
 }
 
+/* =========================================
+   LANGUAGE SELECT
+========================================= */
 
-/* =====================================================
-   LANGUAGE
-===================================================== */
+.settings-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
 
 .language-select {
-  min-width: 145px;
-
-  padding: 10px 14px;
-
-  border: 1px solid #cccccc;
-
-  border-radius: 8px;
-
-  background: #ffffff;
-  color: #222222;
-
-  font-size: 14px;
-  font-weight: 600;
-
+  width: 170px;
+  min-height: 43px;
+  padding: 0 38px 0 13px;
+  border: 1px solid var(--settings-border);
+  border-radius: 10px;
   outline: none;
-
+  background-color: var(--settings-card);
+  color: var(--settings-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
 
-  transition:
-    background 0.3s ease,
-    color 0.3s ease,
-    border-color 0.3s ease;
+.language-select:hover {
+  border-color: #b9c9e9;
 }
 
 .language-select:focus {
-  border-color: #777777;
+  border-color: var(--settings-blue);
+  box-shadow: 0 0 0 3px rgba(36, 89, 196, 0.1);
 }
 
-
-/* =====================================================
-   APPEARANCE
-===================================================== */
-
-.theme-control {
-  display: flex;
-
-  border: 1px solid #cccccc;
-
-  border-radius: 9px;
-
+.settings-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
   overflow: hidden;
-
-  background: #f3f3f3;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.theme-control button {
-  border: none;
-
-  padding: 9px 16px;
-
-  font-size: 13px;
-  font-weight: 700;
-
-  background: #f3f3f3;
-  color: #555555;
-
-  cursor: pointer;
-
-  transition:
-    background 0.2s ease,
-    color 0.2s ease;
-}
-
-.theme-control button:hover {
-  background: #e5e5e5;
-}
-
-/* Light selected */
-.theme-control .light-active {
-  background: #111111;
-  color: #ffffff;
-}
-
-/* Dark selected */
-.theme-control .dark-active {
-  background: #555555;
-  color: #ffffff;
-}
-
-
-/* =====================================================
-   NOTIFICATION
-===================================================== */
-
-.notification-control {
-  display: flex;
-
-  border: 1px solid #cccccc;
-
-  border-radius: 9px;
-
-  overflow: hidden;
-
-  background: #f3f3f3;
-}
-
-.notification-control button {
-  border: none;
-
-  padding: 9px 18px;
-
-  font-size: 13px;
-  font-weight: 700;
-
-  background: #f3f3f3;
-  color: #555555;
-
-  cursor: pointer;
-
-  transition:
-    background 0.2s ease,
-    color 0.2s ease;
-}
-
-.notification-control button:hover {
-  background: #e5e5e5;
-}
-
-/* ON selected */
-.notification-control .on-active {
-  background: #111111;
-  color: #ffffff;
-}
-
-/* OFF selected */
-.notification-control .off-active {
-  background: #555555;
-  color: #ffffff;
-}
-
-
-/* =====================================================
+/* =========================================
    HELP & GUIDELINES
-===================================================== */
+========================================= */
 
 .help-row {
   cursor: pointer;
-
-  border-bottom: 1px solid #d2d2d2;
-
-  transition:
-    background 0.2s ease,
-    border-color 0.3s ease;
 }
 
 .help-row:hover {
-  background: #f7f7f7;
+  background: var(--settings-bg);
+}
+
+.help-row.help-expanded {
+  background: var(--settings-blue-light);
 }
 
 .help-arrow {
-  padding-right: 8px;
-
-  font-size: 34px;
-  font-weight: 300;
-
-  color: #555555;
-
-  transition: color 0.3s ease;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--settings-border);
+  border-radius: 9px;
+  background: var(--settings-card);
+  color: var(--settings-blue);
+  font-size: 25px;
+  line-height: 1;
+  transition: transform 0.2s ease;
 }
 
-
-/* =====================================================
-   DARK MODE - WHOLE APPLICATION
-===================================================== */
-
-html.dark-theme {
-  background: #111111 !important;
+.help-expanded .help-arrow {
+  transform: rotate(180deg);
 }
 
-html.dark-theme body {
-  background: #111111 !important;
-  color: #ffffff !important;
+.settings-help-content {
+  padding: 22px 28px 25px 88px;
+  border-bottom: 1px solid var(--settings-border);
+  background: var(--settings-bg);
+  animation: settingsFadeIn 0.2s ease;
 }
 
-html.dark-theme #root {
-  background: #111111 !important;
-  color: #ffffff !important;
+.settings-help-content h3 {
+  margin: 0 0 14px;
+  color: var(--settings-text);
+  font-size: 15px;
+  font-weight: 750;
 }
 
+.settings-help-content ul {
+  margin: 0;
+  padding-left: 20px;
+}
 
-/* =====================================================
-   DARK MODE - SETTINGS
-===================================================== */
+.settings-help-content li {
+  margin-bottom: 10px;
+  padding-left: 3px;
+  color: var(--settings-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
 
-html.dark-theme .settings-page {
-  background: #111111;
+.settings-help-content li::marker {
+  color: var(--settings-blue);
+}
+
+.settings-help-content p {
+  margin: 13px 0 0;
+  color: var(--settings-muted);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+/* =========================================
+   BOTTOM INFORMATION NOTE
+========================================= */
+
+.settings-bottom-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-top: 22px;
+  padding: 15px 18px;
+  border: 1px solid var(--settings-border);
+  border-radius: 12px;
+  background: var(--settings-card);
+}
+
+.settings-note-icon {
+  flex-shrink: 0;
+  color: var(--settings-blue);
+  font-size: 17px;
+  font-weight: 750;
+}
+
+.settings-bottom-note p {
+  margin: 0;
+  color: var(--settings-muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* =========================================
+   SUCCESS MESSAGE / TOAST
+========================================= */
+
+.settings-toast {
+  position: fixed;
+  right: 28px;
+  bottom: 25px;
+  z-index: 9999;
+  max-width: min(390px, calc(100vw - 32px));
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 15px 17px;
+  border: 1px solid #bdebd5;
+  border-radius: 12px;
+  background: #f0fff7;
+  color: #176c48;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(25, 42, 75, 0.14);
+  animation: settingsFadeIn 0.2s ease;
+}
+
+.settings-toast > span {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #d6f8e6;
+  color: #13834f;
+  font-size: 14px;
+}
+
+.settings-toast button {
+  width: 27px;
+  height: 27px;
+  flex-shrink: 0;
+  margin-left: auto;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #176c48;
+  font-size: 21px;
+  cursor: pointer;
+}
+
+.settings-toast button:hover {
+  background: #dff8eb;
+}
+
+/* =========================================
+   DARK THEME
+========================================= */
+
+.settings-page.settings-dark {
+  --settings-bg: #111827;
+  --settings-card: #1b2536;
+  --settings-text: #edf2fa;
+  --settings-muted: #a3afc2;
+  --settings-border: #303d51;
+  --settings-blue: #82aaff;
+  --settings-blue-light: #25344d;
+}
+
+.settings-dark .settings-heading-icon {
+  background: linear-gradient(135deg, #315fc1, #547fe0);
+}
+
+.settings-dark .settings-overview {
+  border-color: #34486a;
+  background: linear-gradient(110deg, #202f49, #1d293d);
+}
+
+.settings-dark .settings-overview-icon {
+  background: #29374c;
+  box-shadow: none;
+}
+
+.settings-dark .settings-overview h2 {
+  color: #c5d8ff;
+}
+
+.settings-dark .settings-overview p {
+  color: #b0bfd8;
+}
+
+.settings-dark .settings-segment-control button.active-btn,
+.settings-dark .settings-segment-control button.on-active,
+.settings-dark .settings-segment-control button.light-active {
+  border-color: #3b4d69;
+  background: #26364d;
+  color: #a9c5ff;
+  box-shadow: none;
+}
+
+.settings-dark .settings-segment-control button.inactive-btn,
+.settings-dark .settings-segment-control button.off-active {
+  border-color: #75404a;
+  background: #422a35;
+  color: #ffb2b7;
+}
+
+.settings-dark .settings-segment-control button.dark-active {
+  border-color: #4a5c78;
+  background: #34445e;
   color: #ffffff;
 }
 
-
-/* =====================================================
-   DARK MODE - HEADER
-===================================================== */
-
-html.dark-theme .settings-header-icon {
-  color: #ffffff;
+.settings-dark .language-select {
+  color-scheme: dark;
 }
 
-html.dark-theme .settings-header h1 {
-  color: #ffffff;
+.settings-dark .settings-bottom-note {
+  background: var(--settings-card);
 }
 
-
-/* =====================================================
-   DARK MODE - TEXT
-===================================================== */
-
-html.dark-theme .setting-info h3 {
-  color: #ffffff;
+.settings-dark .help-row:hover {
+  background: #202d40;
 }
 
-html.dark-theme .setting-info p {
-  color: #bdbdbd;
+.settings-dark .help-row.help-expanded {
+  background: #25344d;
 }
 
-
-/* =====================================================
-   DARK MODE - DIVIDER LINES
-===================================================== */
-
-/*
-   Important:
-   Cards ke beech lines clearly visible
-*/
-
-html.dark-theme .setting-row {
-  border-bottom: 1px solid #666666 !important;
+.settings-dark .settings-help-content {
+  background: #151f30;
 }
 
-html.dark-theme .help-row {
-  border-bottom: 1px solid #666666 !important;
+.settings-dark .help-arrow {
+  background: #25344a;
+  border-color: #3b4b63;
 }
 
-
-/* =====================================================
-   DARK MODE - ACCOUNT STATUS
-===================================================== */
-
-html.dark-theme .status-control {
-  border: 1px solid #777777;
-
-  background: #222222;
+.settings-dark .settings-toast {
+  border-color: #286c50;
+  background: #173a2d;
+  color: #b6f2d2;
 }
 
-html.dark-theme .status-control button {
-  background: #222222;
-
-  color: #dddddd;
+.settings-dark .settings-toast > span {
+  background: #20523d;
+  color: #b6f2d2;
 }
 
-/* ACTIVE SELECTED */
-html.dark-theme .status-control .active-btn {
-  background: #ffffff;
-
-  color: #111111;
-
-  font-weight: 800;
+.settings-dark .settings-toast button {
+  color: #b6f2d2;
 }
 
-/* INACTIVE SELECTED */
-html.dark-theme .status-control .inactive-btn {
-  background: #555555;
+/* =========================================
+   ANIMATIONS
+========================================= */
 
-  color: #ffffff;
+@keyframes settingsFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
 
-  font-weight: 800;
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
+/* =========================================
+   RESPONSIVE: TABLETS
+========================================= */
 
-/* =====================================================
-   DARK MODE - LANGUAGE
-===================================================== */
-
-html.dark-theme .language-select {
-  background: #222222;
-
-  color: #ffffff;
-
-  border: 1px solid #777777;
-}
-
-
-/* =====================================================
-   DARK MODE - APPEARANCE
-===================================================== */
-
-html.dark-theme .theme-control {
-  border: 1px solid #777777;
-
-  background: #222222;
-}
-
-html.dark-theme .theme-control button {
-  background: #222222;
-
-  color: #dddddd;
-}
-
-/* LIGHT SELECTED */
-html.dark-theme .theme-control .light-active {
-  background: #ffffff;
-
-  color: #111111;
-
-  font-weight: 800;
-}
-
-/* DARK SELECTED */
-html.dark-theme .theme-control .dark-active {
-  background: #555555;
-
-  color: #ffffff;
-
-  font-weight: 800;
-}
-
-
-/* =====================================================
-   DARK MODE - NOTIFICATION
-===================================================== */
-
-html.dark-theme .notification-control {
-  border: 1px solid #777777;
-
-  background: #222222;
-}
-
-html.dark-theme .notification-control button {
-  background: #222222;
-
-  color: #dddddd;
-}
-
-/* ON SELECTED */
-html.dark-theme .notification-control .on-active {
-  background: #ffffff;
-
-  color: #111111;
-
-  font-weight: 800;
-}
-
-/* OFF SELECTED */
-html.dark-theme .notification-control .off-active {
-  background: #555555;
-
-  color: #ffffff;
-
-  font-weight: 800;
-}
-
-
-/* =====================================================
-   DARK MODE - HELP
-===================================================== */
-
-html.dark-theme .help-arrow {
-  color: #ffffff;
-}
-
-html.dark-theme .help-row:hover {
-  background: #1d1d1d;
-}
-
-
-/* =====================================================
-   DARK MODE - ICON BACKGROUNDS
-===================================================== */
-
-html.dark-theme .account-icon {
-  background: #26344f;
-}
-
-html.dark-theme .language-icon {
-  background: #24402d;
-}
-
-html.dark-theme .appearance-icon {
-  background: #4a3b20;
-}
-
-html.dark-theme .notification-icon {
-  background: #48272d;
-}
-
-html.dark-theme .help-icon {
-  background: #382f50;
-}
-
-
-/* =====================================================
-   RESPONSIVE - TABLET
-===================================================== */
-
-@media (max-width: 768px) {
-
+@media (max-width: 900px) {
   .settings-page {
-    padding: 25px 20px 35px;
-  }
-
-  .settings-header {
-    margin-bottom: 25px;
-  }
-
-  .settings-header h1 {
-    font-size: 30px;
+    padding: 24px 22px 30px;
   }
 
   .setting-row {
-    min-height: auto;
-
-    padding: 18px 5px;
-
-    align-items: flex-start;
+    padding: 20px;
+    gap: 16px;
   }
 
   .setting-left {
     gap: 12px;
   }
 
-  .setting-info h3 {
+  .setting-info p {
+    max-width: 340px;
+  }
+
+  .setting-control {
+    min-width: 165px;
+  }
+
+  .settings-segment-control button {
+    min-width: 65px;
+    padding: 8px 10px;
+  }
+
+  .settings-help-content {
+    padding-left: 25px;
+  }
+}
+
+/* =========================================
+   RESPONSIVE: MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+  .settings-page {
+    padding: 20px 14px 28px;
+  }
+
+  .settings-page-heading {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .settings-heading-left {
+    gap: 12px;
+  }
+
+  .settings-heading-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    font-size: 24px;
+  }
+
+  .settings-heading-left h1 {
+    font-size: 24px;
+  }
+
+  .settings-heading-left p {
+    max-width: 245px;
+    font-size: 12px;
+  }
+
+  .settings-heading-tag {
+    gap: 7px;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .settings-overview {
+    align-items: flex-start;
+    gap: 13px;
+    padding: 18px 15px;
+    margin-bottom: 25px;
+  }
+
+  .settings-overview-icon {
+    width: 43px;
+    height: 43px;
+    border-radius: 12px;
+    font-size: 22px;
+  }
+
+  .settings-overview h2 {
     font-size: 15px;
+  }
+
+  .settings-overview p {
+    font-size: 12px;
+  }
+
+  .settings-section-heading h2 {
+    font-size: 18px;
+  }
+
+  .setting-row {
+    min-height: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 17px;
+    padding: 19px 16px;
+  }
+
+  .setting-left {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .setting-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    font-size: 19px;
+  }
+
+  .setting-info h3 {
+    font-size: 14px;
   }
 
   .setting-info p {
     font-size: 12px;
   }
 
-  .setting-icon {
-    width: 36px;
-    height: 36px;
-
-    font-size: 18px;
+  .setting-control {
+    width: 100%;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-left: 54px;
   }
 
-  .status-control,
-  .theme-control,
-  .notification-control {
-    flex-shrink: 0;
-  }
-
-  .status-control button,
-  .theme-control button,
-  .notification-control button {
-    padding: 8px 10px;
-
+  .settings-segment-control button {
+    min-width: 59px;
+    min-height: 34px;
+    padding: 7px 10px;
     font-size: 11px;
   }
 
+  .setting-current-value {
+    font-size: 10.5px;
+    text-align: right;
+  }
+
   .language-select {
-    min-width: 110px;
+    width: 145px;
+    min-height: 39px;
+    font-size: 12px;
+  }
 
-    padding: 8px 10px;
+  .help-row {
+    flex-direction: row;
+    align-items: center;
+  }
 
+  .help-row .setting-left {
+    flex: 1;
+  }
+
+  .help-arrow {
+    width: 29px;
+    height: 29px;
+  }
+
+  .settings-help-content {
+    padding: 19px 18px;
+  }
+
+  .settings-help-content li {
+    font-size: 12px;
+  }
+
+  .settings-bottom-note {
+    padding: 13px;
+  }
+
+  .settings-bottom-note p {
+    font-size: 11px;
+  }
+
+  .settings-toast {
+    right: 16px;
+    bottom: 16px;
+    padding: 12px;
     font-size: 12px;
   }
 }
 
+/* =========================================
+   SMALL MOBILE
+========================================= */
 
-/* =====================================================
-   RESPONSIVE - MOBILE
-===================================================== */
-
-@media (max-width: 550px) {
-
-  .settings-page {
-    padding: 22px 15px 30px;
+@media (max-width: 380px) {
+  .settings-heading-tag {
+    padding: 7px 8px;
+    font-size: 10px;
   }
 
-  .settings-header {
-    gap: 10px;
+  .settings-heading-left h1 {
+    font-size: 21px;
   }
 
-  .settings-header-icon {
-    font-size: 35px;
+  .settings-heading-left p {
+    max-width: 190px;
   }
 
-  .settings-header h1 {
-    font-size: 27px;
+  .setting-control {
+    padding-left: 0;
   }
 
-  .setting-row {
-    flex-direction: column;
-
-    align-items: stretch;
-
-    gap: 15px;
-
-    padding: 18px 5px;
+  .settings-segment-control button {
+    min-width: 52px;
+    padding: 7px 8px;
   }
 
-  .status-control,
-  .theme-control,
-  .notification-control,
-  .language-select {
-    align-self: flex-end;
-  }
-
-  .help-row {
-    position: relative;
-  }
-
-  .help-arrow {
-    position: absolute;
-
-    right: 5px;
-    top: 50%;
-
-    transform: translateY(-50%);
+  .setting-current-value {
+    max-width: 115px;
   }
 }
