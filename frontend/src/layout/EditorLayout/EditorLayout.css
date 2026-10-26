@@ -1,67 +1,33 @@
 
-/* ===== EDITOR LAYOUT ===== */
+/* ==========================================
+   EDITOR LAYOUT
+   ========================================== */
 
 .editor-layout {
-  width: 100%;
   min-height: 100vh;
-  height: auto;
-  background: #f5f7fb;
-
-  overflow: visible;
-  position: relative;
+  background: var(--app-bg, #f3f7fc);
 }
 
-/* ===== ALL EDITOR PAGES ===== */
-
+/* Main content area */
 .editor-main-content {
-  margin-left: 240px;
-  width: calc(100% - 240px);
-
+  margin-left: 250px;
   min-height: 100vh;
-  height: auto;
-
-  padding: 96px 25px 50px;
+  padding: 0 26px 28px;
   box-sizing: border-box;
-
-  background: #f5f7fb;
-
-  overflow: visible;
-  position: relative;
+  background: var(--app-bg, #f3f7fc);
+  color: var(--app-text, #173766);
 }
 
-/* ===== RESPONSIVE ===== */
+/* Back button hover support */
+.editor-main-content button {
+  font-family: inherit;
+}
 
+/* Responsive layout */
 @media (max-width: 768px) {
   .editor-main-content {
-    margin-left: 190px;
-    width: calc(100% - 190px);
-    padding: 92px 12px 40px;
+    margin-left: 0;
+    padding-left: 15px;
+    padding-right: 15px;
   }
-}
-
-@media (max-width: 480px) {
-  .editor-main-content {
-    margin-left: 66px;
-    width: calc(100% - 66px);
-    padding: 90px 10px 35px;
-  }
-}
-
-/* ===== EDITOR MODULE SCROLLING ===== */
-
-html,
-body,
-#root {
-  min-height: 100%;
-  height: auto;
-}
-
-html,
-body {
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-#root {
-  overflow: visible;
 }
