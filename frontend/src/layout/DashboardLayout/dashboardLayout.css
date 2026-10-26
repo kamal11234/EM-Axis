@@ -1,41 +1,176 @@
+/* ==========================================
+   REPORTER DASHBOARD LAYOUT
+   ========================================== */
 
 .dashboard-layout {
-  width: 100%;
   min-height: 100vh;
-  margin: 0;
-  padding: 0;
+  background: var(--app-bg, #f3f7fc);
 }
 
-/* Main content area */
 .dashboard-main {
-  position: fixed;
-  top: 76px;
-  left: 240px;
-  right: 0;
-  bottom: 0;
-
-  width: auto;
-  height: calc(100vh - 76px);
-
-  margin: 0;
-  padding: 0;
-
+  margin-left: 250px;
+  min-height: calc(100vh - 76px);
+  padding: 0 26px 28px;
   box-sizing: border-box;
-  overflow-x: auto;
-  overflow-y: auto;
 }
 
-/* Prevent default spacing on direct page containers */
-.dashboard-main > * {
-  margin-top: 0;
+/* ==========================================
+   BACK BUTTON AREA
+   ========================================== */
+
+.reporter-back-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 18px 0 20px;
 }
 
-/* Responsive layout */
+/* Stylish blue back button */
+.reporter-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  padding: 10px 20px 10px 12px;
+
+  background: linear-gradient(135deg, #397fe5, #2455ad);
+  color: #ffffff;
+
+  border: none;
+  border-radius: 12px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+
+  cursor: pointer;
+
+  box-shadow: 0 5px 12px rgba(36, 85, 173, 0.22);
+
+  transition:
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+/* Arrow inside separate circle */
+.reporter-back-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 29px;
+  height: 29px;
+
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.19);
+  color: #ffffff;
+
+  font-size: 21px;
+  line-height: 1;
+
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease;
+}
+
+/* Hover effect */
+.reporter-back-button:hover {
+  background: linear-gradient(135deg, #245fbe, #173e83);
+  box-shadow: 0 8px 19px rgba(36, 85, 173, 0.32);
+  transform: translateY(-2px);
+}
+
+.reporter-back-button:hover .reporter-back-arrow {
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateX(-3px);
+}
+
+/* Click animation */
+.reporter-back-button:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 3px 7px rgba(36, 85, 173, 0.2);
+}
+
+/* Keyboard accessibility */
+.reporter-back-button:focus-visible {
+  outline: 3px solid #8cbaff;
+  outline-offset: 3px;
+}
+
+/* Dark mode */
+:root[data-theme="dark"] .reporter-back-button {
+  background: linear-gradient(135deg, #397fe5, #2455ad);
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .reporter-back-button:hover {
+  background: linear-gradient(135deg, #245fbe, #173e83);
+}
+
+/* Mobile responsive */
 @media (max-width: 768px) {
   .dashboard-main {
-    top: 76px;
-    left: 210px;
-    width: auto;
-    height: calc(100vh - 76px);
+    margin-left: 0;
+    padding: 0 15px 22px;
   }
+
+  .reporter-back-wrapper {
+    padding: 14px 0 16px;
+  }
+
+  .reporter-back-button {
+    padding: 8px 16px 8px 10px;
+    border-radius: 10px;
+  }
+
+  .reporter-back-arrow {
+    width: 27px;
+    height: 27px;
+  }
+}
+.dashboard-layout .dashboard-main .reporter-back-wrapper {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 999 !important;
+  width: 100%;
+  min-height: 55px;
+  align-items: center;
+  padding: 12px 0;
+  box-sizing: border-box;
+}
+
+.dashboard-layout .dashboard-main .reporter-back-button {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 9px 17px;
+  background: #245fbe !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(36, 95, 190, 0.22);
+}
+
+.dashboard-layout .dashboard-main .reporter-back-arrow {
+  display: inline-flex !important;
+  color: #ffffff !important;
+  font-size: 20px;
+}
+
+.dashboard-layout .dashboard-main .reporter-back-button:hover {
+  background: #17488f !important;
+  box-shadow: 0 6px 16px rgba(36, 95, 190, 0.3);
+  transform: translateY(-2px);
 }
