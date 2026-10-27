@@ -7,16 +7,21 @@
   width: 100%;
   min-height: 100vh;
   padding: 24px 28px 32px;
-   background: #f5f7fc;
+  background: #f5f7fc;
   color: #172554;
- font-family: "Segoe UI", Arial, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
   box-sizing: border-box;
   overflow-x: hidden;
 }
 
 .notifications-page *,
 .notifications-page *::before,
-.notifications-page *::after {
+.notifications-page *::after,
+.notification-modal-overlay,
+.notification-modal-overlay *,
+.notification-modal-overlay *::before,
+.notification-modal-overlay *::after {
+  font-family: "Segoe UI", Arial, sans-serif;
   box-sizing: border-box;
 }
 
@@ -227,7 +232,6 @@
   border-radius: 8px;
   background: #fff;
   color: #52627a;
-  font-family: inherit;
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
@@ -278,7 +282,6 @@
   outline: none;
   background: #fff;
   color: #334155;
-  font-family: inherit;
   font-size: 12px;
   box-shadow: none;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -350,7 +353,6 @@
   border-radius: 8px;
   background: #fff;
   color: #64748b;
-  font-family: inherit;
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
@@ -655,8 +657,6 @@
   border-radius: 7px;
   background: #f0f5ff;
   color: #285cc5;
-  font-family: inherit;
-  font-size: 10px;
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
@@ -679,7 +679,6 @@
   border-radius: 7px;
   background: #fff5f5;
   color: #d84b4b;
-  font-family: inherit;
   font-size: 21px;
   line-height: 1;
   cursor: pointer;
@@ -738,7 +737,6 @@
   border-radius: 8px;
   background: #f0f5ff;
   color: #285cc5;
-  font-family: inherit;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
@@ -1027,7 +1025,6 @@
   padding: 0 16px;
   border: 1px solid transparent;
   border-radius: 9px;
-  font-family: inherit;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;

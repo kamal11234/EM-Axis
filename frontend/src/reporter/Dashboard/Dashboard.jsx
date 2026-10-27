@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./dashboard.css";
-import repoimg from "../../assets/repoimg.jpeg";
+import repoimg from "../../assets/repoimg.png";
 
 const API_URL = "http://localhost:5000";
 

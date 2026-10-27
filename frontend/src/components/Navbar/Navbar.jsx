@@ -1,8 +1,11 @@
-
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./navbar.css";
 import logo1 from "../../assets/logo1.png";
+
+const API_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000"
+).replace(/\/+$/, "");
 
 function getLoggedInUser() {
   try {
@@ -10,6 +13,16 @@ function getLoggedInUser() {
   } catch {
     return {};
   }
+}
+
+function getReporterId(user) {
+  return (
+    user.id ||
+    user.userId ||
+    user.user_id ||
+    user.user?.id ||
+    null
+  );
 }
 
 function getReporterPhoto() {
@@ -20,13 +33,39 @@ function getReporterPhoto() {
   }
 }
 
+function normalizeRole(value = "") {
+  return String(value).toLowerCase().replace(/[\s-]+/g, "_");
+}
+
+function normalizeNotification(item) {
+  return {
+    ...item,
+    id: item.id ?? item.notification_id,
+    title: item.title || item.notification_title || "New notification",
+    message:
+      item.message ||
+      item.description ||
+      item.notification_message ||
+      item.details ||
+      "You have a new notification. Check it now.",
+    read:
+      item.read === true ||
+      item.is_read === true ||
+      Boolean(item.read_at),
+  };
+}
+
 function Navbar({ userName = "", userRole = "" }) {
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+  const previousIdsRef = useRef(null);
+  const toastTimerRef = useRef(null);
 
   const [user] = useState(getLoggedInUser);
   const [photo, setPhoto] = useState(getReporterPhoto);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [toast, setToast] = useState(null);
 
   const name =
     userName ||
@@ -35,18 +74,115 @@ function Navbar({ userName = "", userRole = "" }) {
     user.name ||
     "Reporter";
 
-  const role = String(userRole || user.role || "reporter")
-    .toLowerCase()
-    .replace(/[\s-]+/g, "_");
+  const role = normalizeRole(userRole || user.role || "reporter");
+  const reporterId = getReporterId(user);
 
   const designation =
     role === "editor"
       ? "Editor"
-      : role === "channel_head" || role === "channelhead"
+      : role === "channel_head"
       ? "Channel Head"
       : "Reporter";
 
-  // Close dropdown on outside click or Escape
+  const unreadCount = notifications.filter(
+    (item) => !item.read
+  ).length;
+
+  // Fetch real notifications from the existing backend API.
+  const fetchNotifications = useCallback(async () => {
+    if (role !== "reporter" || !reporterId) return;
+
+    try {
+      const response = await fetch(
+        `${API_URL}/api/notifications/reporter/${encodeURIComponent(
+          reporterId
+        )}`
+      );
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      if (data.success === false) return;
+
+      const latest = Array.isArray(data.notifications)
+        ? data.notifications.map(normalizeNotification)
+        : [];
+
+      const latestIds = new Set(
+        latest
+          .filter((item) => item.id != null)
+          .map((item) => String(item.id))
+      );
+
+      // First fetch establishes the baseline; it won't show a false toast.
+      if (previousIdsRef.current === null) {
+        previousIdsRef.current = latestIds;
+        setNotifications(latest);
+        return;
+      }
+
+      const newNotification = latest.find(
+        (item) =>
+          item.id != null &&
+          !previousIdsRef.current.has(String(item.id))
+      );
+
+      previousIdsRef.current = latestIds;
+      setNotifications(latest);
+
+      if (newNotification) {
+        setToast({
+          id: String(newNotification.id),
+          title: newNotification.title,
+          message: newNotification.message,
+        });
+
+        if (toastTimerRef.current) {
+          clearTimeout(toastTimerRef.current);
+        }
+
+        toastTimerRef.current = setTimeout(() => {
+          setToast(null);
+        }, 6000);
+      }
+    } catch (error) {
+      // Avoid repeatedly showing error popups during temporary network issues.
+      console.error("Navbar notification fetch failed:", error);
+    }
+  }, [reporterId, role]);
+
+  useEffect(() => {
+    if (role !== "reporter" || !reporterId) return;
+
+    let active = true;
+
+    const load = async () => {
+      if (active) await fetchNotifications();
+    };
+
+    load();
+
+    const intervalId = window.setInterval(load, 5000);
+
+    // Refresh when the browser tab becomes active again.
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") load();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      active = false;
+      clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibility);
+
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, [fetchNotifications, role, reporterId]);
+
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (
@@ -60,6 +196,7 @@ function Navbar({ userName = "", userRole = "" }) {
     const handleEscape = (event) => {
       if (event.key === "Escape") {
         setShowDropdown(false);
+        setToast(null);
       }
     };
 
@@ -72,136 +209,162 @@ function Navbar({ userName = "", userRole = "" }) {
     };
   }, []);
 
-  // My Profile: navigate only; do not clear session
-  const handleMyProfile = () => {
-    setShowDropdown(false);
-    navigate("/profile");
-  };
-
-  // Logout: clear session only when Logout is clicked
-  const handleLogout = () => {
-    setShowDropdown(false);
-
-    sessionStorage.removeItem("emAxisUser");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("token");
-
-    navigate("/", { replace: true });
-  };
-
-  // Notifications
   const handleNotifications = () => {
+    setToast(null);
     setShowDropdown(false);
 
     if (role === "editor") {
       navigate("/editor/notifications");
-    } else if (
-      role === "channel_head" ||
-      role === "channelhead"
-    ) {
+    } else if (role === "channel_head") {
       navigate("/channel-head/notifications");
     } else {
       navigate("/reporter/notifications");
     }
   };
 
+  const handleMyProfile = () => {
+    setShowDropdown(false);
+    navigate("/profile");
+  };
+
+  const handleLogout = () => {
+    setShowDropdown(false);
+    sessionStorage.removeItem("emAxisUser");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    navigate("/", { replace: true });
+  };
+
   return (
-    <nav className="navbar">
-      {/* LEFT SIDE */}
-      <div className="navbar-left">
-        <img
-          src={logo1}
-          alt="EM-Axis Logo"
-          className="navbar-logo"
-        />
+    <>
+      <nav className="navbar">
+        <div className="navbar-left">
+          <img
+            src={logo1}
+            alt="EM-Axis Logo"
+            className="navbar-logo"
+          />
 
-        <div className="navbar-brand">
-          <h2>EM-AXIS</h2>
+          <div className="navbar-brand">
+            <h2>EM-AXIS</h2>
+          </div>
         </div>
-      </div>
 
-      {/* RIGHT SIDE */}
-      <div className="navbar-right">
-        {/* Notification */}
-        <button
-          type="button"
-          className="navbar-notification"
-          title="Notifications"
-          aria-label="Notifications"
-          onClick={handleNotifications}
-        >
-          <span className="notification-icon">🔔</span>
-        </button>
-
-        <div className="navbar-divider" />
-
-        {/* Profile Menu */}
-        <div
-          className="navbar-profile-wrapper"
-          ref={dropdownRef}
-        >
+        <div className="navbar-right">
           <button
             type="button"
-            className="navbar-profile"
-            title="Profile menu"
-            aria-label="Open profile menu"
-            aria-expanded={showDropdown}
-            aria-haspopup="menu"
-            onClick={() =>
-              setShowDropdown((previous) => !previous)
-            }
+            className="navbar-notification"
+            title={`${unreadCount} unread notifications`}
+            aria-label={`Notifications, ${unreadCount} unread`}
+            onClick={handleNotifications}
           >
-            <span className="profile-icon">
-              {photo ? (
-                <img
-                  src={photo}
-                  alt="User profile"
-                  onError={() => setPhoto("")}
-                />
-              ) : (
-                <span className="profile-default-avatar">
-                  👤
-                </span>
-              )}
-            </span>
+            <span className="notification-icon">🔔</span>
 
-            <span className="profile-info">
-              <span className="profile-name">{name}</span>
-              <span className="profile-role">{designation}</span>
-            </span>
-
-            <span className="profile-arrow">
-              {showDropdown ? "▲" : "▼"}
-            </span>
+            {unreadCount > 0 && (
+              <span className="navbar-notification-badge">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
           </button>
 
-          {/* Dropdown */}
-          {showDropdown && (
-            <div className="profile-dropdown" role="menu">
-              <button
-                type="button"
-                className="profile-dropdown-item"
-                role="menuitem"
-                onClick={handleMyProfile}
-              >
-                <span className="dropdown-item-icon">👤</span>
-                <span>My Profile</span>
-              </button>
+          <div className="navbar-divider" />
 
-              <button
-                type="button"
-                className="profile-dropdown-item logout-item"
-                role="menuitem"
-                onClick={handleLogout}
-              >
-                <span className="dropdown-item-icon">↪</span>
-                <span>Logout</span>
-              </button>
-            </div>
-          )}
+          <div
+            className="navbar-profile-wrapper"
+            ref={dropdownRef}
+          >
+            <button
+              type="button"
+              className="navbar-profile"
+              title="Profile menu"
+              aria-label="Open profile menu"
+              aria-expanded={showDropdown}
+              aria-haspopup="menu"
+              onClick={() =>
+                setShowDropdown((previous) => !previous)
+              }
+            >
+              <span className="profile-icon">
+                {photo ? (
+                  <img
+                    src={photo}
+                    alt="User profile"
+                    onError={() => setPhoto("")}
+                  />
+                ) : (
+                  <span className="profile-default-avatar">👤</span>
+                )}
+              </span>
+
+              <span className="profile-info">
+                <span className="profile-name">{name}</span>
+                <span className="profile-role">{designation}</span>
+              </span>
+
+              <span className="profile-arrow">
+                {showDropdown ? "▲" : "▼"}
+              </span>
+            </button>
+
+            {showDropdown && (
+              <div className="profile-dropdown" role="menu">
+                <button
+                  type="button"
+                  className="profile-dropdown-item"
+                  role="menuitem"
+                  onClick={handleMyProfile}
+                >
+                  <span className="dropdown-item-icon">👤</span>
+                  <span>My Profile</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="profile-dropdown-item logout-item"
+                  role="menuitem"
+                  onClick={handleLogout}
+                >
+                  <span className="dropdown-item-icon">↪</span>
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {toast && (
+        <div
+          className="em-notification-toast"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="em-toast-icon">🔔</div>
+
+          <div className="em-toast-content">
+            <strong>{toast.title || "New notification received!"}</strong>
+            <p>{toast.message || "Check your notifications now."}</p>
+
+            <button
+              type="button"
+              className="em-toast-action"
+              onClick={handleNotifications}
+            >
+              Check notification
+            </button>
+          </div>
+
+          <button
+            type="button"
+            className="em-toast-close"
+            aria-label="Dismiss notification"
+            onClick={() => setToast(null)}
+          >
+            ×
+          </button>
+        </div>
+      )}
+    </>
   );
 }
 

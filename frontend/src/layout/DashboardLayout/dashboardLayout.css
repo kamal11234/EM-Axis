@@ -4,15 +4,33 @@
 ========================================== */
 
 .dashboard-layout {
+  width: 100%;
   min-height: 100vh;
-  background: var(--app-bg, #f3f7fc);
+  height: auto;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background: #ffffff;
+  overflow: visible;
 }
 
+.dashboard-layout * {
+  box-sizing: border-box;
+}
+
+/* ==========================================
+   MAIN CONTENT
+========================================== */
+
 .dashboard-main {
-  margin-left: 240px;
+  width: calc(100% - 240px);
   min-height: calc(100vh - 76px);
+  height: auto;
+  margin-left: 240px;
   padding: 0 8px 28px;
   box-sizing: border-box;
+  background: #ffffff;
+  overflow: visible;
 }
 
 /* ==========================================
@@ -22,61 +40,52 @@
 .reporter-back-wrapper {
   display: flex;
   align-items: center;
+  width: 100%;
+  min-height: 45px;
   padding: 8px 0 10px;
+  box-sizing: border-box;
+  background: transparent;
 }
 
-/* Stylish blue back button */
 .reporter-back-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-
-  padding: 10px 20px 10px 12px;
-
+  padding: 9px 17px;
+  border: none;
+  border-radius: 10px;
   background: linear-gradient(135deg, #397fe5, #2455ad);
   color: #ffffff;
-
-  border: none;
-  border-radius: 12px;
-
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.2px;
-
   cursor: pointer;
-
-  box-shadow: 0 5px 12px rgba(36, 85, 173, 0.22);
-
+  box-shadow: 0 4px 12px rgba(36, 85, 173, 0.22);
   transition:
     background 0.25s ease,
     box-shadow 0.25s ease,
     transform 0.25s ease;
 }
 
-/* Arrow inside separate circle */
 .reporter-back-arrow {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   width: 29px;
   height: 29px;
-
+  flex-shrink: 0;
   border-radius: 9px;
   background: rgba(255, 255, 255, 0.19);
   color: #ffffff;
-
   font-size: 21px;
   line-height: 1;
-
   transition:
     background 0.25s ease,
     transform 0.25s ease;
 }
 
-/* Hover effect */
 .reporter-back-button:hover {
   background: linear-gradient(135deg, #245fbe, #173e83);
   box-shadow: 0 8px 19px rgba(36, 85, 173, 0.32);
@@ -88,97 +97,30 @@
   transform: translateX(-3px);
 }
 
-/* Click animation */
 .reporter-back-button:active {
   transform: translateY(0) scale(0.97);
   box-shadow: 0 3px 7px rgba(36, 85, 173, 0.2);
 }
 
-/* Keyboard accessibility */
 .reporter-back-button:focus-visible {
   outline: 3px solid #8cbaff;
   outline-offset: 3px;
 }
 
-/* Dark mode */
-:root[data-theme="dark"] .reporter-back-button {
-  background: linear-gradient(135deg, #397fe5, #2455ad);
-  color: #ffffff;
-}
-
-:root[data-theme="dark"] .reporter-back-button:hover {
-  background: linear-gradient(135deg, #245fbe, #173e83);
-}
-
-/* Mobile responsive */
-@media (max-width: 768px) {
-  .dashboard-main {
-    margin-left: 0;
-    padding: 0 8px 22px;
-  }
-
-  .reporter-back-wrapper {
-    padding: 8px 0 10px;
-  }
-
-  .reporter-back-button {
-    padding: 8px 16px 8px 10px;
-    border-radius: 10px;
-  }
-
-  .reporter-back-arrow {
-    width: 27px;
-    height: 27px;
-  }
-}
-
-/* ==========================================
-   BACK BUTTON VISIBILITY
-========================================== */
+/* Keep back button visible */
 
 .dashboard-layout .dashboard-main .reporter-back-wrapper {
-  display: flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  position: relative !important;
-  z-index: 999 !important;
-  width: 100%;
-  min-height: 45px;
-  align-items: center;
-  padding: 8px 0;
-  box-sizing: border-box;
+  display: flex;
+  visibility: visible;
+  opacity: 1;
+  position: relative;
+  z-index: 5;
 }
 
 .dashboard-layout .dashboard-main .reporter-back-button {
-  display: inline-flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  position: relative !important;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  padding: 9px 17px;
-  background: #245fbe !important;
-  color: #ffffff !important;
-  border: none !important;
-  border-radius: 10px;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(36, 95, 190, 0.22);
-}
-
-.dashboard-layout .dashboard-main .reporter-back-arrow {
-  display: inline-flex !important;
-  color: #ffffff !important;
-  font-size: 20px;
-}
-
-.dashboard-layout .dashboard-main .reporter-back-button:hover {
-  background: #17488f !important;
-  box-shadow: 0 6px 16px rgba(36, 95, 190, 0.3);
-  transform: translateY(-2px);
+  display: inline-flex;
+  visibility: visible;
+  opacity: 1;
 }
 
 /* ==========================================
@@ -188,15 +130,16 @@
 .page-back-arrow-wrapper {
   display: flex;
   align-items: center;
-  padding: 8px 8px;
+  padding: 8px;
+  background: transparent;
 }
 
 .page-back-arrow {
-  width: 40px;
-  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 40px;
+  height: 40px;
   border: none;
   border-radius: 50%;
   background: #e7efff;
@@ -205,7 +148,9 @@
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .page-back-arrow:hover {
@@ -218,15 +163,64 @@
   outline-offset: 3px;
 }
 
+/* ==========================================
+   REMOVE LIGHT-BLUE LAYOUT BACKGROUND
+========================================== */
+
+.dashboard-layout,
+.dashboard-layout .dashboard-main {
+  background-color: #ffffff;
+}
+
+/* ==========================================
+   RESPONSIVE LAYOUT
+========================================== */
+
 @media (max-width: 768px) {
+  .dashboard-layout {
+    width: 100%;
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .dashboard-layout .dashboard-main {
+    width: 100%;
+    min-height: calc(100vh - 76px);
+    height: auto;
+    margin-left: 0;
+    padding: 0 8px 22px;
+    overflow: visible;
+  }
+
+  .reporter-back-wrapper {
+    padding: 8px 0 10px;
+  }
+
+  .reporter-back-button {
+    gap: 8px;
+    padding: 8px 14px 8px 10px;
+    border-radius: 10px;
+  }
+
+  .reporter-back-arrow {
+    width: 27px;
+    height: 27px;
+  }
+
   .page-back-arrow-wrapper {
     padding: 8px;
   }
 }
+/* FIX: RESTORE PAGE SCROLLING */
 
-/* ==========================================
-   REPORTER PAGE SCROLLING — KEEP
-========================================== */
+html,
+body,
+#root {
+  min-height: 100%;
+  height: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
 
 .dashboard-layout {
   height: auto !important;
@@ -234,33 +228,18 @@
   overflow: visible !important;
 }
 
-.dashboard-layout .dashboard-main {
-  margin-left: 240px;
-  height: calc(100vh - 76px) !important;
-  min-height: 0 !important;
-  padding: 0 8px 28px;
-  box-sizing: border-box;
-
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-
-  overscroll-behavior-y: auto;
-  -webkit-overflow-scrolling: touch;
+.dashboard-main {
+  height: auto !important;
+  min-height: calc(100vh - 76px);
+  overflow: visible !important;
+  overflow-y: visible !important;
+  overflow-x: visible !important;
 }
 
-@media (max-width: 768px) {
-  .dashboard-layout .dashboard-main {
-    margin-left: 0;
-    width: 100%;
-    height: calc(100vh - 76px) !important;
-    min-height: 0 !important;
-    padding: 0 8px 22px;
-    box-sizing: border-box;
-
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-
-    overscroll-behavior-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+/* Keep sidebar fixed without blocking page scroll */
+.sidebar {
+  position: fixed;
+  top: 76px;
+  height: calc(100vh - 76px);
+  overflow-y: auto;
 }

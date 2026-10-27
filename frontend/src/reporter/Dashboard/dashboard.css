@@ -1,3 +1,4 @@
+
 /* ==========================================
    EM-AXIS | REPORTER DASHBOARD
 ========================================== */
@@ -5,10 +6,11 @@
 .dashboard-content {
   width: 100%;
   min-height: 100vh;
+  height: auto;
   padding: 24px;
   box-sizing: border-box;
   overflow-x: hidden;
-   background: #f5f7fc;
+  background: #f5f7fc;
   color: #24334b;
   font-family: "Segoe UI", Arial, sans-serif;
 }
@@ -77,11 +79,13 @@
   pointer-events: none;
 }
 
+/* WELCOME TEXT — 45% WIDTH */
+
 .dashboard-content .welcome-text {
   position: relative;
   z-index: 1;
-  flex: 0 0 60%;
-  width: 60%;
+  flex: 0 0 45%;
+  width: 45%;
   min-width: 0;
   height: 100%;
   padding: 25px 32px;
@@ -115,13 +119,13 @@
   line-height: 1.7;
 }
 
-/* IMAGE: RIGHT SIDE, 40% WIDTH, FULL HEIGHT */
+/* WELCOME IMAGE — 55% WIDTH, RIGHT END */
 
 .dashboard-content .welcome-image {
   position: relative;
   z-index: 1;
-  flex: 0 0 40%;
-  width: 40%;
+  flex: 0 0 55%;
+  width: 55%;
   height: 100%;
   min-width: 0;
   min-height: 0;
@@ -129,9 +133,10 @@
   padding: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   overflow: hidden;
   background: transparent;
+  border-radius: 0;
 }
 
 .dashboard-content .welcome-image img {
@@ -148,7 +153,7 @@
   border: none;
   border-radius: 0;
   object-fit: contain;
-  object-position: center center;
+  object-position: right center;
 }
 
 /* ==========================================
@@ -171,7 +176,7 @@
 }
 
 .dashboard-left {
-  overflow: hidden;
+  overflow: visible;
 }
 
 .dashboard-right {
@@ -317,6 +322,7 @@
     opacity: 0;
     transform: translateY(-4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -924,13 +930,13 @@
   }
 
   .dashboard-content .welcome-text {
-    flex: 0 0 60%;
-    width: 60%;
+    flex: 0 0 45%;
+    width: 45%;
   }
 
   .dashboard-content .welcome-image {
-    flex: 0 0 40%;
-    width: 40%;
+    flex: 0 0 55%;
+    width: 55%;
     height: 100%;
   }
 
@@ -955,12 +961,14 @@
   .dashboard-content .welcome-section {
     height: 165px;
     min-height: 165px;
+    flex-direction: row;
     border-radius: 13px;
   }
 
   .dashboard-content .welcome-text {
-    flex: 0 0 60%;
-    width: 60%;
+    flex: 0 0 45%;
+    width: 45%;
+    height: 100%;
     padding: 15px 10px;
   }
 
@@ -978,8 +986,8 @@
   }
 
   .dashboard-content .welcome-image {
-    flex: 0 0 40%;
-    width: 40%;
+    flex: 0 0 55%;
+    width: 55%;
     height: 100%;
     padding: 0;
   }
@@ -988,7 +996,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    object-position: center center;
+    object-position: right center;
   }
 
   .dashboard-main-layout {
@@ -1106,5 +1114,104 @@
   .status-badge {
     padding: 4px 7px;
     font-size: 9px;
+  }
+}
+/* ==========================================
+   WELCOME IMAGE — WIDER & RIGHT EDGE
+========================================== */
+
+.dashboard-content .welcome-section {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  height: 205px;
+  min-height: 205px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.dashboard-content .welcome-text {
+  flex: 0 0 58%;
+  width: 58%;
+  min-width: 0;
+  height: 100%;
+}
+
+.dashboard-content .welcome-image {
+  position: relative;
+  flex: 0 0 42%;
+  width: 42%;
+  height: 100% !important;
+  min-height: 0;
+  align-self: stretch;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  border-radius: 0;
+}
+
+.dashboard-content .welcome-image img {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0 !important;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Laptop / tablet */
+@media (max-width: 900px) {
+  .dashboard-content .welcome-section {
+    height: 190px;
+    min-height: 190px;
+  }
+
+  .dashboard-content .welcome-text {
+    flex: 0 0 52%;
+    width: 52%;
+    padding: 20px;
+  }
+
+  .dashboard-content .welcome-image {
+    flex: 0 0 48%;
+    width: 48%;
+    height: 100% !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .dashboard-content .welcome-section {
+    height: auto;
+    min-height: 0;
+    flex-direction: column;
+  }
+
+  .dashboard-content .welcome-text {
+    flex: 0 0 auto;
+    width: 100%;
+    padding: 20px 16px;
+  }
+
+  .dashboard-content .welcome-image {
+    flex: 0 0 auto;
+    width: 100%;
+    height: 180px !important;
+  }
+
+  .dashboard-content .welcome-image img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain;
   }
 }
